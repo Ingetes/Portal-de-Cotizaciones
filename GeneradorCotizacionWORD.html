@@ -417,7 +417,7 @@ async function loadDefaultBackground() {
       const resp = await fetch(name, {cache: 'no-cache'});
       if (resp.ok) {
         DEFAULT_BG_BUF = await resp.arrayBuffer();
-        if (status) status.textContent = `Cargada automáticamente: ${name}`;
+        if (status) status.textContent = `${name} cargada automáticamente ✓`;
         return;
       }
     } catch (_) { /* ignorar e intentar el siguiente */ }
@@ -1028,3 +1028,4 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
