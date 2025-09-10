@@ -122,11 +122,12 @@ input:focus,select:focus,textarea:focus{
 
       <!-- 1) Archivo de entrada -->
       <h2>1) Archivo de entrada</h2>
+	  <div id="bgRow">
       <label for="bg">Imagen de fondo
         <small id="bgStatus" style="margin-left:6px;color:#6b7280"></small>
       </label>
       <input id="bg" type="file" accept="image/png,image/jpeg"/>
-
+	  </div>
 
       <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
       <input id="xls" type="file" accept=".xlsx,.xls"/>
@@ -341,6 +342,29 @@ async function loadDefaultBackground() {
   if (statusEl) statusEl.textContent = 'Sin imagen automática. Puedes elegir una.';
 }
 
+// === Manejo de imagen de fondo ===
+let DEFAULT_BG_BUF = null;
+
+async function loadDefaultBackground() {
+  const candidatos = ['MarcaDeAgua.png','fondo.png','background.png'];
+  for (const nombre of candidatos) {
+    try {
+      const resp = await fetch(nombre, { cache: 'no-store' });
+      if (!resp.ok) continue;
+      const buf = await resp.arrayBuffer();
+      if (buf && buf.byteLength > 0) {
+        DEFAULT_BG_BUF = buf;
+        document.getElementById('bgRow').style.display = 'none'; // ocultar input
+        return;
+      }
+    } catch(e) {
+      // probar siguiente
+    }
+  }
+  // Si no se encontró nada, mostrar input
+  document.getElementById('bgRow').style.display = '';
+}
+	
 window.addEventListener('load', () => {
   // 1) Intento de carga automática
   loadDefaultBackground();
@@ -971,4 +995,5 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
