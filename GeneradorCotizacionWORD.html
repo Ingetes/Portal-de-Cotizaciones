@@ -368,7 +368,7 @@ if (statusEl) statusEl.textContent = 'Marca de agua cargada automáticamente ✓
   document.getElementById('bgRow').style.display = '';
 }
 	
-window.addEventListener('load', () => {
+window.addEventListener('load', () => { 
   // 1) Intento de carga automática
   loadDefaultBackground();
 
@@ -396,6 +396,14 @@ window.addEventListener('load', () => {
         if (statusEl) statusEl.textContent = 'Error leyendo la imagen.';
         console.error(e);
       }
+    });
+  }
+  // Botón Reiniciar
+  const btnReset = document.getElementById('reset');
+  if (btnReset) {
+    btnReset.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      resetForm();
     });
   }
 });
@@ -470,55 +478,76 @@ function validateRequiredFields() {
 
 /* ========= Función para reiniciar formulario ========= */
 function resetForm() {
-  // Reiniciar campos de archivo
-  document.getElementById('bg').value = '';
-  document.getElementById('xls').value = '';
-  
-  // Reiniciar fecha (establecer a vacío)
-  document.getElementById('fecha').value = '';
-  
-  // Reiniciar selects a sus valores por defecto
-  document.getElementById('comercial').selectedIndex = 0; // -Seleccionar opción-
-  document.getElementById('garantia').selectedIndex = 0;
-  document.getElementById('formaPago').selectedIndex = 5; // Crédito 30 días
-  document.getElementById('sitioEntrega').selectedIndex = 0;
-  document.getElementById('validezOferta').selectedIndex = 0;
-  document.getElementById('precios').selectedIndex = 0;
-  
-  // Reiniciar campos de texto
-  document.getElementById('empresa').value = '';
-  document.getElementById('dirigido').value = '';
-  document.getElementById('area').value = '';
-  document.getElementById('office').value = '';
-  document.getElementById('tel').value = '';
-  document.getElementById('email').value = '';
-  document.getElementById('obsExtra').value = '';
-  
-  // Ocultar campos "otro" y limpiarlos
-  const otrosCampos = [
-    'garantia_otro', 
-    'formaPago_otro', 
-    'sitioEntrega_otro', 
-    'validezOferta_otro', 
-    'precios_otro'
-  ];
-  
-  otrosCampos.forEach(id => {
-    const campo = document.getElementById(id);
-    if (campo) {
-      campo.value = '';
-      campo.classList.add('hidden');
+  // Reiniciar archivos
+  const bgInput  = document.getElementById('bg');
+  const xlsInput = document.getElementById('xls');
+  if (bgInput)  bgInput.value = '';
+  if (xlsInput) xlsInput.value = '';
+
+  // Reiniciar fecha
+  const fechaEl = document.getElementById('fecha');
+  if (fechaEl) fechaEl.value = '';
+
+  // Selects
+  const selCom = document.getElementById('comercial');
+  if (selCom) selCom.selectedIndex = 0; // -Seleccionar opción-
+  const selGar = document.getElementById('garantia');
+  if (selGar) selGar.selectedIndex = 0;
+  const selFP  = document.getElementById('formaPago');
+  if (selFP)  selFP.selectedIndex  = 5; // Crédito 30 días
+  const selSit = document.getElementById('sitioEntrega');
+  if (selSit) selSit.selectedIndex = 0;
+  const selVal = document.getElementById('validezOferta');
+  if (selVal) selVal.selectedIndex = 0;
+  const selPre = document.getElementById('precios');
+  if (selPre) selPre.selectedIndex = 0;
+
+  // Textos
+  const idsTxt = ['empresa','dirigido','area','office','tel','email','obsExtra'];
+  idsTxt.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+
+  // Quitar resaltados de obligatorios
+  const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office'];
+  requiredFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.style.borderColor = '';
+      el.style.boxShadow = '';
     }
   });
-  
+
+  // Ocultar campos "otro" y limpiarlos
+  ['garantia_otro','formaPago_otro','sitioEntrega_otro','validezOferta_otro','precios_otro'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) { el.value=''; el.classList.add('hidden'); }
+  });
+
+  // === Estado de la imagen de fondo ===
+  const statusEl = document.getElementById('bgStatus');
+  // Si tenemos imagen por defecto precargada, seguimos usándola y ocultamos el input;
+  // si NO, mostramos el input para que el usuario elija una.
+  if (typeof DEFAULT_BG_BUF !== 'undefined' && DEFAULT_BG_BUF) {
+    // seguir usando la cargada automáticamente
+    if (bgInput) bgInput.style.display = 'none';
+    if (statusEl) statusEl.textContent = 'Marca de agua cargada automáticamente ✓';
+    // también resetea cualquier carga manual previa
+    window._bgBuf  = DEFAULT_BG_BUF;
+    window._bgName = null;
+  } else {
+    // no hay imagen por defecto: permitir seleccionar
+    if (bgInput) bgInput.style.display = '';
+    if (statusEl) statusEl.textContent = 'Sin imagen seleccionada.';
+    window._bgBuf  = null;
+    window._bgName = null;
+  }
+
+  // Mensaje final
   const successMessage = 'Formulario reiniciado. Puedes comenzar una nueva cotización.';
-  
-  // Si estamos en un iframe, enviar el mensaje al padre
   if (window.parent !== window.self) {
-    window.parent.postMessage({
-      __ingetes_alert: true,
-      message: successMessage
-    }, '*');
+    window.parent.postMessage({ __ingetes_alert:true, message: successMessage }, '*');
   } else {
     alert(successMessage);
   }
@@ -999,4 +1028,3 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
-
