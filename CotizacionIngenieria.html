@@ -67,9 +67,9 @@ tfoot td{font-weight:800;background:#fafafa}
     </div>
   </div>
 
-  <div id="loadStatus" class="muted">Cargando lista de precios desde <b>ListaPrecios.xlsx</b>…</div>
+  <div id="loadStatus" class="muted">Cargando lista de precios desde <b>ListaPreciosIngenieria.xlsx</b>…</div>
   <div id="fallbackWrap" style="display:none;gap:8px" class="grid two">
-    <div class="warn">No se pudo leer <b>ListaPrecios.xlsx</b> automáticamente. Cárgalo manualmente aquí:</div>
+    <div class="warn">No se pudo leer <b>ListaPreciosIngenieria.xlsx</b> automáticamente. Cárgalo manualmente aquí:</div>
     <div><input type="file" id="filePicker" accept=".xlsx,.xls"/></div>
   </div>
 </div>
@@ -340,8 +340,8 @@ function deriveViaticosFixed(){
 
 /* Carga Excel */
 async function loadPricingFromURL(){
-  const url = 'ListaPrecios.xlsx?v=' + Date.now();   // cache-buster
-  loadStatus.textContent = 'Cargando lista de precios desde ListaPrecios.xlsx…';
+  const url = 'ListaPreciosIngenieria.xlsx?v=' + Date.now();   // cache-buster
+  loadStatus.textContent = 'Cargando lista de precios desde ListaPreciosIngenieria.xlsx…';
   try{
     const resp = await fetch(url, { cache: 'no-store' });
     if(!resp.ok) throw new Error('HTTP '+resp.status);
@@ -355,11 +355,11 @@ async function loadPricingFromURL(){
     } else {
       parseHierarchicalRows(rows);
     }
-    loadStatus.innerHTML = 'Lista de precios <b>cargada</b> desde <code>ListaPrecios.xlsx</code>.';
+    loadStatus.innerHTML = 'Lista de precios <b>cargada</b> desde <code>ListaPreciosIngenieria.xlsx</code>.';
     applyAllDefaultPrices(); updateViaticosPriceView(); updateDependentRows(); toggleHorasBadgesAll(); recalcTotals();
   }catch(e){
     console.warn(e);
-    loadStatus.innerHTML = 'No se pudo leer <code>ListaPrecios.xlsx</code> automáticamente.';
+    loadStatus.innerHTML = 'No se pudo leer <code>ListaPreciosIngenieria.xlsx</code> automáticamente.';
     fallbackWrap.style.display='grid';
   }
 }
