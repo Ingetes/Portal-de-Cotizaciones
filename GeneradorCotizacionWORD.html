@@ -122,12 +122,12 @@ input:focus,select:focus,textarea:focus{
 
       <!-- 1) Archivo de entrada -->
       <h2>1) Archivo de entrada</h2>
-	  <div id="bgRow">
-      <label for="bg">Imagen de fondo
-        <small id="bgStatus" style="margin-left:6px;color:#6b7280"></small>
-      </label>
-      <input id="bg" type="file" accept="image/png,image/jpeg"/>
-	  </div>
+	 	<div id="bgRow">
+		  <label for="bg">Imagen de fondo</label>
+		  <input id="bg" type="file" accept="image/png,image/jpeg"/>
+		  <small id="bgStatus" style="margin-left:6px;color:#6b7280"></small>
+		</div>
+
 
       <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
       <input id="xls" type="file" accept=".xlsx,.xls"/>
@@ -354,8 +354,11 @@ async function loadDefaultBackground() {
       const buf = await resp.arrayBuffer();
       if (buf && buf.byteLength > 0) {
         DEFAULT_BG_BUF = buf;
-        document.getElementById('bgRow').style.display = 'none'; // ocultar input
-        return;
+const bgEl = document.getElementById('bg');
+if (bgEl) bgEl.style.display = 'none';
+const statusEl = document.getElementById('bgStatus');
+if (statusEl) statusEl.textContent = 'Marca de agua cargada automáticamente ✓';
+		  return;
       }
     } catch(e) {
       // probar siguiente
@@ -385,8 +388,11 @@ window.addEventListener('load', () => {
         _bgBuf = await f.arrayBuffer();
         _bgName = f.name;
         if (statusEl) statusEl.textContent = `Imagen seleccionada: ${f.name}`;
-        document.getElementById('bgRow').style.display = 'none'; // ocultar input después de cargar manualmente
-      } catch (e) {
+
+		  bgEl.style.display = 'none';
+		  if (statusEl) statusEl.textContent = `Marca de agua cargada: ${f.name} ✓`;
+
+	  } catch (e) {
         if (statusEl) statusEl.textContent = 'Error leyendo la imagen.';
         console.error(e);
       }
@@ -993,3 +999,4 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
