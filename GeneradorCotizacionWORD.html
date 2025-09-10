@@ -122,8 +122,11 @@ input:focus,select:focus,textarea:focus{
 
       <!-- 1) Archivo de entrada -->
       <h2>1) Archivo de entrada</h2>
-      <label for="bg">Imagen de fondo</label>
+      <label for="bg">Imagen de fondo
+        <small id="bgStatus" style="margin-left:6px;color:#6b7280"></small>
+      </label>
       <input id="bg" type="file" accept="image/png,image/jpeg"/>
+
 
       <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
       <input id="xls" type="file" accept=".xlsx,.xls"/>
@@ -306,6 +309,80 @@ const run=(text,spec,opts={})=>new docx.TextRun(Object.assign({text},spec,opts))
 const para=(children,align)=>new docx.Paragraph({children,spacing:SPACING_SINGLE,alignment:align});
 const capFirst=s=>{s=(s||'').toString().trim();return s? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';};
 const val=(id,def='')=>{const el=document.getElementById(id);const v=(el&&typeof el.value==='string')?el.value.trim():'';return v!==''?v:def;};
+
+// === Imagen de fondo: auto o manual ===
+let _bgBuf = null;       // aquí guardamos la imagen (auto o elegida)
+let _bgName = null;      // nombre de la fuente usada (solo para mostrar estado)
+
+async function loadDefaultBackground() {
+  const statusEl = document.getElementById('bgStatus');
+  if (statusEl) statusEl.textContent = 'Cargando imagen de fondo automática…';
+
+  // Pon aquí los nombres que sueles usar; se prueban en orden:
+  const candidatos = ['MarcaDeAgua.jpg', 'MarcaDeAgua.png', 'marcadeagua.jpg', 'marcadeagua.png'];
+
+  for (const nombre of candidatos) {
+    try {
+      const res = await fetch('./' + nombre, { cache: 'no-store' });
+      if (!res.ok) continue;
+      const buf = await res.arrayBuffer();
+      if (buf && buf.byteLength > 0) {
+        _bgBuf = buf;
+        _bgName = nombre;
+        if (statusEl) statusEl.textContent = `Imagen cargada automáticamente: ${nombre}`;
+        return;
+      }
+    } catch (_) { /* continúa con el siguiente candidato */ }
+  }
+  if (statusEl) statusEl.textContent = 'Sin imagen automática. Puedes elegir una.';
+}
+
+window.addEventListener('load', () => {
+  // 1) Intento de carga automática
+  loadDefaultBackground();
+
+  // 2) Si el usuario elige archivo, reemplazamos el buffer
+  const bgEl = document.getElementById('bg');
+  if (bgEl) {
+    bgEl.addEventListener('change', async () => {
+      const statusEl = document.getElementById('bgStatus');
+      try {
+        const f = bgEl.files && bgEl.files[0];
+        if (!f) {
+          if (statusEl) statusEl.textContent = 'Sin imagen seleccionada.';
+          _bgBuf = null;
+          _bgName = null;
+          return;
+        }
+        _bgBuf = await f.arrayBuffer();
+        _bgName = f.name;
+        if (statusEl) statusEl.textContent = `Imagen seleccionada: ${f.name}`;
+      } catch (e) {
+        if (statusEl) statusEl.textContent = 'Error leyendo la imagen.';
+        console.error(e);
+      }
+    });
+  }
+});
+
+// === Fondo por defecto (misma carpeta del HTML) ===
+let DEFAULT_BG_BUF = null;
+
+async function loadDefaultBackground() {
+  const status = document.getElementById('bgStatus');
+  const candidates = ['MarcaDeAgua.png','MarcaDeAgua.jpg','marcadeagua.png','marcadeagua.jpg']; // orden de prueba
+
+  for (const name of candidates) {
+    try {
+      const resp = await fetch(name, {cache: 'no-cache'});
+      if (resp.ok) {
+        DEFAULT_BG_BUF = await resp.arrayBuffer();
+        if (status) status.textContent = `Cargada automáticamente: ${name}`;
+        return;
+      }
+    } catch (_) { /* ignorar e intentar el siguiente */ }
+  }
+}
 
 function validateRequiredFields() {
   const requiredFields = [
@@ -510,9 +587,12 @@ function bindOtroToggle(id){
   sel.addEventListener('change',sync);
   sync(); // inicializa
 }
+
 window.addEventListener('load',()=>{
   ['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(bindOtroToggle);
-  document.getElementById('reset').addEventListener('click', resetForm);
+
+  // Cargar imagen por defecto (si existe en la carpeta)
+  loadDefaultBackground();
 });
 
 /* ========= Excel helpers ========= */
@@ -808,42 +888,65 @@ cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextR
 }
 
 /* ========= Botón principal ========= */
-window.addEventListener('load',()=>{
-  ['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(bindOtroToggle);
+/* ========= Botón principal ========= */
+window.addEventListener('load', () => {
+  // Activa los toggles de campos "Otro"
+  ['garantia', 'formaPago', 'sitioEntrega', 'validezOferta', 'precios'].forEach(bindOtroToggle);
 
-  document.getElementById('make').addEventListener('click',async()=>{
-    try{
+  // Botón principal
+  document.getElementById('make').addEventListener('click', async () => {
+    try {
       // Validar campos obligatorios
-    if (!validateRequiredFields()) {
-      return;
-    }
-      const docx=await ensureDocx();
-      const bgFile=document.getElementById('bg').files[0];
-      const xlsFile=document.getElementById('xls').files[0];
-      if(!xlsFile) throw new Error('Debe cargar un archivo Excel (.xlsx)');
-      if(!bgFile) throw new Error('Debe cargar una imagen de fondo');
+      if (!validateRequiredFields()) {
+        return;
+      }
 
-      // Leer archivos
-      const bgBuf=await bgFile.arrayBuffer();
-      const xlsBuf=await xlsFile.arrayBuffer();
+      const docx = await ensureDocx();
+      const bgEl  = document.getElementById('bg');
+      const xlsEl = document.getElementById('xls');
+
+      const xlsFile = xlsEl.files && xlsEl.files[0];
+      if (!xlsFile) throw new Error('Debe cargar un archivo Excel (.xlsx)');
+
+      // === IMAGEN DE FONDO ===
+      // 1) si el usuario eligió archivo, usarlo
+      // 2) si no eligió, usar la cargada automáticamente en DEFAULT_BG_BUF
+      // 3) si ninguna, error claro
+      let bgBuf;
+      const bgFile = bgEl.files && bgEl.files[0];
+      if (bgFile) {
+        bgBuf = await bgFile.arrayBuffer();
+      } else {
+        bgBuf = DEFAULT_BG_BUF;
+        if (!bgBuf) {
+          throw new Error('No se encontró imagen de fondo (ni archivo seleccionado ni imagen predeterminada en la carpeta).');
+        }
+      }
+
+      // === EXCEL ===
+      const xlsBuf = await xlsFile.arrayBuffer();
 
       // Construir tabla desde Excel
-      let excelTable=null;
-      try{ excelTable=await buildTableFromWorkbook(docx, xlsBuf); } catch(e){ console.error('Error al procesar Excel:',e); }
+      let excelTable = null;
+      try {
+        excelTable = await buildTableFromWorkbook(docx, xlsBuf);
+      } catch (e) {
+        console.error('Error al procesar Excel:', e);
+      }
 
-      // Nombre del archivo - usa el nombre del Excel subido
-      const nombreExcel = xlsFile.name.replace(/\.[^.]+$/, ''); // Quita la extensión
+      // Nombre del archivo = nombre del Excel + .docx
+      const nombreExcel = xlsFile.name.replace(/\.[^.]+$/, '');
       const fileName = nombreExcel + '.docx';
 
       // Construir documento
-      const doc=buildDocCommon(docx, fileName.replace('.docx', ''), bgBuf, excelTable);
+      const doc = buildDocCommon(docx, nombreExcel, bgBuf, excelTable);
 
       // Descargar usando File System Access API
       await downloadWithFilePicker(doc, fileName);
 
-    } catch(e){
+    } catch (e) {
       console.error(e);
-      alert('Error: '+e.message);
+      alert('Error: ' + e.message);
     }
   });
 });
@@ -861,8 +964,6 @@ requiredFields.forEach(fieldId => {
     });
   }
 });
-
 </script>
 </body>
 </html>
-
