@@ -385,6 +385,7 @@ window.addEventListener('load', () => {
         _bgBuf = await f.arrayBuffer();
         _bgName = f.name;
         if (statusEl) statusEl.textContent = `Imagen seleccionada: ${f.name}`;
+        document.getElementById('bgRow').style.display = 'none'; // ocultar input después de cargar manualmente
       } catch (e) {
         if (statusEl) statusEl.textContent = 'Error leyendo la imagen.';
         console.error(e);
@@ -392,9 +393,6 @@ window.addEventListener('load', () => {
     });
   }
 });
-
-// === Fondo por defecto (misma carpeta del HTML) ===
-let DEFAULT_BG_BUF = null;
 
 async function loadDefaultBackground() {
   const status = document.getElementById('bgStatus');
@@ -995,5 +993,3 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
-
-
