@@ -377,12 +377,12 @@
   const norm=s=>stripAccents(String(s||'').toLowerCase().trim());
   function autoMap(){
     const cols=headers.map(h=>({raw:h, n:norm(h)}));
-    const find=(arr)=>{const hit=cols.find(c=>arr.some(p=>c.n.includes(p))); return hit?hit.raw:null};
+    const find=(arr)=>{const hit=cols.find(c=>arr.some(p=>c.n.includes(norm(p)))); return hit?hit.raw:null};
     return {
       referencia: find(['id de material','id material','material','referencia', 'Material ID']),
       cantidad:   find(['cantidad','qty','quantity','Quantity']),
       descripcion:find(['descripcion','descripción','description', 'Description']),
-      precio:     find(['precio unidad (peso colombiano)','precio unidad','precio lista','unidad (peso colombiano)','Price (Colombian Peso)']),
+      precio:     find(['precio unidad (peso colombiano)','precio unidad','precio lista','unidad (peso colombiano)','Price (Colombian Peso)','price (colombian peso)']),
       descuento:  find(['descuento (%)','descuento','discount','Discount (%)']),
       fecha:      find(['fecha de entrega estimada','entrega estimada','estimated delivery','delivery','Requ.delivery date'])
     };
@@ -888,4 +888,5 @@ if(window.ExcelJS){
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
 </body>
 </html>
+
 
