@@ -632,17 +632,18 @@ function postDownloadToParent(blob, fileName, mime){
       c(6).value=it.precioLista;
       c(7).value=it.boton;
       c(8).value=it.dcto/100;
-      c(10).value={formula:`H${r}*(1 - J${r})`};
+      c(10).value={formula:`CEILING(H${r}*(1 - J${r}),100)`};
       c(11).value=it.factorUtil;
+      c(13).value={formula:`CEILING(N${r}*E${r},100)`};
       
       // MODIFICAR ESTA LÍNEA - Sumar el envío directamente en la fórmula
       if (it.envio > 0) {
-        c(12).value={formula:`(L${r}*M${r})+${it.envio}`};
+        c(12).value={formula:`CEILING((L${r}*M${r})+${it.envio},100)`};
       } else {
-        c(12).value={formula:`L${r}*M${r}+0`};
+        c(12).value={formula:`CEILING(L${r}*M${r}+0,100)`};
       }
       
-      c(13).value={formula:`N${r}*E${r}`};
+      c(13).value={formula:`CEILING(N${r}*E${r},100)`};
       c(6).numFmt='"$" #,##0'; c(8).numFmt='0%'; c(10).numFmt='"$" #,##0'; c(12).numFmt='"$" #,##0'; c(13).numFmt='"$" #,##0';
       
       for(let i=0;i<hdr.length;i++) ws.getCell(r,startCol+i).border=box;
@@ -823,13 +824,13 @@ if(window.ExcelJS){
   
   // MODIFICAR ESTAS LÍNEAS - Sumar el envío directamente en la fórmula
   if (it.envio > 0) {
-    wsLoc['N'+r]={t:'n',f:`(L${r}*M${r})+${it.envio}`};
+    wsLoc['N'+r]={t:'n',f:`CEILING((L${r}*M${r})+${it.envio},100)`};
   } else {
-    wsLoc['N'+r]={t:'n',f:`L${r}*M${r}+0`};
+    wsLoc['N'+r]={t:'n',f:`CEILING(L${r}*M${r}+0,100)`};
   }
   
-  wsLoc['O'+r]={t:'n',f:`N${r}*E${r}`}; 
-  wsLoc['L'+r]={t:'n',f:`H${r}*(1 - J${r})`}; 
+  wsLoc['O'+r]={t:'n',f:`CEILING(N${r}*E${r},100)`}; 
+  wsLoc['L'+r]={t:'n',f:`CEILING(H${r}*(1 - J${r}),100)`}; 
 });
 
     XLSX.utils.book_append_sheet(wb, wsLoc, 'LOCATIVO');
@@ -888,5 +889,6 @@ if(window.ExcelJS){
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
 </body>
 </html>
+
 
 
