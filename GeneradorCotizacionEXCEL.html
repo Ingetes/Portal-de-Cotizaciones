@@ -561,7 +561,15 @@ function postDownloadToParent(blob, fileName, mime){
     if(!parsedRows.length){ alert('Primero carga un archivo .xls/.xlsx'); return; }
     const m=autoMap();
     const miss=['referencia','cantidad','descripcion','precio','descuento','fecha'].filter(k=>!m[k]);
-    if(miss.length){ alert('No se encontraron columnas requeridas: '+miss.join(', ')); return; }
+    if (miss.length) {
+  const msg = 'No se encontraron columnas requeridas: ' + miss.join(', ');
+  if (window.parent !== window.self) {
+    window.parent.postMessage({ __ingetes_alert: true, message: msg }, '*');
+  } else {
+    alert(msg);
+  }
+  return;
+}
 
     const factor=parseFloat($('#factor').value||'0');
     if(!(factor >= 1.2)){ alert('El factor de utilidad debe ser mayor o igual a 1,20'); $('#factor').focus(); return; }
@@ -891,3 +899,4 @@ if(window.ExcelJS){
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
 </body>
 </html>
+
