@@ -350,7 +350,7 @@ btnSave?.addEventListener('click', async ()=>{
   const seleccionados = res.filter(x=>x.nombre);
   if (seleccionados.length===0) { alert('No se seleccionaron archivos.'); return; }
 
-  const detalle = seleccionados.map(r=>`${r.nombre} → ${r.ok?'OK -> Espera ~5 minutos para que se reflejen los cambios.':'ERROR'}${r.ok?'':(' ('+r.msg+')')}`).join('\n');
+  const detalle = seleccionados.map(r=>`${r.nombre} → ${r.ok?'Espera ~5 minutos para que se reflejen los cambios.':'ERROR'}${r.ok?'':(' ('+r.msg+')')}`).join('\n');
   alert(detalle);
 
   // Romper caché si hubo al menos 1 OK
