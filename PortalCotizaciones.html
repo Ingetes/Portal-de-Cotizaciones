@@ -65,6 +65,15 @@
     .modal-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);padding:14px 16px}
     .modal-body{padding:16px}
     .modal-footer{display:flex;gap:10px;justify-content:flex-end;border-top:1px solid var(--border);padding:12px 16px}
+
+/* ---- Indicador de carga y estados en Ajustes ---- */
+.status-line{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:6px}
+.spinner{width:14px;height:14px;border:2px solid #cbd5e1;border-top-color:#0f172a;border-radius:50%;
+         display:inline-block;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status-ok{color:#14532d}
+.status-err{color:#7f1d1d}
+  
   </style>
 </head>
 <body>
@@ -223,13 +232,19 @@
           <div class="stack">
             <label>Lista Siemens (PDF)<br>
             <small class="muted">Nombre de archivo requerido: <b>Listaprecios2025.pdf</b></small>
-            <input id="fileSiemens" type="file" accept="application/pdf" class="input"></label>
+            <input id="fileSiemens" type="file" accept="application/pdf" class="input">
+            </label>
+            <div id="statusSiemens" class="status-line muted"></div>
             <label>Lista Motores (PDF)<br>
             <small class="muted">Nombre de archivo requerido: <b>ListaPreciosMotores.pdf</b></small>
-            <input id="fileMotores" type="file" accept="application/pdf" class="input"></label>
+            <input id="fileMotores" type="file" accept="application/pdf" class="input">
+            </label>
+            <div id="statusMotores" class="status-line muted"></div>
             <label>Lista Ingetes (PDF)<br>
             <small class="muted">Nombre de archivo requerido: <b>Listapreciosingetes.pdf</b></small>
-            <input id="fileIngetes" type="file" accept="application/pdf" class="input"></label>
+            <input id="fileIngetes" type="file" accept="application/pdf" class="input">
+            </label>
+            <div id="statusMotores" class="status-line muted"></div>
           </div>
         </div>
       </div>
@@ -315,42 +330,94 @@ async function fileToBase64(file) {
   return btoa(binary); // base64 puro (sin encabezado)
 }
 
-async function subirPDF(inputId, rutaEnRepo, etiqueta) {
-  const f = document.getElementById(inputId)?.files?.[0];
-  if (!f) return {nombre:null, ok:false, msg:'sin archivo'};
+const MAX_SIZE = 25 * 1024 * 1024; // 25 MB
 
-  const base64 = await fileToBase64(f);
-
-  const resp = await fetch(ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      adminKey: document.getElementById('admPass').value,   // clave del modal
-      fileBase64: base64,                                   // base64 del PDF
-      path: rutaEnRepo,                                     // nombre EXACTO en el repo
-      message: `Actualiza ${etiqueta} desde el portal`
-    })
-  });
-
-  let j = {};
-  try { j = await resp.json(); } catch(e){ j={ok:false,msg:'Respuesta no JSON'} }
-
-  if (!resp.ok || !j.ok) {
-    return {nombre:f.name, ok:false, msg:(j.msg || (`HTTP ${resp.status}`))};
+function setStatus(where, type, text){
+  const el = document.getElementById(where);
+  if (!el) return;
+  if (type === 'idle'){
+    el.classList.remove('status-ok','status-err');
+    el.innerHTML = text || '';
+  } else if (type === 'loading'){
+    el.classList.remove('status-ok','status-err');
+    el.innerHTML = `<span class="spinner"></span>${text || 'Subiendo…'}`;
+  } else if (type === 'ok'){
+    el.classList.remove('status-err'); el.classList.add('status-ok');
+    el.innerHTML = `✅ ${text || 'Actualizado (puede tardar ~5 min en verse para todos)'}`;
+  } else if (type === 'err'){
+    el.classList.remove('status-ok'); el.classList.add('status-err');
+    el.innerHTML = `❌ ${text || 'Error al subir'}`;
   }
+}
+
+async function subirPDF(inputId, rutaEnRepo, etiqueta, statusId) {
+  const inp = document.getElementById(inputId);
+  const f = inp?.files?.[0];
+  if (!f) { setStatus(statusId, 'idle', ''); return {nombre:null, ok:false, msg:'sin archivo'}; }
+
+  // Mostrar selección y validar tamaño
+  setStatus(statusId, 'idle', `Seleccionado: ${f.name}`);
+  if (f.size > MAX_SIZE){
+    setStatus(statusId, 'err', 'Archivo muy grande (máx. 25 MB)');
+    return {nombre:f.name, ok:false, msg:'Archivo muy grande'};
+  }
+
+  // A subir…
+  setStatus(statusId, 'loading', 'Subiendo…');
+
+  // Convertir a base64
+  const buf = await f.arrayBuffer();
+  let bin = ''; const bytes = new Uint8Array(buf);
+  for (let i=0;i<bytes.length;i++) bin += String.fromCharCode(bytes[i]);
+  const base64 = btoa(bin);
+
+  // Llamar a tu endpoint
+  let resp, j;
+  try{
+    resp = await fetch(ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        adminKey: document.getElementById('admPass').value,   // clave del modal
+        fileBase64: base64,                                   // base64 del PDF
+        path: rutaEnRepo,                                     // nombre EXACTO en el repo
+        message: `Actualiza ${etiqueta} desde el portal`
+      })
+    });
+    try { j = await resp.json(); } catch(_) { j = {}; }
+  }catch(e){
+    setStatus(statusId, 'err', 'Fallo de red');
+    return {nombre:f.name, ok:false, msg:'Fallo de red'};
+  }
+
+  // Manejo de errores comunes del backend/GitHub
+  if (resp.status === 413){
+    setStatus(statusId, 'err', 'Archivo muy grande ( GitHub/servidor )');
+    return {nombre:f.name, ok:false, msg:'Payload Too Large'};
+  }
+  if (!resp.ok || !j?.ok){
+    const msg = (j?.msg || `HTTP ${resp.status}`);
+    setStatus(statusId, 'err', msg);
+    return {nombre:f.name, ok:false, msg};
+  }
+
+  // OK
+  setStatus(statusId, 'ok', 'Subido. Espera ~5 min para que se refleje.');
   return {nombre:f.name, ok:true, msg:'OK'};
 }
 
 btnSave?.addEventListener('click', async ()=>{
   const res = [];
-  res.push(await subirPDF('fileSiemens','Listaprecios2025.pdf','Lista Siemens'));
-  res.push(await subirPDF('fileMotores','ListaPreciosMotores.pdf','Lista Motores'));
-  res.push(await subirPDF('fileIngetes','Listapreciosingetes.pdf','Lista Ingetes'));
+  res.push(await subirPDF('fileSiemens','Listaprecios2025.pdf','Lista Siemens','statusSiemens'));
+  res.push(await subirPDF('fileMotores','ListaPreciosMotores.pdf','Lista Motores','statusMotores'));
+  res.push(await subirPDF('fileIngetes','Listapreciosingetes.pdf','Lista Ingetes','statusIngetes'));
 
   const seleccionados = res.filter(x=>x.nombre);
   if (seleccionados.length===0) { alert('No se seleccionaron archivos.'); return; }
 
-  const detalle = seleccionados.map(r=>`${r.nombre} → ${r.ok?'Espera ~5 minutos para que se reflejen los cambios.':'ERROR'}${r.ok?'':(' ('+r.msg+')')}`).join('\n');
+  const detalle = seleccionados.map(r=>
+    `${r.nombre} → ${r.ok?'OK -> Espera ~5 minutos para que se reflejen los cambios.':'ERROR'}${r.ok?'':(' ('+r.msg+')')}`
+  ).join('\n');
   alert(detalle);
 
   // Romper caché si hubo al menos 1 OK
