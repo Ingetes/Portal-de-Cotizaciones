@@ -112,6 +112,7 @@
               <a id="lnkSiemens"  href="./Listaprecios2025.pdf" target="_blank" rel="noopener" class="btn btn-wide">Lista de precios Siemens</a>
               <a id="lnkMotores"  href="./ListaPreciosMotores.pdf"   target="_blank" rel="noopener" class="btn btn-wide">Lista de Precios de Motores</a>
               <a id="lnkIngetes"  href="./Listapreciosingetes.pdf"   target="_blank" rel="noopener" class="btn btn-wide">Lista de Precios Ingetes</a>
+              <a id="lnkTarifasIng" href="./ListaPreciosIngenieria.xlsx" target="_blank" rel="noopener" class="btn btn-wide">Tarifas Ingeniería (Excel)</a>
             </div>
           </div>
 
@@ -245,6 +246,13 @@
             <input id="fileIngetes" type="file" accept="application/pdf" class="input">
             </label>
             <div id="statusMotores" class="status-line muted"></div>
+            <label>Tarifas Ingeniería (Excel)<br>
+            <small class="muted">Nombre de archivo requerido: <b>ListaPreciosIngenieria.xlsx</b></small>
+            <input id="fileTarifasIng" type="file"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            class="input">
+            </label>
+<div id="statusTarifasIng" class="status-line muted"></div>
           </div>
         </div>
       </div>
@@ -411,6 +419,7 @@ btnSave?.addEventListener('click', async ()=>{
   res.push(await subirPDF('fileSiemens','Listaprecios2025.pdf','Lista Siemens','statusSiemens'));
   res.push(await subirPDF('fileMotores','ListaPreciosMotores.pdf','Lista Motores','statusMotores'));
   res.push(await subirPDF('fileIngetes','Listapreciosingetes.pdf','Lista Ingetes','statusIngetes'));
+  res.push(await subirPDF('fileTarifasIng','ListaPreciosIngenieria.xlsx','Tarifas Ingeniería','statusTarifasIng'));
 
   const seleccionados = res.filter(x=>x.nombre);
   if (seleccionados.length===0) { alert('No se seleccionaron archivos.'); return; }
@@ -426,6 +435,9 @@ btnSave?.addEventListener('click', async ()=>{
     const l1=document.getElementById('lnkSiemens'); if(l1) l1.href='./Listaprecios2025.pdf'+v;
     const l2=document.getElementById('lnkMotores'); if(l2) l2.href='./ListaPreciosMotores.pdf'+v;
     const l3=document.getElementById('lnkIngetes'); if(l3) l3.href='./Listapreciosingetes.pdf'+v;
+
+    // NUEVO: refrescar link del Excel
+    const l4=document.getElementById('lnkTarifasIng'); if(l4) l4.href='./ListaPreciosIngenieria.xlsx'+v;
   }
 });
     
@@ -509,11 +521,10 @@ window.addEventListener('message', (ev) => {
 });
 
 // Siempre que hagan click en un PDF, añade ?v=timestamp para forzar versión nueva
-['lnkSiemens','lnkMotores','lnkIngetes'].forEach(id=>{
+['lnkSiemens','lnkMotores','lnkIngetes','lnkTarifasIng'].forEach(id=>{
   const a = document.getElementById(id);
   if (!a) return;
-  a.addEventListener('click', (e)=>{
-    // si ya tiene ?v=, lo renovamos; si no, lo agregamos
+  a.addEventListener('click', ()=>{
     const u = new URL(a.href, location.href);
     u.searchParams.set('v', Date.now().toString());
     a.href = u.toString();
