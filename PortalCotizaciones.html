@@ -245,7 +245,7 @@
             <small class="muted">Nombre de archivo requerido: <b>Listapreciosingetes.pdf</b></small>
             <input id="fileIngetes" type="file" accept="application/pdf" class="input">
             </label>
-            <div id="statusMotores" class="status-line muted"></div>
+            <div id="statusIngetes" class="status-line muted"></div>
             <label>Tarifas Ingeniería (Excel)<br>
             <small class="muted">Nombre de archivo requerido: <b>ListaPreciosIngenieria.xlsx</b></small>
             <input id="fileTarifasIng" type="file"
@@ -310,8 +310,11 @@
       btnSave.classList.toggle('hidden', !logged);
       btnLogout.classList.toggle('hidden', !logged);
     }
-    function closeModal(){ modal.style.display='none'; modal.setAttribute('aria-hidden','true'); }
-
+    function closeModal(){
+      resetSettingsForm();                       // <-- limpiar inputs y estados
+      modal.style.display='none';
+      modal.setAttribute('aria-hidden','true');
+    }
     openBtn?.addEventListener('click', openModal);
     closeBtn?.addEventListener('click', closeModal);
     modal?.addEventListener('click', (e)=>{ if(e.target===modal) closeModal(); });
@@ -323,8 +326,13 @@
       btnSave.classList.remove('hidden'); btnLogout.classList.remove('hidden');
     });
     btnLogout?.addEventListener('click', ()=>{
-      logged=false; document.getElementById('admPass').value='';
-      contentView.classList.add('hidden'); btnSave.classList.add('hidden'); btnLogout.classList.add('hidden'); loginView.classList.remove('hidden');
+      logged = false;
+      document.getElementById('admPass').value = '';
+      resetSettingsForm();                       // <-- limpiar inputs y estados
+      contentView.classList.add('hidden');
+      btnSave.classList.add('hidden');
+      btnLogout.classList.add('hidden');
+      loginView.classList.remove('hidden');
     });
 
 // === SUBIDA DE PDFs vía API segura en Vercel ===
@@ -340,6 +348,22 @@ async function fileToBase64(file) {
 
 const MAX_SIZE = 25 * 1024 * 1024; // 25 MB
 
+function resetSettingsForm(){
+  // Limpiar archivos seleccionados
+  ['fileSiemens','fileMotores','fileIngetes','fileTarifasIng'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  // Limpiar líneas de estado
+  ['statusSiemens','statusMotores','statusIngetes','statusTarifasIng'].forEach(id=>{
+    if (typeof setStatus === 'function') setStatus(id, 'idle', '');
+    else {
+      const el = document.getElementById(id);
+      if (el) el.textContent = '';
+    }
+  });
+}
+    
 function setStatus(where, type, text){
   const el = document.getElementById(where);
   if (!el) return;
