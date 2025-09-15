@@ -219,7 +219,7 @@
         </div>
         <!-- Contenido -->
         <div id="settingsContent" class="hidden">
-          <p class="muted">Actualiza los documentos de descarga (solo para esta sesión del navegador).</p>
+          <p class="muted">Actualiza los documentos de descarga.</p>
           <div class="stack">
             <label>Lista Siemens (PDF)<br><input id="fileSiemens" type="file" accept="application/pdf" class="input"></label>
             <label>Lista Motores (PDF)<br><input id="fileMotores" type="file" accept="application/pdf" class="input"></label>
@@ -298,20 +298,64 @@
       contentView.classList.add('hidden'); btnSave.classList.add('hidden'); btnLogout.classList.add('hidden'); loginView.classList.remove('hidden');
     });
 
-    function setLinkFromFile(inputId, linkId){
-      const input=document.getElementById(inputId);
-      const link=document.getElementById(linkId);
-      const f=input?.files?.[0]; if(!f || !link) return false;
-      const url=URL.createObjectURL(f);
-      link.href=url; link.target='_blank'; return true;
-    }
-    btnSave?.addEventListener('click', ()=>{
-      const ok1=setLinkFromFile('fileSiemens','lnkSiemens');
-      const ok2=setLinkFromFile('fileMotores','lnkMotores');
-      const ok3=setLinkFromFile('fileIngetes','lnkIngetes');
-      alert((ok1||ok2||ok3)?'Enlaces actualizados para esta sesión.':'No se seleccionaron archivos.');
-    });
+// === SUBIDA DE PDFs vía API segura en Vercel ===
+const ENDPOINT = 'https://portal-api-nine.vercel.app/api/upload'; // <-- tu URL
 
+async function fileToBase64(file) {
+  const buf = await file.arrayBuffer();
+  let binary = '';
+  const bytes = new Uint8Array(buf);
+  for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary); // base64 puro (sin encabezado)
+}
+
+async function subirPDF(inputId, rutaEnRepo, etiqueta) {
+  const f = document.getElementById(inputId)?.files?.[0];
+  if (!f) return {nombre:null, ok:false, msg:'sin archivo'};
+
+  const base64 = await fileToBase64(f);
+
+  const resp = await fetch(ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      adminKey: document.getElementById('admPass').value,   // clave del modal
+      fileBase64: base64,                                   // base64 del PDF
+      path: rutaEnRepo,                                     // nombre EXACTO en el repo
+      message: `Actualiza ${etiqueta} desde el portal`
+    })
+  });
+
+  let j = {};
+  try { j = await resp.json(); } catch(e){ j={ok:false,msg:'Respuesta no JSON'} }
+
+  if (!resp.ok || !j.ok) {
+    return {nombre:f.name, ok:false, msg:(j.msg || (`HTTP ${resp.status}`))};
+  }
+  return {nombre:f.name, ok:true, msg:'OK'};
+}
+
+btnSave?.addEventListener('click', async ()=>{
+  const res = [];
+  res.push(await subirPDF('fileSiemens','Listaprecios2025.pdf','Lista Siemens'));
+  res.push(await subirPDF('fileMotores','ListaPreciosMotores.pdf','Lista Motores'));
+  res.push(await subirPDF('fileIngetes','Listapreciosingetes.pdf','Lista Ingetes'));
+
+  const seleccionados = res.filter(x=>x.nombre);
+  if (seleccionados.length===0) { alert('No se seleccionaron archivos.'); return; }
+
+  const detalle = seleccionados.map(r=>`${r.nombre} → ${r.ok?'OK':'ERROR'}${r.ok?'':(' ('+r.msg+')')}`).join('\n');
+  alert(detalle);
+
+  // Romper caché si hubo al menos 1 OK
+  if (res.some(x=>x.ok)){
+    const v='?v='+Date.now();
+    const l1=document.getElementById('lnkSiemens'); if(l1) l1.href='./Listaprecios2025.pdf'+v;
+    const l2=document.getElementById('lnkMotores'); if(l2) l2.href='./ListaPreciosMotores.pdf'+v;
+    const l3=document.getElementById('lnkIngetes'); if(l3) l3.href='./Listapreciosingetes.pdf'+v;
+  }
+});
+    
     const ingenieria = document.getElementById('cotizacionIngenieria');
 
     document.getElementById('goEngineering')?.addEventListener('click', ()=>{
@@ -326,9 +370,7 @@
     });
 
   })();
-  </script>
 
-<script>
 /* === Receptor de descargas desde iframes con preferencia por "Guardar como..." === */
 (function(){
   async function saveWithPicker(buffer, suggestedName, mime){
@@ -391,6 +433,18 @@ window.addEventListener('message', (ev) => {
   
   // Mostrar alerta desde el iframe
   alert(d.message);
+});
+
+// Siempre que hagan click en un PDF, añade ?v=timestamp para forzar versión nueva
+['lnkSiemens','lnkMotores','lnkIngetes'].forEach(id=>{
+  const a = document.getElementById(id);
+  if (!a) return;
+  a.addEventListener('click', (e)=>{
+    // si ya tiene ?v=, lo renovamos; si no, lo agregamos
+    const u = new URL(a.href, location.href);
+    u.searchParams.set('v', Date.now().toString());
+    a.href = u.toString();
+  });
 });
 
 </script>
