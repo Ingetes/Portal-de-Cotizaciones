@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cotizador de ingeniería — Ingetes (v30)</title>
+<title>Cotizador de ingeniería </title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
@@ -27,7 +27,6 @@ body{
   font-family:Inter,system-ui,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
 }
 
-/* Encabezado igual al de Excel */
 header{
   padding:35px 16px;
   border-bottom:1px solid var(--line);
@@ -62,7 +61,7 @@ input:focus,select:focus,textarea:focus{
   border-color:#9aa7b4; box-shadow:0 0 0 3px rgba(2,132,199,.15);
 }
 
-/* Botón "Reiniciar" claro (estilo similar al de Word) */
+/* Botón "Reiniciar" claro */
 .btn.reset{
   background:#eef1f5;
   color:var(--text);
@@ -94,13 +93,12 @@ table tfoot tr td{
     cursor:pointer;font-weight:600;
 }
 
-/* Borde rojo para campos obligatorios vacíos (igual que Word) */
+/* Borde rojo para campos obligatorios vacíos */
 input.error, select.error, textarea.error{
   border-color:#ef4444 !important;
   box-shadow:0 0 0 3px rgba(239,68,68,.15) !important;
 }
 
-/* etiqueta (colspan) a la derecha y valor a la derecha ya existente */
 table tfoot tr td:first-child{ text-align:right; }
 
 /* Tabla */
@@ -122,7 +120,7 @@ td.right{text-align:right}
 .muted{color:var(--muted)}
 .warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:8px 12px;margin-top:12px}
 
-/* Botón principal oscuro como en Excel/Word */
+/* Botón principal oscuro */
 button{
   background:var(--accent);color:#fff;border:0;border-radius:12px;
   padding:10px 14px;font-weight:700;cursor:pointer
@@ -152,7 +150,7 @@ header .brand{
 <body>
 
 <header>
-  <h1>Cotizador de ingeniería — INGETES</h1>
+  <h1>Cotizador de ingeniería</h1>
   <div class="brand">INGETES SAS</div>
 </header>
 
