@@ -677,11 +677,11 @@ c(13).value={formula:`CEILING(N${r}*E${r},100)`};
     const thinB={style:'thin',color:{argb:'FF000000'}}, boxThin={top:thinB,left:thinB,bottom:thinB,right:thinB};
 
     // Fila amarilla vacía D3:I3
-    wv.mergeCells(3,4,3,9);
-    for(let c=4;c<=9;c++){ const cell=wv.getCell(3,c); cell.value=''; cell.fill=yellow; cell.border=boxThin; }
+    wv.mergeCells(3,4,3,8);
+    for(let c=4;c<=8;c++){ const cell=wv.getCell(3,c); cell.value=''; cell.fill=yellow; cell.border=boxThin; }
 
     // Encabezado D4:I4
-    const HDR=['ITEM','CANT','DESCRIPCION','DISPONIBILIDAD','V/UNIT','V/TOTAL'];
+    const HDR=['ITEM','CANT','DESCRIPCIÓN','V/UNIT','V/TOTAL'];
     for(let i=0;i<HDR.length;i++){ const cell=wv.getCell(4,4+i); cell.value=HDR[i]; cell.fill=yellow; cell.font={bold:true}; cell.alignment={vertical:'middle',horizontal:'center',wrapText:true}; cell.border=boxThin; }
     
     // Forzar wrapText para toda la columna de DESCRIPCION
@@ -693,88 +693,87 @@ c(13).value={formula:`CEILING(N${r}*E${r},100)`};
     for(let i=0;i<items.length;i++){
       const loc = 10 + i; // fila de LOCATIVO
       const desc = cfg.showRef ? `${items[i].descripcion}\nREF: ${items[i].referencia}` : items[i].descripcion;
+      const descFormula = cfg.showRef
+      ? `LOCATIVO!F${loc}&CHAR(10)&"REF: "&LOCATIVO!D${loc}&CHAR(10)&"DISP: "&LOCATIVO!G${loc}`
+      : `LOCATIVO!F${loc}&CHAR(10)&"DISP: "&LOCATIVO!G${loc}`;
 
       // MODIFICAR ESTAS LÍNEAS - Usar referencias a LOCATIVO en lugar de valores estáticos
       wv.getCell(rr,4).value={ formula:`LOCATIVO!B${loc}` };  // ITEM (columna C en LOCATIVO)
       wv.getCell(rr,5).value={ formula:`LOCATIVO!E${loc}` };  // CANT (columna E en LOCATIVO)
-      wv.getCell(rr,6).value = cfg.showRef
-      ? { formula: `LOCATIVO!F${loc}&CHAR(10)&"REF: "&LOCATIVO!D${loc}` }
-      : { formula: `LOCATIVO!F${loc}` };
-      wv.getCell(rr,7).value={ formula:`LOCATIVO!G${loc}` };  // DISP
-      wv.getCell(rr,8).value={ formula:`LOCATIVO!N${loc}` };  // V/UNIT
-      wv.getCell(rr,9).value={ formula:`LOCATIVO!O${loc}` };  // V/TOTAL
+      wv.getCell(rr,6).value={ formula: descFormula };   
+      wv.getCell(rr,7).value={ formula:`LOCATIVO!N${loc}` };  // V/UNIT
+      wv.getCell(rr,8).value={ formula:`LOCATIVO!O${loc}` };  // V/TOTAL
 
       wv.getCell(rr,6).alignment = { vertical:'top', horizontal:'left', wrapText:true };
 
       // Alineaciones exactas
       wv.getCell(rr,4).alignment={vertical:'middle',horizontal:'center'};
       wv.getCell(rr,5).alignment={vertical:'middle',horizontal:'center'};
-      wv.getCell(rr,6).alignment = { vertical:'top', horizontal:'left', wrapText:true };
-      wv.getCell(rr,7).alignment={vertical:'middle',horizontal:'center',wrapText:true};
+      wv.getCell(rr,6).alignment = { vertical:'middle', horizontal:'left', wrapText:true };
+      wv.getCell(rr,7).alignment={vertical:'middle',horizontal:'right',wrapText:true};
       wv.getCell(rr,8).alignment={vertical:'middle',horizontal:'right'};
-      wv.getCell(rr,9).alignment={vertical:'middle',horizontal:'right'};
 
       // Formato & bordes
+      wv.getCell(rr,7).numFmt='"$" #,##0';
       wv.getCell(rr,8).numFmt='"$" #,##0';
-      wv.getCell(rr,9).numFmt='"$" #,##0';
-      for(let c=4;c<=9;c++) wv.getCell(rr,c).border=boxThin;
+      for(let c=4;c<=8;c++) wv.getCell(rr,c).border=boxThin;
       rr++;
     }
     const last=rr-1;
 
     if((cfg.descuentoPct||0) > 0){
       const rowSub = last + 1;
-      wv.mergeCells(rowSub,4,rowSub,8);
+      wv.mergeCells(rowSub,4,rowSub,7);
       wv.getCell(rowSub,4).value='SUBTOTAL';
       wv.getCell(rowSub,4).alignment={horizontal:'right',vertical:'middle'};
       wv.getCell(rowSub,4).font={bold:true};
-      wv.getCell(rowSub,9).value={ formula:`SUM(I5:I${last})` };
-      wv.getCell(rowSub,9).numFmt='"$" #,##0';
+      wv.getCell(rowSub,8).value={ formula:`SUM(H5:H${last})` };
+      wv.getCell(rowSub,8).numFmt='"$" #,##0';
 
       const rowDesc = rowSub + 1;
-      wv.mergeCells(rowDesc,4,rowDesc,8);
+      wv.mergeCells(rowDesc,4,rowDesc,7);
       wv.getCell(rowDesc,4).value=`DESCUENTO (${Math.round((cfg.descuentoPct||0)*100)}%)`;
       wv.getCell(rowDesc,4).alignment={horizontal:'right',vertical:'middle'};
       wv.getCell(rowDesc,4).font={bold:true};
-      wv.getCell(rowDesc,9).value={ formula:`I${rowSub}*${(cfg.descuentoPct||0)}` };
-      wv.getCell(rowDesc,9).numFmt='"$" #,##0';
+      wv.getCell(rowDesc,8).value={ formula:`H${rowSub}*${(cfg.descuentoPct||0)}` };
+      wv.getCell(rowDesc,8).numFmt='"$" #,##0';
 
       const rowTot = rowDesc + 1;
-      wv.mergeCells(rowTot,4,rowTot,8);
+      wv.mergeCells(rowTot,4,rowTot,7);
       wv.getCell(rowTot,4).value='TOTAL';
       wv.getCell(rowTot,4).alignment={horizontal:'right',vertical:'middle'};
       wv.getCell(rowTot,4).font={bold:true};
-      wv.getCell(rowTot,9).value={ formula:`I${rowSub}-I${rowDesc}` };
-      wv.getCell(rowTot,9).numFmt='"$" #,##0';
+      wv.getCell(rowTot,8).value={ formula:`H${rowSub}-H${rowDesc}` };
+      wv.getCell(rowTot,8).numFmt='"$" #,##0';
 
       const rowIva = rowTot + 1;
-      wv.mergeCells(rowIva,4,rowIva,9);
+      wv.mergeCells(rowIva,4,rowIva,8);
       wv.getCell(rowIva,4).value='IVA NO INCLUIDO';
       wv.getCell(rowIva,4).alignment={horizontal:'center',vertical:'middle'};
       wv.getCell(rowIva,4).font={bold:true};
 
       const yellow={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFFF00'}};
       for(const r of [rowSub,rowDesc,rowTot,rowIva]){
-        for(let c=4;c<=9;c++){ const cell=wv.getCell(r,c); cell.fill=yellow; cell.border=thinB?{top:thinB,left:thinB,bottom:thinB,right:thinB}:undefined; }
+        for(let c=4;c<=8;c++){ const cell=wv.getCell(r,c); cell.fill=yellow; cell.border=thinB?{top:thinB,left:thinB,bottom:thinB,right:thinB}:undefined; }
       }
     } else {
       const rowTot = last + 1;
-      wv.mergeCells(rowTot,4,rowTot,8);
+      wv.mergeCells(rowTot,4,rowTot,7);
       wv.getCell(rowTot,4).value='TOTAL';
       wv.getCell(rowTot,4).alignment={horizontal:'right',vertical:'middle'};
       wv.getCell(rowTot,4).font={bold:true};
-      wv.getCell(rowTot,9).value={ formula:`SUM(I5:I${last})` };
-      wv.getCell(rowTot,9).numFmt='"$" #,##0';
+      wv.getCell(rowTot,8).value={ formula:`SUM(H5:H${last})` };
+      wv.getCell(rowTot,8).numFmt='"$" #,##0';
 
       const rowIva = rowTot + 1;
-      wv.mergeCells(rowIva,4,rowIva,9);
+      wv.mergeCells(rowIva,4,rowIva,8);
       wv.getCell(rowIva,4).value='IVA NO INCLUIDO';
       wv.getCell(rowIva,4).alignment={horizontal:'center',vertical:'middle'};
       wv.getCell(rowIva,4).font={bold:true};
 
       const yellow={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFFF00'}};
       for(const r of [rowTot,rowIva]){
-        for(let c=4;c<=9;c++){ const cell=wv.getCell(r,c); cell.fill=yellow; cell.border={top:thinB,left:thinB,bottom:thinB,right:thinB}; }
+        for(let c=4;c<=8;c++){ const cell=wv.getCell(r,c); cell.fill=yellow; cell.border={top:thinB,left:thinB,bottom:thinB,right:thinB}; }
       }
     }
     // Forzar recálculo al abrir
@@ -848,16 +847,17 @@ if(window.ExcelJS){
     // VENTA (D4) + fila amarilla (sin estilos avanzados en fallback)
     const wsVen=XLSX.utils.aoa_to_sheet([]);
     wsVen['!merges']=[XLSX.utils.decode_range('D3:I3')];
-    XLSX.utils.sheet_add_aoa(wsVen, [['ITEM','CANT','DESCRIPCION','DISPONIBILIDAD','V/UNIT','V/TOTAL']], {origin:'D4'});
+    XLSX.utils.sheet_add_aoa(wsVen, [['ITEM','CANT','DESCRIPCION','V/UNIT','V/TOTAL']], {origin:'D4'});
     items.forEach((it,i)=>{
       const r=5+i, loc=10+i;
-      const desc = cfg.showRef ? `${it.descripcion}\nREF: ${it.referencia}` : it.descripcion;
+      const desc = cfg.showRef
+      ? `${it.descripcion}\nREF: ${it.referencia}\nDISP: ${it.disponibilidad}`
+      : `${it.descripcion}\nDISP: ${it.disponibilidad}`;
       XLSX.utils.sheet_add_aoa(wsVen, [
         [
           {f:`LOCATIVO!B${loc}`},  // ITEM (columna C en LOCATIVO)
           {f:`LOCATIVO!E${loc}`},  // CANT (columna E en LOCATIVO)
           desc, 
-          {f:`LOCATIVO!G${loc}`},
           {f:`LOCATIVO!N${loc}`},
           {f:`LOCATIVO!O${loc}`}
         ]
@@ -869,22 +869,22 @@ if(window.ExcelJS){
     if((cfg.descuentoPct||0)>0){
       const rowSub=last+1, rowDesc=rowSub+1, rowTot=rowDesc+1, rowIva=rowTot+1;
       wsVen['!merges']=wsVen['!merges'].concat([
-        XLSX.utils.decode_range(`D${rowSub}:H${rowSub}`),
-        XLSX.utils.decode_range(`D${rowDesc}:H${rowDesc}`),
-        XLSX.utils.decode_range(`D${rowTot}:H${rowTot}`),
-        XLSX.utils.decode_range(`D${rowIva}:I${rowIva}`)
+        XLSX.utils.decode_range(`D${rowSub}:G${rowSub}`),
+        XLSX.utils.decode_range(`D${rowDesc}:G${rowDesc}`),
+        XLSX.utils.decode_range(`D${rowTot}:G${rowTot}`),
+        XLSX.utils.decode_range(`D${rowIva}:H${rowIva}`)
       ]);
-      XLSX.utils.sheet_add_aoa(wsVen, [[ 'SUBTOTAL', null,null,null,null, {f:`SUM(I5:I${last})`} ]], {origin:`D${rowSub}`} );
-      XLSX.utils.sheet_add_aoa(wsVen, [[ `DESCUENTO (${Math.round((cfg.descuentoPct||0)*100)}%)`, null,null,null,null, {f:`I${rowSub}*${(cfg.descuentoPct||0)}`} ]], {origin:`D${rowDesc}`} );
-      XLSX.utils.sheet_add_aoa(wsVen, [[ 'TOTAL', null,null,null,null, {f:`I${rowSub}-I${rowDesc}`} ]], {origin:`D${rowTot}`} );
+      XLSX.utils.sheet_add_aoa(wsVen, [[ 'SUBTOTAL', null,null,null, {f:`SUM(H5:H${last})`} ]], {origin:`D${rowSub}`} );
+      XLSX.utils.sheet_add_aoa(wsVen, [[ `DESCUENTO (${Math.round((cfg.descuentoPct||0)*100)}%)`, null,null,null, {f:`H${rowSub}*${(cfg.descuentoPct||0)}`} ]], {origin:`D${rowDesc}`} );
+      XLSX.utils.sheet_add_aoa(wsVen, [[ 'TOTAL', null,null,null, {f:`H${rowSub}-H${rowDesc}`} ]], {origin:`D${rowTot}`} );
       XLSX.utils.sheet_add_aoa(wsVen, [[ 'IVA NO INCLUIDO' ]], {origin:`D${rowIva}`} );
     } else {
       const rowTot=last+1, rowIva=rowTot+1;
       wsVen['!merges']=wsVen['!merges'].concat([
-        XLSX.utils.decode_range(`D${rowTot}:H${rowTot}`),
-        XLSX.utils.decode_range(`D${rowIva}:I${rowIva}`)
+        XLSX.utils.decode_range(`D${rowTot}:G${rowTot}`),
+        XLSX.utils.decode_range(`D${rowIva}:H${rowIva}`)
       ]);
-      XLSX.utils.sheet_add_aoa(wsVen, [[ 'TOTAL', null,null,null,null, {f:`SUM(I5:I${last})`} ]], {origin:`D${rowTot}`} );
+      XLSX.utils.sheet_add_aoa(wsVen, [[ 'TOTAL', null,null,null, {f:`SUM(H5:H${last})`} ]], {origin:`D${rowTot}`} );
       XLSX.utils.sheet_add_aoa(wsVen, [[ 'IVA NO INCLUIDO' ]], {origin:`D${rowIva}`} );
     }
     wsVen['!cols']=[{wch:3},{wch:3},{wch:3},{wch:6},{wch:8},{wch:75},{wch:22},{wch:18},{wch:18}];
@@ -899,5 +899,3 @@ if(window.ExcelJS){
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
 </body>
 </html>
-
-
