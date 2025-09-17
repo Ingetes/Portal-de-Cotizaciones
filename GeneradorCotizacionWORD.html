@@ -949,10 +949,10 @@ const fechaStr = (() => {
           right:{style:docx.BorderStyle.SINGLE,size:4,color:'000000'}
         },
         children:[
-          para([ run('Bogotá, '+fechaStr, FONTS.MSS12) ]),
-	  para([ run('', FONTS.MSS12) ]),
           para([ run('Señores:', FONTS.MSS12) ]),
-          para([ run(empresaStr||'', FONTS.MSS12, {bold:true}) ])
+          para([ run(empresaStr||'', FONTS.MSS12, {bold:true}) ]),
+          para([ run('ATTE. '+(dirigidoStr||''), FONTS.MSS12) ]),
+          para([ run(areaStr||'', FONTS.MSS12, {bold:true}) ]),
         ]
       }),
       new docx.TableCell({
@@ -976,9 +976,9 @@ const fechaStr = (() => {
   });
 
   const cuerpo=[
+    para([ run('Bogotá, '+fechaStr, FONTS.MSS12) ]),
+    para([ run('', FONTS.MSS12) ]),
     tableIntro,
-    para([ run('ATTE. '+(dirigidoStr||''), FONTS.MSS12) ]),
-    para([ run(areaStr||'', FONTS.MSS12, {bold:true}) ]),
     para([ run(ubicacionStr, FONTS.MSS12) ]),
     para([ run('', FONTS.AR10) ]),
     para([ run('ASUNTO: '+ asuntoStr, FONTS.AR10, {bold:true}) ]),
@@ -1061,5 +1061,6 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
