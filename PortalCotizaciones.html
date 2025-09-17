@@ -159,6 +159,13 @@
               <button id="goEngineering" class="btn btn-wide">Ingeniería</button>
             </div>
           </div>
+          <div class="box">
+            <h3>Inventario</h3>
+            <p class="muted">Consulta rápida de existencias y referencias.</p>
+            <div class="stack">
+              <button id="goInventory" class="btn btn-wide">Revisor de inventario</button>
+          </div>
+          </div>
         </div>
       </div>
     </section>
@@ -231,6 +238,27 @@
         <iframe id="frameIngenieria" class="embedded" src="CotizacionIngenieria.html" title="Cotización Ingeniería"></iframe>
       </div>
     </section>
+    <!-- ===== REVISOR DE INVENTARIO ===== -->
+    <section id="inventarioView" class="hidden" aria-hidden="true">
+      <div class="panel-card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <div class="row">
+            <img src="ingetes.jpg" alt="" style="height:42px">
+            <h2 style="margin-left:10px">Revisor de inventario</h2>
+          </div>
+          <button id="backToPanelFromInventory" class="btn btn-small">← Volver</button>
+        </div>
+        <iframe
+          id="frameInventario"
+          class="embedded"
+          src="Inventario.html"
+          title="Revisor de inventario"
+          sandbox="allow-scripts allow-same-origin allow-downloads allow-popups allow-top-navigation-by-user-activation"
+          allow="clipboard-read; clipboard-write; file-system-access; fullscreen"
+        ></iframe>
+      </div>
+    </section>
+
 
   </main>
 
@@ -299,6 +327,22 @@
     function goNormal(){ hide(panel); show(normal); window.scrollTo({top:0,behavior:'smooth'}); }
     function backFromFast(){ hide(fast); show(panel); }
     function backFromNormal(){ hide(normal); show(panel); }
+
+    // Helpers mínimos (si ya existen, omite estas funciones)
+    function showSec(id){ const el=document.getElementById(id); if(el){ el.classList.remove('hidden'); el.setAttribute('aria-hidden','false'); } }
+    function hideSec(id){ const el=document.getElementById(id); if(el){ el.classList.add('hidden'); el.setAttribute('aria-hidden','true'); } }
+
+    // Ir a Inventario
+    document.getElementById('goInventory')?.addEventListener('click', ()=>{
+      hideSec('panel');
+      showSec('inventarioView');
+    });
+
+    // Volver desde Inventario
+    document.getElementById('backToPanelFromInventory')?.addEventListener('click', ()=>{
+      hideSec('inventarioView');
+      showSec('panel');
+    });
 
     $('startBtn')?.addEventListener('click', e=>{ e.preventDefault(); window.__goPanel(); });
     $('goFast')?.addEventListener('click',  e=>{ e.preventDefault(); goFast(); });
