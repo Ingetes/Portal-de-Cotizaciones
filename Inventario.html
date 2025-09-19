@@ -74,7 +74,6 @@
         <input id="qtyManual" type="number" min="1" step="1" value="1" placeholder="Cantidad" style="max-width:120px" />
         <button id="btnRunSingle" class="btn">Comparar</button>
       </div>
-      <div class="muted" style="margin-top:6px">Se normaliza: espacios/guiones → formato estándar, mayúsculas.</div>
     </section>
   </div>
 
@@ -87,7 +86,7 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Referencia encontrada en cotización</th>
+            <th>Referencia</th>
             <th>Descripción</th>
             <th>Estado</th>
             <th>Cant. solicitada</th>
@@ -106,6 +105,7 @@
     <div class="row">
       <button id="btnClear" class="btn">Limpiar (tabla y cotización)</button>
       <button id="btnReset" class="btn">Reiniciar todo</button>
+      <button id="btnExportFromCot" class="btn">Descargar .xlsx</button>
     </div>
     <div id="cleanInfo" class="muted" style="margin-top:6px"></div>
   </section>
@@ -136,6 +136,45 @@ function normRef(s){
     .toUpperCase();
 }
 
+function cellText(cell){
+  const v = cell?.value;
+  if (v == null) return '';
+  if (typeof v === 'string' || typeof v === 'number') return String(v);
+  if (typeof v === 'object'){
+    if (v.richText) return v.richText.map(t=>t.text).join('');
+    if (v.text) return String(v.text);
+    if (v.result != null) return String(v.result);
+    if (v.formula) return String(v.formula);
+  }
+  return String(v);
+}
+function findHeaderRow(ws){
+  const max = Math.min(ws.rowCount, 30);
+  for (let r=1; r<=max; r++){
+    const row = ws.getRow(r);
+    let hitRef=false, hitExi=false;
+    row.eachCell(c=>{
+      const t = cellText(c).trim().toUpperCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+      if (t === 'REFERENCIA') hitRef = true;
+      if (t === 'EXISTENCIA') hitExi = true;
+    });
+    if (hitRef && hitExi) return r;
+  }
+  return 9; // fallback típico del formato
+}
+function findColByHeader(ws, headerRow, name){
+  name = name.toUpperCase();
+  const row = ws.getRow(headerRow);
+  let idx = null;
+  row.eachCell((cell, col)=>{
+    const t = cellText(cell).trim().toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    if (t === name) idx = col;
+  });
+  return idx;
+}
+
 function getRequested(refN){
   const row = cotMap.get(refN);
   return row ? Number(row.req || 0) : 1; // en modo manual, tomamos 1 por defecto
@@ -163,71 +202,79 @@ function isInventoryLoaded(){
   return invMap && typeof invMap.size === 'number' && invMap.size > 0;
 }
 
-  function readWorkbook(file){
-    return file.arrayBuffer().then(buf => XLSX.read(buf,{type:'array'}));
-  }
+function readWorkbook(file){
+  return file.arrayBuffer().then(buf => XLSX.read(buf,{type:'array'}));
+}
 
-  function pickSheetByNameLike(wb, names){
-    const want = names.map(n=>n.toUpperCase());
-    for(const n of wb.SheetNames){
-      if(want.includes(n.toUpperCase())) return n;
-    }
-    // si no coincide, toma la primera
-    return wb.SheetNames[0];
+function pickSheetByNameLike(wb, names){
+  const want = names.map(n=>n.toUpperCase());
+  for(const n of wb.SheetNames){
+     if(want.includes(n.toUpperCase())) return n;
   }
+  // si no coincide, toma la primera
+  return wb.SheetNames[0];
+}
 
 function loadInventario(wb){
   const sheetName = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
   const ws = wb.Sheets[sheetName];
+  if(!ws || !ws['!ref']) throw new Error('Hoja sin datos');
   const range = XLSX.utils.decode_range(ws['!ref']);
 
-  // Detecta columnas escaneando primeras filas/columnas
-  let colRef=null, colDesc=null, colQty=null, headerRow=range.s.r;
+  // Detectar columnas por encabezado
+  let colRef=null, colMarca=null, colDesc=null, colQty=null, headerRow=range.s.r;
   const normH = s => String(s||'').trim().toUpperCase()
                     .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
   const maxR = Math.min(range.s.r+10, range.e.r);
   const maxC = Math.min(range.s.c+20, range.e.c);
-  for (let r=range.s.r; r<=maxR && (colRef===null || colDesc===null || colQty===null); r++){
-    for (let c=range.s.c; c<=maxC && (colRef===null || colDesc===null || colQty===null); c++){
+  for (let r=range.s.r; r<=maxR; r++){
+    for (let c=range.s.c; c<=maxC; c++){
       const t = normH(ws[XLSX.utils.encode_cell({r,c})]?.v);
-      if (t === 'REFERENCIA'   && colRef === null){ colRef = c; headerRow = r; }
-      if (t === 'DESCRIPCION'  && colDesc=== null){ colDesc= c; headerRow = r; }
-      if (t === 'CANTIDAD'     && colQty === null){ colQty = c; headerRow = r; }
+      if (!t) continue;
+      if (t==='REFERENCIA'  && colRef  ===null){ colRef  = c; headerRow = r; }
+      if (t==='MARCA'       && colMarca===null){ colMarca= c; headerRow = r; }
+      if (t==='DESCRIPCION' && colDesc ===null){ colDesc = c; headerRow = r; }
+      if (t==='CANTIDAD'    && colQty  ===null){ colQty  = c; headerRow = r; }
     }
   }
-  // Fallbacks por si el encabezado no está:
+  // Fallbacks si no encuentra encabezado
   if (colRef  === null) colRef  = 0; // A
+  if (colMarca=== null) colMarca= 1; // B
   if (colDesc === null) colDesc = 2; // C
   if (colQty  === null) colQty  = 3; // D
 
   const set = new Set();
   const map = new Map();
 
+  // Leer filas y poblar el mapa
   for (let r=headerRow+1; r<=range.e.r; r++){
     const cR = ws[XLSX.utils.encode_cell({r, c: colRef})];
     if (!cR) continue;
+
     const raw  = String(cR.v ?? '').trim();
     const refN = normRef(raw);
     if (!refN) continue;
 
-    const cD   = ws[XLSX.utils.encode_cell({r, c: colDesc})];
-    const cQ   = ws[XLSX.utils.encode_cell({r, c: colQty})];
+    const cM = ws[XLSX.utils.encode_cell({r, c: colMarca})];
+    const cD = ws[XLSX.utils.encode_cell({r, c: colDesc})];
+    const cQ = ws[XLSX.utils.encode_cell({r, c: colQty})];
 
+    const marca       = cM ? String(cM.v ?? '').trim() : '';
     const descripcion = cD ? String(cD.v ?? '').trim() : '';
     const cantidad    = parseQty(cQ ? cQ.v : 0);
 
     set.add(refN);
-    map.set(refN, { raw, descripcion, cantidad, sheet: sheetName, row: r+1 });
+    map.set(refN, { raw, marca, descripcion, cantidad, sheet: sheetName, row: r+1 });
   }
 
   invRefs = set;
   invMap  = map;
 
-  // Muestra qué columnas se usaron (A/B/C/D…)
+  // Mostrar columnas detectadas
   const colL = n => XLSX.utils.encode_col(n);
   $('#invInfo').textContent =
-    `Hoja "${sheetName}" • ${invRefs.size} referencias cargadas • REF=${colL(colRef)}, DESC=${colL(colDesc)}, CANT=${colL(colQty)}.`;
+    `Hoja "${sheetName}" • ${invRefs.size} referencias cargadas • REF=${colL(colRef)}, MARCA=${colL(colMarca)}, DESC=${colL(colDesc)}, CANT=${colL(colQty)}.`;
 }
 
 function loadCotizacion(wb){
@@ -273,27 +320,6 @@ function loadCotizacion(wb){
   cotRefs = Array.from(cotMap.keys());
 
   $('#cotInfo').textContent = `Hoja "${sheetName}" • ${cotRefs.length} referencias de cotización.`;
-}
-
-function compare(){
-  results = cotRefs.map((refN, i) => {
-    const invRow = invMap.get(refN);
-    const hasRow = !!invRow;
-    const stock  = hasRow ? Number(invRow.cantidad || 0) : 0;
-
-    // EN INVENTARIO únicamente si existe y hay stock > 0
-    const inInv  = hasRow && stock > 0;
-
-    return {
-      idx: i+1,
-      refCot: refN,
-      estado: inInv ? 'EN INVENTARIO' : 'NO EN INVENTARIO',
-      cantidad: stock,                    // mostrar 0 si no existe
-      refInv: inInv ? invRow.raw : ''     // SOLO si hay stock
-    };
-  });
-
-  renderTable();
 }
 
 // Compara una lista de referencias y (opcional) agrega al resultado existente
@@ -464,6 +490,83 @@ const btnReset = $('#btnReset');
 if (btnReset) btnReset.addEventListener('click', ()=>{
   if (confirm('¿Seguro que deseas reiniciar todo (incluye inventario)?')) resetAll();
 });
+
+async function ensureExcelJS(){
+  if (window.ExcelJS) return;
+  await new Promise((res, rej)=>{
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js';
+    s.onload = res; s.onerror = ()=>rej(new Error('No se pudo cargar ExcelJS'));
+    document.head.appendChild(s);
+  });
+}
+
+async function exportCotizacionIgual(){
+  // Validaciones
+  const f = document.querySelector('#fileCot')?.files?.[0];
+  if (!f){ alert('Primero carga la cotización en 2)'); return; }
+  if (!invMap || !invMap.size){ alert('Primero carga el Informe de Inventario.'); return; }
+
+  await ensureExcelJS();
+
+  // Abrir la cotización como plantilla
+  const buf = await f.arrayBuffer();
+  const wb = new ExcelJS.Workbook();
+  await wb.xlsx.load(buf);
+
+  // Usar la hoja LOCATIVO (o la primera si el nombre cambia)
+  const ws = wb.getWorksheet('LOCATIVO') || wb.worksheets[0];
+
+  // Localizar encabezados y columnas REQUERENCIA / EXISTENCIA
+  const headerRow = findHeaderRow(ws);
+  const cRef = findColByHeader(ws, headerRow, 'REFERENCIA') || 4;   // D típico
+  const cExi = findColByHeader(ws, headerRow, 'EXISTENCIA') || 11; // K típico
+
+  // Recorrer filas de datos hasta que deje de haber referencia
+  for (let r = headerRow + 1; r <= ws.rowCount; r++){
+    const refRaw = cellText(ws.getRow(r).getCell(cRef));
+    const refN   = normRef(refRaw);
+    if (!refN){ continue; } // fila vacía o separador
+
+    const inv = invMap.get(refN);
+    let existencia = '';
+    if (inv){
+      const stock = Number(inv.cantidad || 0);
+      existencia = stock > 0 ? 'INGETES' : (inv.marca || '');
+    }
+
+    // Escribimos SOLO EXISTENCIA; todo lo demás queda igual
+    ws.getRow(r).getCell(cExi).value = existencia;
+  }
+
+  // Guardar con mismo estilo/formatos
+  const out = await wb.xlsx.writeBuffer({ useStyles:true });
+  const blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+
+  // Nombre: original + sufijo
+  const newName = f.name.replace(/\.xlsx?$/i,'') + ' - EXISTENCIA.xlsx';
+
+  // Guardado (File System Access si está disponible; si no, descarga clásica)
+  if ('showSaveFilePicker' in window){
+    try{
+      const handle = await window.showSaveFilePicker({
+        suggestedName: newName,
+        types:[{description:'Excel', accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]
+      });
+      const w = await handle.createWritable();
+      await w.write(blob); await w.close();
+    }catch(e){ if(e?.name!=='AbortError') console.error(e); }
+  }else{
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = newName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+}
+
+// Listener
+const btnExportFromCot = document.querySelector('#btnExportFromCot');
+if (btnExportFromCot) btnExportFromCot.addEventListener('click', exportCotizacionIgual);
 
 </script>
 </body>
