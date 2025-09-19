@@ -621,8 +621,8 @@ function postDownloadToParent(blob, fileName, mime){
     ws.mergeCells('B2:O2'); ws.getCell('B2').value='TABLA DE COSTOS'; ws.getCell('B2').font={bold:true,size:14}; ws.getCell('B2').alignment=center;
     ws.mergeCells('B4:I4'); ws.getCell('B4').value=`CLIENTE: ${meta.cliente||''}`; ws.getCell('B4').border=box;
     ws.mergeCells('B5:I5'); ws.getCell('B5').value=`FECHA DE ELABORACIÓN COTIZACIÓN: ${meta.fechaElab||''}`; ws.getCell('B5').border=box;
-    ws.mergeCells('B6:I6'); ws.getCell('B6').value=`O.C ANTERIOR DEL CLIENTE:            FECHA:`; ws.getCell('B6').border=box;
-    ws.mergeCells('B7:I7'); ws.getCell('B7').value=`O.C ACTUAL DEL CLIENTE:              FECHA:`; ws.getCell('B7').border=box;
+    ws.mergeCells('B6:I6'); ws.getCell('B6').value=`O.C ANTERIOR DEL CLIENTE:                                           FECHA:`; ws.getCell('B6').border=box;
+    ws.mergeCells('B7:I7'); ws.getCell('B7').value=`O.C ACTUAL DEL CLIENTE:                                               FECHA:`; ws.getCell('B7').border=box;
 
     const hdr=['ITEM','# PARTE','REFERENCIA','CANT','DESCRIPCION','DISPONIBILIDAD','PRECIO LISTA','BOTÓN','% DESC.','EXISTENCIA','V/COSTO','FACT. UTILIDAD','V/UNIT VENTA','V/TOTAL'];
     const startRow=9, startCol=2;
@@ -899,3 +899,4 @@ if(window.ExcelJS){
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
 </body>
 </html>
+
