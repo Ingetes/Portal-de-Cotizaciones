@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Revisor de Inventario — INGETES</title>
+<style>
+  :root{
+    --bg:#f6f8fb; --card:#ffffff; --border:#e5e7eb;
+    --muted:#6b7280; --text:#0b1020; --pill-bg:#eef2f7; --pill-text:#111827;
+    --btn:#111827; --btn-text:#ffffff; --btn-border:#0b0f19; --table-head:#f1f5f9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;background:var(--bg);color:var(--text)}
+  header{padding:24px 16px;border-bottom:1px solid var(--border);background:#fff}
+  h1{margin:0;font-size:24px;font-weight:800}
+  main{max-width:1100px;margin:0 auto;padding:24px 16px}
+  .grid{display:grid;gap:16px}
+  .two{grid-template-columns:repeat(2,minmax(0,1fr))} @media(max-width:900px){.two{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:16px}
+  .pad{padding:16px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  label.required::after{content:" *";color:#dc2626}
+  input[type=file]{width:100%;padding:10px 12px;background:#fff;border:1px solid #d1d5db;border-radius:10px}
+  input[type=text]{width:100%;max-width:340px;padding:10px 12px;background:#fff;border:1px solid #d1d5db;border-radius:10px}
+  input[type=number]{width:100%;max-width:340px;padding:10px 12px;background:#fff;border:1px solid #d1d5db;border-radius:10px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:#f3f4f6;color:var(--text);cursor:pointer;font-weight:600}
+  .btn:hover{background:#eef1f5}
+  .pill{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--pill-bg);border:1px solid var(--border);font-size:12px;color:var(--pill-text)}
+  .table{width:100%;border-collapse:collapse;background:#fff}
+  .table th,.table td{border:1px solid var(--border);padding:6px 8px;font-size:12px}
+  .table th{background:var(--table-head);font-weight:700}
+  .ok{color:#065f46;font-weight:700}
+  .bad{color:#991b1b;font-weight:700}
+  .warn{ color:#b45309; font-weight:700 } /* amarillito */
+  .kpis{display:flex;gap:10px;flex-wrap:wrap}
+  .kpi{background:#fff;border:1px solid var(--border);border-radius:14px;padding:10px 12px}
+  .muted{color:var(--muted)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+</style>
+</head>
+<body>
+<header>
+  <h1>Revisor de Inventario</h1>
+  <div>INGETES S.A.S.</div>
+</header>
+
+<main class="grid">
+  <!-- CARD 1: SOLO INVENTARIO -->
+  <section class="card pad">
+    <h3>1) Informe de balance de inventario (para subir)</h3>
+    <input id="fileInv" type="file" accept=".xlsx,.xls">
+    <div id="invInfo" class="muted" style="margin-top:6px"></div>
+  </section>
+
+  <!-- DOS CARDS EN DOS COLUMNAS -->
+  <div class="grid two">
+    <!-- CARD 2: COTIZACIÓN -->
+    <section class="card pad">
+        <h3>2) Cotización en excel</h3>
+        <input id="fileCot" type="file" accept=".xlsx,.xls">
+        <div id="cotInfo" class="muted" style="margin-top:6px"></div>
+        <div class="row" style="margin-top:8px">
+            <button id="btnRunCot" class="btn">Comparar cotización</button>
+        </div>
+    </section>
+
+    <!-- CARD 3: MODO MANUAL -->
+    <section class="card pad">
+      <h3>3) Modo manual (sin cotización)</h3>
+      <div class="row" style="margin-top:8px">
+        <input id="refManual" type="text" placeholder="Escribe referencia (ej: 6ES7...)" />
+        <input id="qtyManual" type="number" min="1" step="1" value="1" placeholder="Cantidad" style="max-width:120px" />
+        <button id="btnRunSingle" class="btn">Comparar</button>
+      </div>
+      <div class="muted" style="margin-top:6px">Se normaliza: espacios/guiones → formato estándar, mayúsculas.</div>
+    </section>
+  </div>
+
+  <!-- RESULTADOS -->
+  <section class="card pad">
+    <h3>4) Resultado</h3>
+    <div class="kpis" id="kpis"></div>
+    <div style="max-height:360px;overflow:auto;border:1px solid var(--border);border-radius:12px;margin-top:12px">
+      <table id="tbl" class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Referencia encontrada en cotización</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Cant. solicitada</th>
+            <th>Cant. inventario</th>
+            <th>Referencia encontrada en inventario</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+</section>
+
+  <!-- CARD 5: LIMPIAR / REINICIAR -->
+  <section class="card pad">
+    <h3>5) Limpiar o reiniciar</h3>
+    <div class="row">
+      <button id="btnClear" class="btn">Limpiar (tabla y cotización)</button>
+      <button id="btnReset" class="btn">Reiniciar todo</button>
+    </div>
+    <div id="cleanInfo" class="muted" style="margin-top:6px"></div>
+  </section>
+
+<!-- Librería para leer Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
+<script>
+  const $ = s => document.querySelector(s);
+
+  let invRefs = new Set();        // Referencias del inventario (col A, hoja DATOS)
+  let cotRefs = [];               // Referencias de la cotización (col D, hoja LOCATIVO)
+  let results = [];               // Resultado comparado
+  let invMap = new Map(); // ref -> { marca, cantidad }
+  let cotMap = new Map(); // refNorm -> { req: number }
+  let lastSource = null; // 'cotizacion' | 'manual' | null
+
+  const norm = s => String(s||'').trim().toUpperCase();
+
+// Normalización especial para REFERENCIAS
+function normRef(s){
+  return String(s||'')
+    .replace(/\u00A0/g, ' ')                 // NBSP -> espacio
+    .replace(/[\u200B-\u200D\uFEFF]/g, '')   // zero-width
+    .replace(/[‐-‒–—−]/g, '-')               // guiones Unicode -> '-'
+    .replace(/\s*-\s*/g, '-')                // espacios alrededor del guion
+    .replace(/\s+/g, ' ')                    // colapsar espacios
+    .trim()
+    .toUpperCase();
+}
+
+function getRequested(refN){
+  const row = cotMap.get(refN);
+  return row ? Number(row.req || 0) : 1; // en modo manual, tomamos 1 por defecto
+}
+
+function parseQty(v){
+  if (typeof v === 'number') return Math.round(v);
+  let s = String(v ?? '').replace(/\u00A0/g,' ').trim(); // NBSP -> espacio
+  if (!s) return 0;
+  // quita separadores de miles (.,) cuando están antes de 3 dígitos
+  s = s.replace(/\.(?=\d{3}(?:\D|$))/g,'');
+  s = s.replace(/,(?=\d{3}(?:\D|$))/g,'');
+  // coma decimal -> punto
+  s = s.replace(/,(\d{1,2})$/,'.$1');
+  const m = s.match(/-?\d+(?:\.\d+)?/);
+  return m ? Math.round(Number(m[0])) : 0;
+}
+
+function setStatus(text){
+  const el = document.querySelector('#status');
+  if (el) el.textContent = text; // no rompe si no existe
+}
+
+function isInventoryLoaded(){
+  return invMap && typeof invMap.size === 'number' && invMap.size > 0;
+}
+
+  function readWorkbook(file){
+    return file.arrayBuffer().then(buf => XLSX.read(buf,{type:'array'}));
+  }
+
+  function pickSheetByNameLike(wb, names){
+    const want = names.map(n=>n.toUpperCase());
+    for(const n of wb.SheetNames){
+      if(want.includes(n.toUpperCase())) return n;
+    }
+    // si no coincide, toma la primera
+    return wb.SheetNames[0];
+  }
+
+function loadInventario(wb){
+  const sheetName = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
+  const ws = wb.Sheets[sheetName];
+  const range = XLSX.utils.decode_range(ws['!ref']);
+
+  // Detecta columnas escaneando primeras filas/columnas
+  let colRef=null, colDesc=null, colQty=null, headerRow=range.s.r;
+  const normH = s => String(s||'').trim().toUpperCase()
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  const maxR = Math.min(range.s.r+10, range.e.r);
+  const maxC = Math.min(range.s.c+20, range.e.c);
+  for (let r=range.s.r; r<=maxR && (colRef===null || colDesc===null || colQty===null); r++){
+    for (let c=range.s.c; c<=maxC && (colRef===null || colDesc===null || colQty===null); c++){
+      const t = normH(ws[XLSX.utils.encode_cell({r,c})]?.v);
+      if (t === 'REFERENCIA'   && colRef === null){ colRef = c; headerRow = r; }
+      if (t === 'DESCRIPCION'  && colDesc=== null){ colDesc= c; headerRow = r; }
+      if (t === 'CANTIDAD'     && colQty === null){ colQty = c; headerRow = r; }
+    }
+  }
+  // Fallbacks por si el encabezado no está:
+  if (colRef  === null) colRef  = 0; // A
+  if (colDesc === null) colDesc = 2; // C
+  if (colQty  === null) colQty  = 3; // D
+
+  const set = new Set();
+  const map = new Map();
+
+  for (let r=headerRow+1; r<=range.e.r; r++){
+    const cR = ws[XLSX.utils.encode_cell({r, c: colRef})];
+    if (!cR) continue;
+    const raw  = String(cR.v ?? '').trim();
+    const refN = normRef(raw);
+    if (!refN) continue;
+
+    const cD   = ws[XLSX.utils.encode_cell({r, c: colDesc})];
+    const cQ   = ws[XLSX.utils.encode_cell({r, c: colQty})];
+
+    const descripcion = cD ? String(cD.v ?? '').trim() : '';
+    const cantidad    = parseQty(cQ ? cQ.v : 0);
+
+    set.add(refN);
+    map.set(refN, { raw, descripcion, cantidad, sheet: sheetName, row: r+1 });
+  }
+
+  invRefs = set;
+  invMap  = map;
+
+  // Muestra qué columnas se usaron (A/B/C/D…)
+  const colL = n => XLSX.utils.encode_col(n);
+  $('#invInfo').textContent =
+    `Hoja "${sheetName}" • ${invRefs.size} referencias cargadas • REF=${colL(colRef)}, DESC=${colL(colDesc)}, CANT=${colL(colQty)}.`;
+}
+
+function loadCotizacion(wb){
+  const sheetName = pickSheetByNameLike(wb, ['LOCATIVO']);
+  const ws = wb.Sheets[sheetName];
+  const range = XLSX.utils.decode_range(ws['!ref']);
+
+  // Detecta columnas por encabezado (REFERENCIA, CANTIDAD)
+  let colRef = null, colQty = null, headerRow = range.s.r;
+  const maxLookRows = Math.min(range.s.r + 10, range.e.r);
+  const maxLookCols = Math.min(range.s.c + 20, range.e.c);
+
+  const normHeader = v => String(v||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+  for (let r = range.s.r; r <= maxLookRows && (colRef===null || colQty===null); r++){
+    for (let c = range.s.c; c <= maxLookCols && (colRef===null || colQty===null); c++){
+      const cell = ws[XLSX.utils.encode_cell({r,c})];
+      const text = normHeader(cell?.v);
+      if (text === 'REFERENCIA' && colRef===null){ colRef = c; headerRow = r; }
+      if (text === 'CANTIDAD'   && colQty===null){ colQty = c; headerRow = r; }
+    }
+  }
+  // Fallbacks por si no encuentra encabezados (mejor esfuerzo)
+  if (colRef === null) colRef = 3;   // D
+  if (colQty === null) colQty = 4;   // E (si tu archivo trae D=CANTIDAD, igual detectará por encabezado)
+
+  // Lee filas y acumula cantidades por referencia
+  const map = new Map();
+  for (let r = headerRow + 1; r <= range.e.r; r++){
+    const cR = ws[XLSX.utils.encode_cell({r, c: colRef})];
+    const cQ = ws[XLSX.utils.encode_cell({r, c: colQty})];
+    if (!cR) continue;
+
+    const refN = normRef(cR.v);
+    if (!refN || refN === 'REFERENCIA') continue;
+
+    const req = parseQty(cQ?.v || 0);
+    const prev = map.get(refN) || 0;
+    map.set(refN, prev + (req || 0));
+  }
+
+  cotMap = new Map(Array.from(map.entries()).map(([k,v]) => [k,{req:v}]));
+  cotRefs = Array.from(cotMap.keys());
+
+  $('#cotInfo').textContent = `Hoja "${sheetName}" • ${cotRefs.length} referencias de cotización.`;
+}
+
+function compare(){
+  results = cotRefs.map((refN, i) => {
+    const invRow = invMap.get(refN);
+    const hasRow = !!invRow;
+    const stock  = hasRow ? Number(invRow.cantidad || 0) : 0;
+
+    // EN INVENTARIO únicamente si existe y hay stock > 0
+    const inInv  = hasRow && stock > 0;
+
+    return {
+      idx: i+1,
+      refCot: refN,
+      estado: inInv ? 'EN INVENTARIO' : 'NO EN INVENTARIO',
+      cantidad: stock,                    // mostrar 0 si no existe
+      refInv: inInv ? invRow.raw : ''     // SOLO si hay stock
+    };
+  });
+
+  renderTable();
+}
+
+// Compara una lista de referencias y (opcional) agrega al resultado existente
+function compareList(items, { append = false } = {}){
+  // items puede ser: ['REF', ...] o [{ref:'REF', qty:2}, ...]
+  const entries = items.map(it => {
+    const refN = typeof it === 'string' ? it : normRef(it.ref);
+    const req  = typeof it === 'string' ? getRequested(refN) : Number(it.qty || 1);
+
+    const invRow = invMap.get(refN);
+    const hasRow = !!invRow;
+    const stock  = hasRow ? Number(invRow.cantidad || 0) : 0;
+    const desc   = hasRow ? String(invRow.descripcion || '') : '';
+
+    let estado, refInv = '';
+    if (!hasRow || stock === 0){
+      estado = 'NO EN INVENTARIO';
+    } else if (stock < req){
+      estado = 'EN INVENTARIO (NO ALCANZA)';
+      refInv = invRow.raw;
+    } else {
+      estado = 'EN INVENTARIO';
+      refInv = invRow.raw;
+    }
+
+    return {
+      idx: 0,
+      refCot: refN,
+      desc,
+      estado,
+      req,           // solicitada
+      cantidad: stock, // en inventario
+      refInv
+    };
+  });
+
+  if (append && results.length){
+    const map = new Map(results.map(r => [r.refCot, r]));
+    for (const e of entries) map.set(e.refCot, e);
+    results = Array.from(map.values());
+  } else {
+    results = entries;
+  }
+
+  results = results.map((r, i) => ({ ...r, idx: i + 1 }));
+  renderTable();
+}
+
+function renderTable(){
+  const tb = $('#tbody');
+  tb.replaceChildren(); // limpia filas previas
+
+results.forEach(r=>{
+  const statusClass =
+    r.estado === 'NO EN INVENTARIO' ? 'bad'  :
+    r.estado.includes('NO ALCANZA') ? 'warn' :
+    r.estado.startsWith('EN INVENTARIO') ? 'ok'  : '';
+
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td style="text-align:center">${r.idx}</td>
+    <td class="mono">${r.refCot}</td>
+    <td>${r.desc || ''}</td> 
+    <td class="${statusClass}">${r.estado}</td>
+    <td style="text-align:right">${Number(r.req || 0)}</td>
+    <td style="text-align:right">${Number(r.cantidad || 0)}</td>
+    <td class="mono">${r.refInv || ''}</td>
+  `;
+  tb.appendChild(tr);
+});
+
+  // KPI exactos, sin variables globales ni acumuladores
+const okCount = results.reduce((n,r)=> n + (r.cantidad > 0 ? 1 : 0), 0);
+const total   = results.length;
+const notFound = total - okCount;
+
+const k = $('#kpis'); k.replaceChildren();
+const mk = (t,v)=>{const d=document.createElement('div'); d.className='kpi'; d.innerHTML=`<div class="muted">${t}</div><div style="font-weight:800;font-size:18px">${v}</div>`; return d;};
+k.appendChild(mk('Total referencias', total));
+k.appendChild(mk('Encontradas en inventario', okCount));
+k.appendChild(mk('No encontradas', notFound));
+
+}
+
+function clearTableUI(){
+  const tb = $('#tbody'); if (tb) tb.replaceChildren();
+  const k  = $('#kpis');  if (k)  k.replaceChildren();
+  $('#notes') && ($('#notes').textContent = '');
+}
+
+function clearCotizacionOnly(){
+  results = [];
+  cotRefs = [];
+  lastSource = null;            // ← importante
+  clearTableUI();
+  const cot = $('#fileCot'); if (cot) cot.value = '';
+  const man = $('#refManual'); if (man) man.value = '';
+  const qtyM = $('#qtyManual'); if (qtyM) qtyM.value = '1';
+  const info = $('#cotInfo'); if (info) info.textContent = '';
+  setStatus('Limpiado: resultados y cotización.');
+}
+
+function resetAll(){
+  clearCotizacionOnly();
+  invRefs = new Set();
+  invMap.clear();
+  lastSource = null;            // ← por si acaso
+  const inv = $('#fileInv'); if (inv) inv.value = '';
+  const invI = $('#invInfo'); if (invI) invI.textContent = '';
+  setStatus('Reiniciado todo (incluye inventario).');
+}
+
+  // Eventos
+  $('#fileInv').addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    try{
+      const wb = await readWorkbook(f);
+      loadInventario(wb);
+    }catch(err){
+      console.error(err);
+      setStatus('Error al leer inventario');
+      alert('No se pudo leer el archivo de inventario.');
+    }
+  });
+
+// Cotización
+$('#btnRunCot').addEventListener('click', ()=>{
+  if(!isInventoryLoaded()){ alert('Falta cargar el Informe de Inventario.'); return; }
+  if(!cotRefs.length){ alert('Falta cargar la Cotización.'); return; }
+  lastSource = 'cotizacion';
+  setStatus('Comparando cotización…');
+  compareList(cotRefs, { append: false }); // siempre reemplaza lo que haya
+});
+
+// Manual (agrega acumulando)
+$('#btnRunSingle').addEventListener('click', ()=>{
+  if(!isInventoryLoaded()){ alert('Falta cargar el Informe de Inventario.'); return; }
+
+  const ref = normRef($('#refManual').value);
+  if(!ref){ alert('Escribe una referencia.'); return; }
+  const qty = Math.max(1, parseQty($('#qtyManual').value)); // mínimo 1
+
+  const append = (lastSource === 'manual'); // si ya estaba en manual, acumula
+  lastSource = 'manual';
+
+  setStatus(append ? 'Agregando referencia manual…' : 'Comparando referencia manual…');
+  compareList([{ ref, qty }], { append });  // ← aquí está la magia
+
+  $('#refManual').value = ''; // opcional: limpia el campo
+});
+
+  $('#fileCot').addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0]; if(!f) return;
+    try{
+      const wb = await readWorkbook(f);
+      loadCotizacion(wb);
+    }catch(err){
+      console.error(err);
+      setStatus('Error al leer cotización');
+      alert('No se pudo leer el archivo de cotización.');
+    }
+  });
+
+const btnClear = $('#btnClear');
+if (btnClear) btnClear.addEventListener('click', clearCotizacionOnly);
+
+const btnReset = $('#btnReset');
+if (btnReset) btnReset.addEventListener('click', ()=>{
+  if (confirm('¿Seguro que deseas reiniciar todo (incluye inventario)?')) resetAll();
+});
+
+</script>
+</body>
+</html>
