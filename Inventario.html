@@ -70,7 +70,7 @@
     <section class="card pad">
       <h3>3) Modo manual (sin cotización)</h3>
       <div class="row" style="margin-top:8px">
-        <input id="refManual" type="text" placeholder="Escribe referencia" />
+        <input id="refManual" type="text" placeholder="Escribe referencia (ej: 6ES7...)" />
         <input id="qtyManual" type="number" min="1" step="1" value="1" placeholder="Cantidad" style="max-width:120px" />
         <button id="btnRunSingle" class="btn">Comparar</button>
       </div>
@@ -266,6 +266,7 @@ function loadInventario(wb){
     set.add(refN);
     map.set(refN, { raw, marca, descripcion, cantidad, sheet: sheetName, row: r+1 });
   }
+
   invRefs = set;
   invMap  = map;
 
@@ -280,24 +281,34 @@ function loadCotizacion(wb){
   const ws = wb.Sheets[sheetName];
   const range = XLSX.utils.decode_range(ws['!ref']);
 
-  // Detecta columnas por encabezado (REFERENCIA, CANTIDAD)
+  // Normaliza encabezados: mayúsculas, sin tildes, sin espacios/puntos
+  const normHeader = v => String(v||'')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // quita tildes
+    .replace(/\./g,'')                                // quita puntos
+    .replace(/\s+/g,'')                               // quita espacios
+    .trim().toUpperCase();
+
+  const isRefHeader  = h => /^(REFERENCIA|REF|NPARTE|NROPARTE|NUMEROPARTE|id de material|id material|material|referencia')$/.test(h);
+  const isQtyHeader  = h => /^(CANT|CANTIDAD|CANTSOLICITADA|CANTIDADSOLICITADA|cantidad|qty|quantity)$/.test(h);
+
+  // Detecta columnas por encabezado (busca en las primeras filas/columnas)
   let colRef = null, colQty = null, headerRow = range.s.r;
   const maxLookRows = Math.min(range.s.r + 10, range.e.r);
   const maxLookCols = Math.min(range.s.c + 20, range.e.c);
-
-  const normHeader = v => String(v||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
   for (let r = range.s.r; r <= maxLookRows && (colRef===null || colQty===null); r++){
     for (let c = range.s.c; c <= maxLookCols && (colRef===null || colQty===null); c++){
       const cell = ws[XLSX.utils.encode_cell({r,c})];
       const text = normHeader(cell?.v);
-      if (text === 'REFERENCIA' && colRef===null){ colRef = c; headerRow = r; }
-      if (text === 'CANTIDAD'   && colQty===null){ colQty = c; headerRow = r; }
+      if (!text) continue;
+      if (isRefHeader(text) && colRef===null){ colRef = c; headerRow = r; }
+      if (isQtyHeader(text) && colQty===null){ colQty = c; headerRow = r; }
     }
   }
+
   // Fallbacks por si no encuentra encabezados (mejor esfuerzo)
   if (colRef === null) colRef = 3;   // D
-  if (colQty === null) colQty = 4;   // E (si tu archivo trae D=CANTIDAD, igual detectará por encabezado)
+  if (colQty === null) colQty = 4;   // E
 
   // Lee filas y acumula cantidades por referencia
   const map = new Map();
@@ -317,7 +328,9 @@ function loadCotizacion(wb){
   cotMap = new Map(Array.from(map.entries()).map(([k,v]) => [k,{req:v}]));
   cotRefs = Array.from(cotMap.keys());
 
-  $('#cotInfo').textContent = `Hoja "${sheetName}" • ${cotRefs.length} referencias de cotización.`;
+  // Info útil: muestra qué columnas detectó (letras)
+  const colL = n => XLSX.utils.encode_col(n);
+  $('#cotInfo').textContent = `Hoja "${sheetName}" • ${cotRefs.length} referencias • REF=${colL(colRef)} · CANT=${colL(colQty)}.`;
 }
 
 // Compara una lista de referencias y (opcional) agrega al resultado existente
@@ -384,7 +397,6 @@ results.forEach(r=>{
     <td class="${statusClass}">${r.estado}</td>
     <td style="text-align:right">${Number(r.req || 0)}</td>
     <td style="text-align:right">${Number(r.cantidad || 0)}</td>
-    <td class="mono">${r.refInv || ''}</td>
   `;
   tb.appendChild(tr);
 });
@@ -569,3 +581,4 @@ if (btnExportFromCot) btnExportFromCot.addEventListener('click', exportCotizacio
 </script>
 </body>
 </html>
+
