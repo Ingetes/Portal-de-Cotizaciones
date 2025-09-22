@@ -330,7 +330,7 @@ function loadCotizacion(wb){
 
   // Info útil: muestra qué columnas detectó (letras)
   const colL = n => XLSX.utils.encode_col(n);
-  $('#cotInfo').textContent = `Hoja "${sheetName}" • ${cotRefs.length} referencias • REF=${colL(colRef)} · CANT=${colL(colQty)}.`;
+  $('#cotInfo').textContent = `Hoja "${sheetName}" • ${cotRefs.length} referencias`;
 }
 
 // Compara una lista de referencias y (opcional) agrega al resultado existente
