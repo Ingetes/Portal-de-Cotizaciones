@@ -288,8 +288,9 @@ function loadCotizacion(wb){
     .replace(/\s+/g,'')                               // quita espacios
     .trim().toUpperCase();
 
-  const isRefHeader  = h => /^(REFERENCIA|REF|NPARTE|NROPARTE|NUMEROPARTE|id de material|id material|material|referencia')$/.test(h);
-  const isQtyHeader  = h => /^(CANT|CANTIDAD|CANTSOLICITADA|CANTIDADSOLICITADA|cantidad|qty|quantity)$/.test(h);
+// Coincide con normHeader: MAYÚSCULAS, sin espacios, sin tildes
+const isRefHeader = h => /^(REFERENCIA|REF|NPARTE|NROPARTE|NUMEROPARTE|IDDEMATERIAL|IDMATERIAL|MATERIAL)$/.test(h);
+const isQtyHeader = h => /^(CANT|CANTIDAD|CANTSOLICITADA|CANTIDADSOLICITADA|QTY|QUANTITY)$/.test(h);
 
   // Detecta columnas por encabezado (busca en las primeras filas/columnas)
   let colRef = null, colQty = null, headerRow = range.s.r;
