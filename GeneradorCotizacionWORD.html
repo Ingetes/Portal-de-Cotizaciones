@@ -685,7 +685,7 @@ async function downloadWithFilePicker(doc, fileName) {
       // Enviar mensaje al padre para manejar la descarga
       window.parent.postMessage({
         __ingetes_download: true,
-        fileName: fileName,
+        filename: fileName,
         mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
         buffer: buffer
       }, '*');
@@ -1123,6 +1123,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
