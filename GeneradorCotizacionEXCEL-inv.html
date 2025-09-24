@@ -703,12 +703,14 @@ function postDownloadToParent(blob, fileName, mime){
     if (window.parent && window.parent !== window) {
       if (blob && typeof blob.arrayBuffer === 'function') {
         blob.arrayBuffer().then(buf=>{
-          window.parent.postMessage({
+          const msg = {
             __ingetes_download: true,
-            filename,
+            filename: fileName,  // <-- nombre correcto
             mime: mime || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             buffer: buf
-          }, '*');
+          };
+          // 👇 IMPORTANTE: transfiere el ArrayBuffer para que no se copie ni se pierda
+          window.parent.postMessage(msg, '*', [buf]);
         });
         return true;
       }
@@ -1330,4 +1332,5 @@ if (!saved) {
 </body>
 
 </html>
+
 
