@@ -547,10 +547,11 @@ btnSave?.addEventListener('click', async ()=>{
   })();
 
 /* === Receptor de descargas desde iframes con preferencia por "Guardar como..." === */
+/* === Receptor de descargas desde iframes con preferencia por "Guardar como..." === */
 (function(){
-  async function saveWithPicker(buffer, suggestedName, mime){
-    // Requiere HTTPS o http://localhost
-    if (!('showSaveFilePicker' in window)) return false;
+  // EXPONER globalmente
+  window.saveWithPicker = async function(buffer, suggestedName, mime){
+    if (!('showSaveFilePicker' in window)) return false; // requiere HTTPS o localhost
     try{
       const isDocx = (mime||'').includes('word');
       const isXlsx = (mime||'').includes('spreadsheet');
@@ -558,24 +559,19 @@ btnSave?.addEventListener('click', async ()=>{
         description: isDocx ? 'Documento Word' : (isXlsx ? 'Archivo Excel' : 'Archivo'),
         accept: { [mime || 'application/octet-stream']: [ isDocx ? '.docx' : (isXlsx ? '.xlsx' : '.*') ] }
       }];
-
-      const handle = await window.showSaveFilePicker({
-        suggestedName,
-        types
-      });
+      const handle = await window.showSaveFilePicker({ suggestedName, types });
       const writable = await handle.createWritable();
       await writable.write(new Uint8Array(buffer));
       await writable.close();
       return true;
     }catch(e){
-      // Si el usuario cancela, devolvemos false para caer al fallback
-      if (e && e.name === 'AbortError') return false;
+      if (e && e.name === 'AbortError') return false; // usuario canceló
       console.error('Picker error:', e);
       return false;
     }
-  }
+  };
 
-  function downloadFallback(buffer, fileName, mime){
+  window.downloadFallback = function(buffer, fileName, mime){
     try{
       const blob = new Blob([new Uint8Array(buffer)], { type: mime || 'application/octet-stream' });
       const url  = URL.createObjectURL(blob);
@@ -586,8 +582,8 @@ btnSave?.addEventListener('click', async ()=>{
     }catch(e){
       alert('No se pudo iniciar la descarga: ' + (e && e.message ? e.message : e));
     }
-  }
-})
+  };
+})();
 
 /* ALERTAS que envían los iframes */
 window.addEventListener('message', (ev) => {
@@ -602,27 +598,39 @@ window.addEventListener('message', async (ev)=>{
   const d = ev.data || {};
   if (!d.__ingetes_download) return;
 
-  // 1) Si viene como ArrayBuffer (buffer) convertir a Blob
-  if (d.buffer && !d.base64) {
-    const u8 = new Uint8Array(d.buffer);
-    const blob = new Blob([u8], { type: d.mime || 'application/octet-stream' });
-    const url  = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = d.filename || 'archivo.bin';
-    document.body.appendChild(a); a.click(); a.remove();
-    URL.revokeObjectURL(url);
+  const filename = d.filename || 'archivo';
+  const mime     = d.mime || 'application/octet-stream';
+
+  // Normaliza a ArrayBuffer
+  let buffer;
+  if (d.buffer && d.buffer.byteLength){          // viene como ArrayBuffer
+    buffer = d.buffer;
+  } else if (d.base64){                           // viene como base64
+    // decode base64 -> Uint8Array
+    const bstr = atob(d.base64);
+    const len  = bstr.length;
+    const bytes = new Uint8Array(len);
+    for (let i=0; i<len; i++) bytes[i] = bstr.charCodeAt(i);
+    buffer = bytes.buffer;
+  } else {
+    alert('Descarga no válida');
     return;
   }
 
-  // 2) Si viene como base64
-  if (d.base64) {
-    const url = 'data:' + (d.mime || 'application/octet-stream') + ';base64,' + d.base64;
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = d.filename || 'archivo.bin';
-    document.body.appendChild(a); a.click(); a.remove();
+  // 1) Intentar diálogo "Guardar como..."
+  let saved = false;
+  try{
+    saved = await (window.saveWithPicker && window.saveWithPicker(buffer, filename, mime));
+  }catch(e){
+    // continúa al fallback
   }
+
+  // 2) Si no se pudo (o el usuario canceló), caemos al fallback
+  if (!saved){
+    window.downloadFallback(buffer, filename, mime);
+  }
+});
+
 
 
 });
