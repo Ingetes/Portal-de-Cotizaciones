@@ -915,7 +915,7 @@ function postDownloadToParent(blob, fileName, mime){
         blob.arrayBuffer().then(buf=>{
           window.parent.postMessage({
             __ingetes_download:true,
-            fileName,
+            filename: fileName,
             mime: mime || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             buffer: buf
           }, '*');
