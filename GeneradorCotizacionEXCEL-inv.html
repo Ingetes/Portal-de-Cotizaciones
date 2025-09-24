@@ -698,7 +698,7 @@ function downloadExcelWithFallback(blob, fileName) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-function postDownloadToParent(blob, fileName, mime){
+function postDownloadToParent(blob, filename, mime){
   try{
     if (window.parent && window.parent !== window) {
       if (blob && typeof blob.arrayBuffer === 'function') {
@@ -1328,4 +1328,5 @@ if (!saved) {
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" defer crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
 </body>
+
 </html>
