@@ -698,14 +698,14 @@ function downloadExcelWithFallback(blob, fileName) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-function postDownloadToParent(blob, filename, mime){
+function postDownloadToParent(blob, fileName, mime){
   try{
     if (window.parent && window.parent !== window) {
       if (blob && typeof blob.arrayBuffer === 'function') {
         blob.arrayBuffer().then(buf=>{
           window.parent.postMessage({
             __ingetes_download: true,
-            fileName,
+            filename,
             mime: mime || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             buffer: buf
           }, '*');
@@ -1330,3 +1330,4 @@ if (!saved) {
 </body>
 
 </html>
+
