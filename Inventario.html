@@ -590,7 +590,7 @@ async function exportCotizacionIgual(){
   const blob = new Blob([out], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 
   // Nombre: original + sufijo
-  const newName = f.name.replace(/\.xlsx?$/i,'') + ' - EXISTENCIA.xlsx';
+  const newName = f.name.replace(/\.xlsx?$/i,'') + '.xlsx';
 
 // Enviar SIEMPRE al portal; si no está embebido, caer al fallback local
 const sent = await postDownloadToParent(blob, newName);
