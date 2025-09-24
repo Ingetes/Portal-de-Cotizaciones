@@ -112,6 +112,37 @@
 <!-- Librería para leer Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js" crossorigin="anonymous"></script>
 <script>
+// === Helpers para trabajar embebido en el portal ===
+function postAlert(msg){
+  if (window.parent && window.parent !== window.self) {
+    window.parent.postMessage({ __ingetes_alert: true, message: msg }, '*');
+  } else {
+    alert(msg);
+  }
+}
+
+// Envía el archivo al portal para que él dispare la descarga
+async function postDownloadToParent(blob, filename){
+  try {
+    if (!window.parent || window.parent === window.self) return false; // no está embebido
+    const b64 = await new Promise((resolve)=>{
+      const r = new FileReader();
+      r.onload = () => resolve(String(r.result).split(',')[1] || '');
+      r.readAsDataURL(blob);
+    });
+    window.parent.postMessage({
+      __ingetes_download: true,
+      filename,
+      mime: blob.type || 'application/octet-stream',
+      base64: b64
+    }, '*');
+    return true;
+  } catch(e){
+    console.error('postDownloadToParent error:', e);
+    return false;
+  }
+}
+
   const $ = s => document.querySelector(s);
 
   let invRefs = new Set();        // Referencias del inventario (col A, hoja DATOS)
@@ -437,10 +468,13 @@ function resetAll(){
   clearCotizacionOnly();
   invRefs = new Set();
   invMap.clear();
-  lastSource = null;            // ← por si acaso
+  lastSource = null;
   const inv = $('#fileInv'); if (inv) inv.value = '';
   const invI = $('#invInfo'); if (invI) invI.textContent = '';
   setStatus('Reiniciado todo (incluye inventario).');
+
+  // === Aviso en el portal o local
+  postAlert('Formulario reiniciado. Puedes comenzar una nueva cotización.');
 }
 
   // Eventos
@@ -452,13 +486,14 @@ function resetAll(){
     }catch(err){
       console.error(err);
       setStatus('Error al leer inventario');
-      alert('No se pudo leer el archivo de inventario.');
+      postAlert('No se pudo leer el archivo de inventario.');
     }
   });
 
 // Cotización
 $('#btnRunCot').addEventListener('click', ()=>{
-  if(!isInventoryLoaded()){ alert('Falta cargar el Informe de Inventario.'); return; }
+  
+  if(!isInventoryLoaded()){ postAlert('Falta cargar el Informe de Inventario.'); return; }
   if(!cotRefs.length){ alert('Falta cargar la Cotización.'); return; }
   lastSource = 'cotizacion';
   setStatus('Comparando cotización…');
@@ -467,10 +502,10 @@ $('#btnRunCot').addEventListener('click', ()=>{
 
 // Manual (agrega acumulando)
 $('#btnRunSingle').addEventListener('click', ()=>{
-  if(!isInventoryLoaded()){ alert('Falta cargar el Informe de Inventario.'); return; }
+  if(!isInventoryLoaded()){ postAlert('Falta cargar el Informe de Inventario.'); return; }
 
   const ref = normRef($('#refManual').value);
-  if(!ref){ alert('Escribe una referencia.'); return; }
+  if(!ref){ postAlert('Escribe una referencia.'); return; }
   const qty = Math.max(1, parseQty($('#qtyManual').value)); // mínimo 1
 
   const append = (lastSource === 'manual'); // si ya estaba en manual, acumula
@@ -490,7 +525,7 @@ $('#btnRunSingle').addEventListener('click', ()=>{
     }catch(err){
       console.error(err);
       setStatus('Error al leer cotización');
-      alert('No se pudo leer el archivo de cotización.');
+      postAlert('No se pudo leer el archivo de cotización.');
     }
   });
 
@@ -515,8 +550,8 @@ async function ensureExcelJS(){
 async function exportCotizacionIgual(){
   // Validaciones
   const f = document.querySelector('#fileCot')?.files?.[0];
-  if (!f){ alert('Primero carga la cotización en 2)'); return; }
-  if (!invMap || !invMap.size){ alert('Primero carga el Informe de Inventario.'); return; }
+  if (!f){ postAlert('Primero carga la cotización en 2)'); return; }
+  if (!invMap || !invMap.size){ postAlert('Primero carga el Informe de Inventario.'); return; }
 
   await ensureExcelJS();
 
@@ -557,22 +592,15 @@ async function exportCotizacionIgual(){
   // Nombre: original + sufijo
   const newName = f.name.replace(/\.xlsx?$/i,'') + ' - EXISTENCIA.xlsx';
 
-  // Guardado (File System Access si está disponible; si no, descarga clásica)
-  if ('showSaveFilePicker' in window){
-    try{
-      const handle = await window.showSaveFilePicker({
-        suggestedName: newName,
-        types:[{description:'Excel', accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]
-      });
-      const w = await handle.createWritable();
-      await w.write(blob); await w.close();
-    }catch(e){ if(e?.name!=='AbortError') console.error(e); }
-  }else{
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = newName;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url), 1500);
-  }
+// Enviar SIEMPRE al portal; si no está embebido, caer al fallback local
+const sent = await postDownloadToParent(blob, newName);
+if (!sent){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = newName;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+
 }
 
 // Listener
