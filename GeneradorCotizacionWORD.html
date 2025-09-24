@@ -673,6 +673,14 @@ function resetForm() {
   }
 }
 
+// Construir nombre a partir del Excel cargado
+const fx = document.getElementById('xls')?.files?.[0] || null;
+const base = fx ? fx.name.replace(/\.(xlsx|xls)$/i,'') : 'Q0000-AAA-25';
+const fileName = base + '.docx';
+
+// Y luego:
+await downloadWithFilePicker(doc, fileName);
+
 /* ========= Descarga con File System Access API ========= */
 async function downloadWithFilePicker(doc, fileName) {
   try {
@@ -1123,6 +1131,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
