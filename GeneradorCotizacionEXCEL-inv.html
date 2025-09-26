@@ -1104,7 +1104,7 @@ wrapAll(ws);
   for(let i=0;i<items.length;i++){
     const loc = 10 + i; // fila en LOCATIVO (empieza en 10)
     const descFormula = showRef
-      ? `LOCATIVO!F${loc}&CHAR(10)&"Ref: "&LOCATIVO!D${loc}&CHAR(10)&"DISP: "&LOCATIVO!G${loc}`
+      ? `LOCATIVO!F${loc}&CHAR(10)&"Ref: "&LOCATIVO!D${loc}&CHAR(10)&"Disponibilidad: "&LOCATIVO!G${loc}`
       : `LOCATIVO!F${loc}&CHAR(10)&"Disponibilidad: "&LOCATIVO!G${loc}`;
 
     wv.getCell(rr,4).value={ formula:`LOCATIVO!B${loc}` };
@@ -1332,5 +1332,6 @@ if (!saved) {
 </body>
 
 </html>
+
 
 
