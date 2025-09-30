@@ -922,10 +922,14 @@ function fillDirigidoOptions(){
   inpDir.value = '';
   inpDir.disabled = false;
 
-  const empRaw = inpEmp.value.trim();
-  if (!empRaw) return;
+const empRaw = inpEmp.value.trim();
+if (!empRaw) return;
 
-  const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
+// Buscar la clave real sin importar mayúsculas/minúsculas
+const key = Array.from(CONTACTS_DB.byEmpresa.keys())
+  .find(k => k.toUpperCase() === empRaw.toUpperCase());
+
+const lista = key ? CONTACTS_DB.byEmpresa.get(key) : [];
   lista.forEach(c=>{
     const cargoNorm = _normKey(c.cargo);
     const isIng = cargoNorm.includes('ingeniero') || cargoNorm.includes('ingeniera');
@@ -1000,6 +1004,7 @@ function wireContactsInput(){
       const buf = await f.arrayBuffer();
       CONTACTS_DB = await parseContactsWorkbook(buf);
       fillEmpresaOptions();
+      hideContactsUploadUI();
     }catch(e){
       console.error(e);
       alert('No se pudo leer el Excel de contactos: ' + (e.message||e));
@@ -1052,7 +1057,7 @@ function buildContactFilenameCandidates(){
   const baseURL = new URL('.', location.href); // misma carpeta del HTML
 
   // ⬅️ PRIORIDAD 1: tu archivo EXACTO (el que me dijiste)
-  const EXACT = 'informedeContactos.xlsx';
+const EXACT = 'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx';
 
   // Utilidades de fecha (zona Bogotá)
   function nowInBogota(){
@@ -1213,12 +1218,6 @@ async function autoDetectContactsInSameFolder(){
         CONTACTS_DB = await parseContactsWorkbook(buf);
         fillEmpresaOptions();
         hideContactsUploadUI(); // NUEVO: oculta el bloque de carga de contactos
-        
-        // Si hay una sola empresa, dispara el cambio (y si hay 1 contacto, también)
-        const selEmp = document.getElementById('empresa');
-        if (selEmp && selEmp.options.length === 2) { // 1 opción + placeholder
-          selEmp.selectedIndex = 1;
-          onEmpresaChange();
         }
         return true;
       }
@@ -1590,6 +1589,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
