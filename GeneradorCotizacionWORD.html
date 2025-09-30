@@ -158,6 +158,21 @@ input:focus,select:focus,textarea:focus{
   /* NUEVO: utilidad para ocultar */
 .hidden { display: none !important; }
 
+.combo-input{
+  width:100%;
+  margin-bottom:8px;
+  padding:10px 12px;
+  background:var(--input-bg);
+  color:var(--text);
+  border:1px solid var(--input-border);
+  border-radius:10px;
+  outline:none;
+  text-transform: uppercase; /* forzar mayúsculas al escribir */
+}
+.combo-input:focus{
+  border-color:#9aa7b4;
+  box-shadow:0 0 0 3px rgba(2,132,199,.15);
+}
   
 </style>
 </head>
@@ -217,12 +232,14 @@ input:focus,select:focus,textarea:focus{
       <div class="grid" style="margin-top:12px">
 <div>
   <label for="empresa" class="required">Nombre de la empresa</label>
+  <input id="empresaSearch" type="text" placeholder="Escribe para filtrar o ingresar nueva empresa" class="combo-input"/>
   <select id="empresa">
     <option value="" selected disabled>-Seleccionar empresa-</option>
   </select>
 </div>
 <div>
   <label for="dirigido" class="required">Dirigido a</label>
+  <input id="dirigidoSearch" type="text" placeholder="Escribe para filtrar o ingresar nuevo destinatario" class="combo-input" disabled/>
   <select id="dirigido" disabled>
     <option value="" selected disabled>-Selecciona primero una empresa-</option>
   </select>
@@ -918,6 +935,11 @@ function fillDirigidoOptions(){
   const selDir = document.getElementById('dirigido');
   if(!selEmp || !selDir) return;
 
+  // Combos editables (empresa y dirigido)
+attachSearchableCombo('empresa','empresaSearch',{ onCommit: onEmpresaChange });
+attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange });
+
+
   const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
   selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
   selDir.disabled = true;
@@ -936,6 +958,7 @@ function fillDirigidoOptions(){
   });
 
   selDir.disabled = lista.length === 0;
+  if (dirSearch) dirSearch.disabled = (lista.length === 0);
 
   // si solo hay 1 contacto, seleccionarlo y autollenar
   if (lista.length === 1) {
@@ -944,17 +967,127 @@ function fillDirigidoOptions(){
   }
 }
 
+// ========= Combo editable con filtro para <select> =========
+function normalizeStr(s){
+  return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+}
+
+/**
+ * Conecta un input de búsqueda a un select:
+ * - Filtra opciones mientras se escribe.
+ * - Si se confirma texto que NO existe, crea/usa una opción "custom" con ese valor.
+ * - Llama onCommit() cuando se elige algo (o texto libre).
+ */
+function attachSearchableCombo(selectId, inputId, { onCommit } = {}){
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  if (!sel || !inp) return;
+
+  // Mantén una opción "custom" para texto libre
+  let customOpt = sel.querySelector('option[data-custom="1"]') || null;
+
+  function resetFilter(){
+    // mostrar todas las opciones
+    Array.from(sel.options).forEach(opt => { opt.hidden = false; });
+  }
+
+  function filterOptions(q){
+    const Q = normalizeStr(q);
+    Array.from(sel.options).forEach((opt, idx)=>{
+      const txt = normalizeStr(opt.textContent||opt.value||'');
+      if (idx===0 && opt.disabled) { // placeholder siempre visible
+        opt.hidden = false;
+        return;
+      }
+      opt.hidden = Q ? !txt.includes(Q) : false;
+    });
+  }
+
+  function selectFirstVisibleOrNone(){
+    const first = Array.from(sel.options).find((o,idx)=> idx>0 && !o.hidden);
+    if (first){
+      sel.value = first.value;
+    }
+  }
+
+  function commitFreeTextIfNeeded(){
+    const valTyped = inp.value.toUpperCase().trim();
+    if (!valTyped) return;
+
+    // ¿coincide exactamente con alguna opción visible?
+    const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === valTyped);
+    if (exact){
+      sel.value = exact.value;
+      return;
+    }
+    // Crear/actualizar opción custom
+    if (!customOpt){
+      customOpt = document.createElement('option');
+      customOpt.dataset.custom = '1';
+      sel.appendChild(customOpt);
+    }
+    customOpt.value = valTyped;
+    customOpt.textContent = valTyped;
+    customOpt.hidden = false;
+    sel.value = customOpt.value;
+  }
+
+  // Sincroniza input cuando cambia el select
+  sel.addEventListener('change', ()=>{
+    const opt = sel.selectedOptions[0];
+    if (opt){
+      inp.value = (opt.textContent||opt.value||'').toUpperCase();
+      if (typeof onCommit === 'function') onCommit();
+    }
+  });
+
+  // Filtra mientras escribes
+  inp.addEventListener('input', ()=>{
+    // Mantener mayúsculas y cursor
+    const pos = inp.selectionStart;
+    inp.value = inp.value.toUpperCase();
+    if (typeof pos === 'number') inp.setSelectionRange(pos, pos);
+
+    resetFilter();
+    filterOptions(inp.value);
+    // No seleccionamos nada automáticamente; el usuario puede abrir el select y elegir
+  });
+
+  // Confirmación con Enter o al salir
+  inp.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      commitFreeTextIfNeeded();
+      if (typeof onCommit === 'function') onCommit();
+    }
+  });
+  inp.addEventListener('blur', ()=>{
+    // si el usuario deja algo escrito, confirmarlo
+    commitFreeTextIfNeeded();
+    if (typeof onCommit === 'function') onCommit();
+  });
+}
+
 function onEmpresaChange(){
   const selDir = document.getElementById('dirigido');
   const email = document.getElementById('email');
   const office = document.getElementById('office');
   const ubic = document.getElementById('ubicacion');
+  const empSearch = document.getElementById('empresaSearch');
+if (empSearch) {
+  const selEmp = document.getElementById('empresa');
+  const opt = selEmp && selEmp.selectedOptions[0];
+  empSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : '';
+}
   if (selDir) { selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>'; selDir.disabled = true; }
   if (email) email.value = '';
   if (office) office.value = '';
   if (ubic) ubic.value = '';
 
   fillDirigidoOptions();
+
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if (dirSearch) dirSearch.value = '';
 
   // quitar marca de error si existía
   const emp = document.getElementById('empresa');
@@ -967,6 +1100,11 @@ function onDirigidoChange(){
   const office = document.getElementById('office');
   const ubic   = document.getElementById('ubicacion');
   const opt    = selDir && selDir.selectedOptions[0];
+  const dirSearch = document.getElementById('dirigidoSearch');
+if (dirSearch) {
+  dirSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : dirSearch.value.toUpperCase();
+}
+
 
   if (opt && opt.dataset.cid != null) {
     const idx = Number(opt.dataset.cid);
@@ -993,6 +1131,8 @@ function wireContactsInput(){
       const buf = await f.arrayBuffer();
       CONTACTS_DB = await parseContactsWorkbook(buf);
       fillEmpresaOptions();
+const empSearch = document.getElementById('empresaSearch');
+if (empSearch) empSearch.value = '';
     }catch(e){
       console.error(e);
       alert('No se pudo leer el Excel de contactos: ' + (e.message||e));
@@ -1004,6 +1144,9 @@ function wireContactsInput(){
   const selDir = document.getElementById('dirigido');
   if (selEmp) selEmp.addEventListener('change', onEmpresaChange);
   if (selDir) selDir.addEventListener('change', onDirigidoChange);
+  // Combos editables (empresa y dirigido)
+attachSearchableCombo('empresa','empresaSearch',{ onCommit: onEmpresaChange });
+attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange });
 }
 
 // ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
@@ -1197,6 +1340,9 @@ async function autoDetectContactsInSameFolder(){
         // parsear y llenar
         CONTACTS_DB = await parseContactsWorkbook(buf);
         fillEmpresaOptions();
+  // sincroniza buscador empresa con placeholder vacío
+const empSearch = document.getElementById('empresaSearch');
+if (empSearch) empSearch.value = '';
         hideContactsUploadUI(); // NUEVO: oculta el bloque de carga de contactos
 
         // Si hay una sola empresa, dispara el cambio (y si hay 1 contacto, también)
@@ -1575,4 +1721,5 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
