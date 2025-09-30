@@ -819,37 +819,46 @@ async function parseContactsWorkbook(arrayBuffer){
     return cell.v==null ? '' : String(cell.v);
   };
 
-  // 1) Encontrar fila de encabezados (soporta "Nombre de la cuenta", "Nombre", "Apellidos", "Correo electrónico", "Ciudad o País", etc.)
-  let headerRow = -1, cols = {};
-  for(let r=range.s.r; r<=range.e.r; r++){
-    const names = [];
-    for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
-    const idxEmpresa = names.findIndex(v => v.includes('nombre de la cuenta'));
-    const idxNombre  = names.findIndex(v => v === 'nombre');
-    const idxApell   = names.findIndex(v => v === 'apellidos');
-    const idxCargo   = names.findIndex(v => v === 'cargo');
-    const idxTel     = names.findIndex(v => v.startsWith('telefono'));            // "Teléfono"
-    const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));  // "Correo electrónico"
-    const idxCiudad  = names.findIndex(v => v.startsWith('ciudad'));              // "Ciudad o País"
-    if (idxEmpresa>=0 && idxNombre>=0 && idxApell>=0 && idxEmail>=0){
-      headerRow = r;
-      cols = {empresa:idxEmpresa, nombre:idxNombre, apellidos:idxApell, cargo:idxCargo, telefono:idxTel, email:idxEmail, ciudadPais:idxCiudad};
-      break;
-    }
+// 1) Encontrar fila de encabezados
+let headerRow = -1, cols = {};
+for(let r=range.s.r; r<=range.e.r; r++){
+  const names = [];
+  for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
+  const idxEmpresa = names.findIndex(v => v.includes('nombre de la cuenta'));
+  const idxNombre  = names.findIndex(v => v === 'nombre');
+  const idxApell   = names.findIndex(v => v === 'apellidos');
+  const idxCargo   = names.findIndex(v => v === 'cargo');
+
+  // Teléfono / Móvil (normalizados sin acentos)
+  const idxTel     = names.findIndex(v => v.startsWith('telefono'));  // Teléfono
+  const idxMovil   = names.findIndex(v => v.startsWith('movil'));     // Móvil
+
+  const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));
+  const idxCiudad  = names.findIndex(v => v.startsWith('ciudad')); // “Ciudad o País”
+
+  if (idxEmpresa>=0 && idxNombre>=0 && idxApell>=0 && idxEmail>=0){
+    headerRow = r;
+    cols = {
+      empresa:idxEmpresa, nombre:idxNombre, apellidos:idxApell, cargo:idxCargo,
+      telefono:idxTel, movil:idxMovil, email:idxEmail, ciudadPais:idxCiudad
+    };
+    break;
   }
-  if(headerRow < 0) throw new Error('No se detectaron encabezados en el Excel de contactos');
+}
+if(headerRow < 0) throw new Error('No se detectaron encabezados en el Excel de contactos');
 
   // 2) Recorrer filas con "arrastre" de empresa y omitir "Subtotal"
   const rows = [];
   let lastEmpresa = '';
   for(let r=headerRow+1; r<=range.e.r; r++){
-    const vEmpresa = _normStr(getCell(r, cols.empresa));
-    const vNombre  = _normStr(getCell(r, cols.nombre));
-    const vApell   = _normStr(getCell(r, cols.apellidos));
-    const vCargo   = _normStr(cols.cargo!=null ? getCell(r, cols.cargo) : '');
-    const vTel     = _normStr(cols.telefono!=null ? getCell(r, cols.telefono) : '');
-    const vEmail   = _normStr(cols.email!=null ? getCell(r, cols.email) : '');
-    const vCiudad  = _normStr(cols.ciudadPais!=null ? getCell(r, cols.ciudadPais) : '');
+const vEmpresa = _normStr(getCell(r, cols.empresa));
+const vNombre  = _normStr(getCell(r, cols.nombre));
+const vApell   = _normStr(getCell(r, cols.apellidos));
+const vCargo   = _normStr(cols.cargo!=null ? getCell(r, cols.cargo) : '');
+const vTel     = _normStr(cols.telefono!=null ? getCell(r, cols.telefono) : '');
+const vMovil   = _normStr(cols.movil!=null ? getCell(r, cols.movil) : '');
+const vEmail   = _normStr(cols.email!=null ? getCell(r, cols.email) : '');
+const vCiudad  = _normStr(cols.ciudadPais!=null ? getCell(r, cols.ciudadPais) : '');
 
     // saltar subtotales/filas vacías
     const line = [vEmpresa, vNombre, vApell, vEmail].join(' ').toLowerCase();
@@ -859,16 +868,17 @@ async function parseContactsWorkbook(arrayBuffer){
     const empresa = lastEmpresa;
     if (!empresa) continue;
 
-    rows.push({
-      id: rows.length,
-      empresa,
-      nombre: vNombre,
-      apellidos: vApell,
-      cargo: vCargo,
-      telefono: vTel,
-      email: vEmail,
-      ciudadPais: vCiudad
-    });
+rows.push({
+  id: rows.length,
+  empresa,
+  nombre: vNombre,
+  apellidos: vApell,
+  cargo: vCargo,
+  telefono: vTel,
+  movil: vMovil,           
+  email: vEmail,
+  ciudadPais: vCiudad
+});
   }
 
   // 3) Agrupar por empresa
@@ -1009,12 +1019,14 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     if (selectId === 'dirigido') {
       const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === inp.value.trim());
       if (!exact) {
-        const email  = document.getElementById('email');
-        const office = document.getElementById('office');
-        const ubic   = document.getElementById('ubicacion');
-        if (email)  email.value  = '';
-        if (office) office.value = '';
-        if (ubic)   ubic.value   = '';
+    const email  = document.getElementById('email');
+    const office = document.getElementById('office');
+    const ubic   = document.getElementById('ubicacion');
+    const tel    = document.getElementById('tel');
+    if (email)  email.value  = '';
+    if (office) office.value = '';
+    if (ubic)   ubic.value   = '';
+    if (tel)    tel.value    = ''; 
       }
     }
   });
@@ -1062,7 +1074,8 @@ if (empSearch) {
 function onDirigidoChange(){
   const selDir = document.getElementById('dirigido');
   const email  = document.getElementById('email');
-  const office = document.getElementById('office');
+  const office = document.getElementById('office'); // debe quedar lleno si hay alguno
+  const tel    = document.getElementById('tel');
   const ubic   = document.getElementById('ubicacion');
   const opt    = selDir && selDir.selectedOptions[0];
 
@@ -1075,15 +1088,41 @@ function onDirigidoChange(){
     const idx = Number(opt.dataset.cid);
     const c   = CONTACTS_DB.all[idx];
     if (c) {
-      if (email)  email.value  = c.email || '';
-      if (office) office.value = c.telefono || '';
-      if (ubic)   ubic.value   = c.ciudadPais || '';
+      // E-mail y ubicación directos
+      if (email) email.value = c.email || '';
+      if (ubic)  ubic.value  = c.ciudadPais || '';
+
+      // Reglas de TELÉFONOS:
+      const tFijo   = (c.telefono || '').trim();
+      const tMovil  = (c.movil    || '').trim();
+
+      // 1) Si hay Teléfono → va a OFFICE
+      // 2) Si hay Móvil → va a TEL
+      // 3) Si NO hay Teléfono pero SÍ hay Móvil → ese Móvil va a OFFICE
+      // 4) Si ninguno → ambos vacíos
+      let officeVal = '';
+      let telVal    = '';
+
+      if (tFijo) {
+        officeVal = tFijo;
+        telVal    = tMovil || '';
+      } else if (tMovil) {
+        officeVal = tMovil; // prioridad: que OFFICE quede lleno
+        telVal    = tMovil; // opcional: lo ponemos también en Tel si quieres verlo ahí
+      } else {
+        officeVal = '';
+        telVal    = '';
+      }
+
+      if (office) office.value = officeVal;
+      if (tel)    tel.value    = telVal;
     }
   } else {
-    // Opción "custom" o no hay coincidencia real -> limpiar autollenado
+    // Opción “custom” o no coincide → limpiar autollenado
     if (email)  email.value  = '';
     if (office) office.value = '';
     if (ubic)   ubic.value   = '';
+    if (tel)    tel.value    = ''; // opcional: si prefieres conservar, elimina esta línea
   }
 
   // quitar marca de error si existía
@@ -1691,6 +1730,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
