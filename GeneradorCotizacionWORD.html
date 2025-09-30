@@ -155,6 +155,9 @@ input:focus,select:focus,textarea:focus{
 }
 
 #empresa, #dirigido { text-transform: uppercase; }
+  /* NUEVO: utilidad para ocultar */
+.hidden { display: none !important; }
+
   
 </style>
 </head>
@@ -1001,6 +1004,21 @@ function wireContactsInput(){
   if (selDir) selDir.addEventListener('change', onDirigidoChange);
 }
 
+// ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
+function findLabelFor(id){
+  return document.querySelector(`label[for="${id}"]`);
+}
+function hideContactsUploadUI(){
+  const lbl = findLabelFor('xlsDatos');
+  const inp = document.getElementById('xlsDatos');
+  const sm  = document.getElementById('xlsDatosStatus');
+
+  // Si tienes un contenedor padre, puedes ocultarlo completo; si no, ocultamos piezas
+  if (lbl) lbl.classList ? lbl.classList.add('hidden') : (lbl.style.display = 'none');
+  if (inp) inp.classList ? inp.classList.add('hidden') : (inp.style.display = 'none');
+  if (sm)  sm.classList  ? sm.classList.add('hidden')  : (sm.style.display  = 'none');
+}
+
 // ========= NUEVO: AUTODETECCIÓN DE EXCEL DE CONTACTOS EN LA MISMA CARPETA =========
 
 // Utilidad: fecha en zona Bogotá (sin depender del SO del usuario)
@@ -1182,6 +1200,8 @@ async function autoDetectContactsInSameFolder(){
         // parsear y llenar
         CONTACTS_DB = await parseContactsWorkbook(buf);
         fillEmpresaOptions();
+        hideContactsUploadUI(); // NUEVO: oculta el bloque de carga de contactos
+        
 
         // Mostrar al usuario cuál se usó
         if (status) status.textContent = `Detectado automáticamente: ${decodeURIComponent(url.split('/').pop())} • Empresas: ${CONTACTS_DB.byEmpresa.size} • Contactos: ${CONTACTS_DB.all.length}`;
@@ -1562,6 +1582,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
