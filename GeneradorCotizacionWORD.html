@@ -383,6 +383,307 @@ const para=(children,align)=>new docx.Paragraph({children,spacing:SPACING_SINGLE
 const capFirst=s=>{s=(s||'').toString().trim();return s? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';};
 const val=(id,def='')=>{const el=document.getElementById(id);const v=(el&&typeof el.value==='string')?el.value.trim():'';return v!==''?v:def;};
 
+/* ===================== CONTACTOS (Excel en la misma carpeta) ===================== */
+
+/** Ruta del archivo de contactos en la MISMA carpeta que el HTML.
+ *  Cambia el nombre si tu archivo se llama distinto en producción. */
+const CONTACTS_FILE = 'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx';
+
+const CONTACTS_STATE = {
+  byCompany: new Map(),   // empresa => [rows]
+  companyNames: [],       // empresas únicas ordenadas
+};
+
+  /* === Contactos: cargar archivo relativo y enganchar eventos === */
+  loadContactsExcelRelative(); // intenta cargar automáticamente el Excel de contactos en la misma carpeta
+
+  const empEl = document.getElementById('empresa');
+  if(empEl){
+    // Cambios en Empresa
+    const onEmpresaChange = () => {
+      const empresa = isSelect(empEl) ? empEl.value : (empEl.value||'').trim();
+      if(!empresa) return;
+      populateDirigidoControlForCompany(empresa);
+      // limpiar estilos de requerido
+      empEl.style.borderColor = '';
+      empEl.style.boxShadow = '';
+      // Si #dirigido es input, limpiar su valor para forzar nueva selección
+      const dirEl = document.getElementById('dirigido');
+      if(dirEl && isInput(dirEl)) dirEl.value = '';
+    };
+    empEl.addEventListener('change', onEmpresaChange);
+    // Para input con datalist, también escuchar "blur" por si el usuario tipea
+    if(isInput(empEl)) empEl.addEventListener('blur', onEmpresaChange);
+  }
+
+  const dirEl = document.getElementById('dirigido');
+  if(dirEl){
+    // Cambios en Dirigido a
+    const onDirigidoChange = () => {
+      const empresa = isSelect(empEl) ? empEl.value : (empEl.value||'').trim();
+      if(!empresa) return;
+
+      if(isSelect(dirEl)){
+        const idx = parseInt(dirEl.value,10);
+        if(!isNaN(idx)) applySelectedPerson(empresa, idx);
+      }else{
+        const label = (dirEl.value||'').toUpperCase();
+        if(label) applySelectedPersonByLabel(empresa, label);
+      }
+      // limpiar estilos de requerido
+      dirEl.style.borderColor = '';
+      dirEl.style.boxShadow = '';
+    };
+    dirEl.addEventListener('change', onDirigidoChange);
+    // Para input con datalist, cubrir también blur
+    if(isInput(dirEl)) dirEl.addEventListener('blur', onDirigidoChange);
+  }
+
+  // Seguridad extra: si el usuario escribe manualmente, forzar MAYÚSCULAS en empresa/dirigido
+  ['empresa','dirigido'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el && isInput(el)){
+      el.addEventListener('input', ()=>{ el.value = (el.value||'').toUpperCase(); });
+    }
+  });
+
+/** Parsea el Excel, detectando encabezados y aplicando "arrastre" de Empresa. */
+async function parseContactsFromExcelBuffer(arrayBuffer){
+  // Usamos la librería XLSX ya presente en tu proyecto
+  const XLSXlib = window.XLSX || window.xlsx || window.XLSXlib;
+  if(!XLSXlib) throw new Error('No está disponible XLSX en la página.');
+
+  const wb = XLSXlib.read(arrayBuffer, { type:'array' });
+  const sheetName = Object.keys(wb.Sheets)[0];
+  const ws = wb.Sheets[sheetName];
+  if(!ws) throw new Error('No se encontró la primera hoja en el Excel de contactos');
+
+  const range = XLSXlib.utils.decode_range(ws['!ref']);
+
+  // 1) Encontrar fila de encabezados por heurística robusta
+  let headerRow = -1;
+  for(let r = range.s.r; r <= Math.min(range.e.r, range.s.r+80); r++){
+    let rowText = '';
+    for(let c = range.s.c; c <= range.e.c; c++){
+      const cell = ws[XLSXlib.utils.encode_cell({r,c})];
+      rowText += ' ' + (cell ? String(cell.v||'').trim() : '');
+    }
+    if(/\bNombre\b/i.test(rowText) && /Correo/i.test(rowText) && /(Ciudad|Pa[ií]s)/i.test(rowText)){
+      headerRow = r; break;
+    }
+  }
+  if(headerRow < 0) throw new Error('No se encontró la fila de encabezados en contactos');
+
+  // 2) Mapa de encabezados
+  const headers = {};
+  for(let c = range.s.c; c <= range.e.c; c++){
+    const cell = ws[XLSXlib.utils.encode_cell({r:headerRow, c})];
+    const label = cell ? String(cell.v||'').trim() : '';
+    if(label) headers[normalizaHeader(label)] = c;
+  }
+  const pick = (...cands) => {
+    for(const k of cands){
+      const col = headers[normalizaHeader(k)];
+      if(col != null) return col;
+    }
+    return null;
+  };
+
+  // Columnas requeridas según tu archivo
+  const C_EMP  = pick('Nombre de la cuenta  ↑','Nombre de la cuenta','Cuenta','Empresa');
+  const C_NOM  = pick('Nombre');
+  const C_APE  = pick('Apellidos','Apellido');
+  const C_CAR  = pick('Cargo');
+  const C_MAIL = pick('Correo electrónico','Correo electronico','Email');
+  const C_TEL  = pick('Teléfono','Telefono');
+  const C_MOV  = pick('Móvil','Celular','Mobile');
+  const C_CITY = pick('Ciudad o País','Ciudad o pais','Ciudad','País');
+
+  if([C_EMP,C_NOM,C_APE,C_MAIL,C_CITY].some(v=>v==null)){
+    throw new Error('Faltan columnas mínimas (Empresa, Nombre, Apellidos, Correo, Ciudad/País).');
+  }
+
+  const byCompany = new Map();
+  const val = (r,c)=> {
+    const cell = ws[XLSXlib.utils.encode_cell({r,c})];
+    return cell ? String(cell.v??'').trim() : '';
+  };
+
+  // 3) Recorrido con "arrastre" de Empresa
+  let lastEmpresa = '';
+  for(let r = headerRow+1; r <= range.e.r; r++){
+    let empresa = val(r, C_EMP);
+    const nombre = val(r, C_NOM);
+    const apell  = val(r, C_APE);
+    const mail   = val(r, C_MAIL);
+    const city   = val(r, C_CITY);
+
+    // si la fila está vacía, sigue
+    if(!empresa && !nombre && !apell && !mail && !city) continue;
+
+    // ARRRASTRE: si Empresa viene vacía, usar la última no vacía
+    if(!empresa) empresa = lastEmpresa; else lastEmpresa = empresa;
+
+    if(!empresa || !nombre) continue; // empresa y nombre mínimos para construir dirigido
+
+    const row = {
+      empresa,
+      nombre,
+      apellidos: apell,
+      cargo:     val(r, C_CAR),
+      email:     mail,
+      telefono:  val(r, C_TEL) || val(r, C_MOV),
+      ciudad:    city
+    };
+
+    if(!byCompany.has(empresa)) byCompany.set(empresa, []);
+    byCompany.get(empresa).push(row);
+  }
+
+  CONTACTS_STATE.byCompany = byCompany;
+  CONTACTS_STATE.companyNames = Array.from(byCompany.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+}
+
+function normalizaHeader(s){
+  return String(s).toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/\s+/g,' ').trim();
+}
+
+/* ---------- Poblado de controles SIN cambiar tu HTML ---------- */
+
+function isSelect(el){ return el && el.tagName === 'SELECT'; }
+function isInput(el){ return el && el.tagName === 'INPUT'; }
+
+/** Llena el control #empresa:
+ *  - Si es <select>, agrega <option>.
+ *  - Si es <input>, crea <datalist id="empresaList"> y agrega opciones (no se toca tu HTML). */
+function populateEmpresaControl(){
+  const el = document.getElementById('empresa');
+  if(!el) return;
+
+  const names = CONTACTS_STATE.companyNames;
+
+  if(isSelect(el)){
+    el.innerHTML = '<option value="" disabled selected>-Seleccionar empresa-</option>';
+    names.forEach(n=>{
+      const opt = document.createElement('option');
+      opt.value = n;
+      opt.textContent = n.toUpperCase(); // MAYÚSCULAS
+      el.appendChild(opt);
+    });
+  }else if(isInput(el)){
+    // datalist no intrusivo
+    let dl = document.getElementById('empresaList');
+    if(!dl){
+      dl = document.createElement('datalist');
+      dl.id = 'empresaList';
+      document.body.appendChild(dl);
+      el.setAttribute('list','empresaList');
+    }
+    dl.innerHTML = '';
+    names.forEach(n=>{
+      const opt = document.createElement('option');
+      opt.value = n; // input mostrará sugerencias
+      dl.appendChild(opt);
+    });
+  }
+}
+
+/** Cuando cambia Empresa, poblar "Dirigido a":
+ *  - Si #dirigido es <select>, <option>s.
+ *  - Si es <input>, se crea <datalist id="dirigidoList"> con etiquetas formateadas. */
+function populateDirigidoControlForCompany(empresa){
+  const el = document.getElementById('dirigido');
+  if(!el) return;
+
+  const list = CONTACTS_STATE.byCompany.get(empresa) || [];
+
+  // Construir etiquetas con regla de ING / SR(A).
+  const labels = list.map(row=>{
+    const esIng = /ingenier/i.test(row.cargo||'');
+    const pref  = esIng ? 'ING ' : 'SR(A). ';
+    const label = (pref + (row.nombre||'') + ' ' + (row.apellidos||'')).toUpperCase();
+    return label;
+  });
+
+  if(isSelect(el)){
+    el.innerHTML = '<option value="" disabled selected>-Seleccionar persona-</option>';
+    labels.forEach((lab,idx)=>{
+      const opt = document.createElement('option');
+      opt.value = String(idx);           // índice de la fila
+      opt.textContent = lab;             // MAYÚSCULAS
+      el.appendChild(opt);
+    });
+    if(list.length === 1){
+      el.selectedIndex = 1;
+      applySelectedPerson(empresa, 0);
+    }
+  }else if(isInput(el)){
+    let dl = document.getElementById('dirigidoList');
+    if(!dl){
+      dl = document.createElement('datalist');
+      dl.id = 'dirigidoList';
+      document.body.appendChild(dl);
+      el.setAttribute('list','dirigidoList');
+    }
+    dl.innerHTML = '';
+    labels.forEach(lab=>{
+      const opt = document.createElement('option');
+      opt.value = lab; // input mostrará la etiqueta en mayúsculas
+      dl.appendChild(opt);
+    });
+    if(list.length === 1){
+      el.value = labels[0];
+      applySelectedPersonByLabel(empresa, labels[0]);
+    }
+  }
+}
+
+/** Aplica datos a los campos (Ubicación, Email, Office) desde empresa + índice. */
+function applySelectedPerson(empresa, idx){
+  const list = CONTACTS_STATE.byCompany.get(empresa) || [];
+  const row = list[idx]; if(!row) return;
+
+  // Forzar mayúsculas de empresa y dirigido (si es select o input)
+  const empEl = document.getElementById('empresa');
+  if(empEl){
+    if(isSelect(empEl)) empEl.value = empresa;
+    else empEl.value = (empresa||'').toUpperCase();
+  }
+
+  const dirEl = document.getElementById('dirigido');
+  if(dirEl){
+    const esIng = /ingenier/i.test(row.cargo||'');
+    const pref  = esIng ? 'ING ' : 'SR(A). ';
+    const label = (pref + (row.nombre||'') + ' ' + (row.apellidos||'')).toUpperCase();
+    if(isSelect(dirEl)) dirEl.value = String(idx);
+    else dirEl.value = label;
+  }
+
+  const ubi = document.getElementById('ubicacion');
+  if(ubi) ubi.value = row.ciudad || '';
+
+  const mail = document.getElementById('email');
+  if(mail) mail.value = row.email || '';
+
+  const off = document.getElementById('office');
+  if(off) off.value = row.telefono || '';
+}
+
+/** Versión para cuando #dirigido es input con datalist (busca por etiqueta). */
+function applySelectedPersonByLabel(empresa, label){
+  const list = CONTACTS_STATE.byCompany.get(empresa) || [];
+  // Reconstruimos etiquetas y buscamos coincidencia exacta
+  for(let i=0;i<list.length;i++){
+    const esIng = /ingenier/i.test(list[i].cargo||'');
+    const pref  = esIng ? 'ING ' : 'SR(A). ';
+    const lab   = (pref + (list[i].nombre||'') + ' ' + (list[i].apellidos||'')).toUpperCase();
+    if(lab === label){
+      applySelectedPerson(empresa, i);
+      break;
+    }
+  }
+}
+
 /* ========= Contactos desde Excel (para Empresa / Dirigido a) ========= */
 let CONTACTS = { byCompany: new Map(), headers: {} };
 
@@ -1325,6 +1626,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
