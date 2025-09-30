@@ -609,7 +609,6 @@ function validateRequiredFields() {
 }
 
 /* ========= Función para reiniciar formulario ========= */
-/* ========= Función para reiniciar formulario ========= */
 function resetForm() {
   // 1) Archivos: NO tocar imagen de fondo ni Excel de contactos
   //    -> solo limpiamos el Excel de VENTA porque es el que cambia por cotización
@@ -644,27 +643,23 @@ function resetForm() {
   const selEmp = document.getElementById('empresa');
   const selDir = document.getElementById('dirigido');
 
-  if (selEmp && selEmp.tagName === 'SELECT') {
-    // quitar opción "custom" si la había
-    Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-    // placeholder
-    selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
-    // repoblar empresas desde CONTACTS_DB (si existe)
-    if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
-      const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
-      empresas.forEach(e=>{
-const opt = document.createElement('option');
-opt.value = etiqueta.toUpperCase();
-opt.textContent = etiqueta.toUpperCase();
-opt.dataset.cid = String(c.id);           // puedes dejarlo, pero ya no dependemos de él
-opt.dataset.tel = (c.telefono || '').trim();
-opt.dataset.movil = (c.movil || '').trim();
-opt.dataset.email = (c.email || '').trim();
-opt.dataset.ciudad = (c.ciudadPais || '').trim();
-selDir.appendChild(opt);
-      });
-    }
+if (selEmp && selEmp.tagName === 'SELECT') {
+  // quitar opción "custom" si la había
+  Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+  // placeholder
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  // repoblar empresas desde CONTACTS_DB (si existe)
+  if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
+    const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+    empresas.forEach(e=>{
+      const opt = document.createElement('option');
+      opt.value = e.toUpperCase();
+      opt.textContent = e.toUpperCase();
+      opt.dataset.empraw = e;
+      selEmp.appendChild(opt);
+    });
   }
+}
 
   if (selDir && selDir.tagName === 'SELECT') {
     // quitar opción "custom" si la había
@@ -1089,7 +1084,6 @@ function onDirigidoChange(){
     dirSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : dirSearch.value.toUpperCase();
   }
 
-  // helper para “limpiar”
   const clearAuto = () => {
     if (email)  email.value  = '';
     if (office) office.value = '';
@@ -1099,27 +1093,35 @@ function onDirigidoChange(){
 
   if (!opt) { clearAuto(); return; }
 
-  // Si la opción viene de la base: usa data-*
-  const tFijo  = (opt.dataset.tel   || '').trim();
-  const tMovil = (opt.dataset.movil || '').trim();
-  const mail   = (opt.dataset.email || '').trim();
-  const city   = (opt.dataset.ciudad|| '').trim();
+  // 1) Intentar leer de data-*
+  let tFijo  = (opt.dataset.tel    || '').trim();
+  let tMovil = (opt.dataset.movil  || '').trim();
+  let mail   = (opt.dataset.email  || '').trim();
+  let city   = (opt.dataset.ciudad || '').trim();
 
-  // Si no hay ningún dato embebido, trátalo como “custom” y limpia
-  if (!tFijo && !tMovil && !mail && !city && opt.dataset.cid == null) {
-    clearAuto();
-    return;
+  // 2) Si no hay datos en data-* pero hay cid, hacer fallback al registro en CONTACTS_DB
+  if (!tFijo && !tMovil && !mail && !city && opt.dataset.cid != null) {
+    const idx = Number(opt.dataset.cid);
+    const c   = CONTACTS_DB.all[idx];
+    if (c) {
+      tFijo  = (c.telefono   || '').trim();
+      tMovil = (c.movil      || '').trim();
+      mail   = (c.email      || '').trim();
+      city   = (c.ciudadPais || '').trim();
+    }
   }
 
-  // E-mail y ubicación
+  // 3) Si sigue sin datos → es opción "custom": limpiar y salir
+  if (!tFijo && !tMovil && !mail && !city) { clearAuto(); return; }
+
+  // 4) E-mail y ubicación
   if (email) email.value = mail;
   if (ubic)  ubic.value  = city;
 
-  // Reglas de teléfonos:
-  // 1) Si hay Teléfono => va a OFFICE
-  // 2) Si hay Móvil    => va a TEL
-  // 3) Si NO hay Teléfono pero SÍ hay Móvil => ese Móvil va a OFFICE
-  // 4) Si ninguno => ambos vacíos
+  // 5) Reglas de teléfonos
+  //    - Si hay Teléfono => OFFICE
+  //    - Si hay Móvil    => TEL
+  //    - Si NO hay Teléfono pero SÍ Móvil => ese Móvil => OFFICE (y opcionalmente también TEL)
   let officeVal = '';
   let telVal    = '';
 
@@ -1128,8 +1130,8 @@ function onDirigidoChange(){
     telVal    = tMovil || '';
   } else if (tMovil) {
     officeVal = tMovil;  // prioridad: que OFFICE quede lleno
-    telVal    = tMovil;  // si prefieres dejar Tel vacío en este caso, borra esta línea
-  } // else ambos quedan ''
+    telVal    = tMovil;  // si prefieres dejar TEL vacío, borra esta línea
+  }
 
   if (office) office.value = officeVal;
   if (tel)    tel.value    = telVal;
@@ -1137,7 +1139,6 @@ function onDirigidoChange(){
   // quitar marca de error si existía
   if(selDir){ selDir.style.borderColor=''; selDir.style.boxShadow=''; }
 }
-
 
 function wireContactsInput(){
   const input = document.getElementById('xlsDatos');
@@ -1740,6 +1741,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
