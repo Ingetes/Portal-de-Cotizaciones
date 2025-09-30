@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Generador .docx â€” INGETES</title>
+<title>Generador .docx — INGETES</title>
 <style>
   :root{
     --bg:#f6f8fb;          /* fondo general */
     --card:#ffffff;        /* tarjetas / contenedores */
-    --border:#e5e7eb;      /* lÃ­neas y bordes suaves */
+    --border:#e5e7eb;      /* líneas y bordes suaves */
     --muted:#6b7280;       /* texto secundario */
     --text:#0b1020;        /* texto principal */
     --input-bg:#ffffff;    
@@ -67,7 +67,7 @@ main{max-width:1100px;margin:0 auto;padding:24px 16px}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px}
 .pad{padding:16px}
 
-/* tÃ­tulos de secciÃ³n */
+/* títulos de sección */
 h2{font-size:18px;margin:22px 0 10px 0;color:var(--text);font-weight:700}
 
 /* etiquetas y controles */
@@ -99,7 +99,7 @@ input:focus,select:focus,textarea:focus{
 /* fila de botones */
 .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
 
-/* botÃ³n principal oscuro (como el de la imagen) */
+/* botón principal oscuro (como el de la imagen) */
 .btn{
   display:inline-flex;align-items:center;gap:8px;
   padding:10px 14px;
@@ -117,7 +117,7 @@ input:focus,select:focus,textarea:focus{
 .btn.primary:hover{filter:brightness(1.05)}
 .btn:hover{background:#eef1f5}
 
-.btn.reset{background:#eef1f5} /* Color rojo para el botÃ³n de reinicio */
+.btn.reset{background:#eef1f5} /* Color rojo para el botón de reinicio */
 
 .btn:focus{outline:2px solid var(--ring);outline-offset:2px}
 .btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
@@ -130,18 +130,18 @@ input:focus,select:focus,textarea:focus{
 /* Hace que un item ocupe las DOS columnas de la grilla */
 .stretch{ grid-column: 1 / -1; }
 
-/* Ocultar campos "otro" hasta que se elija la opciÃ³n correspondiente */
+/* Ocultar campos "otro" hasta que se elija la opción correspondiente */
 .hidden{ display:none !important; }
 
-/* === Cards por secciÃ³n (2 columnas, responsivo) === */
-/* === Cards por secciÃ³n (una sola columna) === */
+/* === Cards por sección (2 columnas, responsivo) === */
+/* === Cards por sección (una sola columna) === */
 .cards{
   display:grid;
   grid-template-columns: 1fr;
   gap:24px;
 }
 
-/* Card individual de cada secciÃ³n */
+/* Card individual de cada sección */
 .card-section{
   background: var(--card);
   border: 1px solid var(--line);
@@ -181,7 +181,7 @@ input:focus,select:focus,textarea:focus{
         <small id="bgStatus" style="margin-left:6px;color:#6b7280"></small>
       </div>
 
-      <label for="xls" style="margin-top:12px">Excel (.xlsx) â€” hoja â€œVENTAâ€</label>
+      <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
       <input id="xls" type="file" accept=".xlsx,.xls"/>
 <div id="xlsDatosRow">
   <label for="xlsDatos" style="margin-top:12px">Excel datos de contacto (.xlsx)</label>
@@ -192,7 +192,7 @@ input:focus,select:focus,textarea:focus{
 
     <!-- Columna derecha -->
     <section class="card-section">
-      <h2>2) ParÃ¡metros iniciales</h2>
+      <h2>2) Parámetros iniciales</h2>
 
       <div class="grid">
         <div>
@@ -202,7 +202,7 @@ input:focus,select:focus,textarea:focus{
         <div>
           <label for="comercial" class="required">Comercial</label>
           <select id="comercial">
-            <option value="" selected disabled>-Seleccionar opciÃ³n-</option>
+            <option value="" selected disabled>-Seleccionar opción-</option>
             <option value="PCR">PABLO CESAR RODRIGUEZ</option>
             <option value="CPR">CLAUDIA PATRICIA RODRIGUEZ</option>
             <option value="JSG">JUAN SEBASTIAN GARZON</option>
@@ -231,16 +231,16 @@ input:focus,select:focus,textarea:focus{
 
       <div class="grid" style="margin-top:12px">
         <div>
-          <label for="area" class="required">Ãrea</label>
-          <input id="area" type="text" placeholder="Ãrea"/>
+          <label for="area" class="required">Área</label>
+          <input id="area" type="text" placeholder="Área"/>
         </div>
         <div>
-    <label for="ubicacion" class="required">UbicaciÃ³n</label>
+    <label for="ubicacion" class="required">Ubicación</label>
     <input id="ubicacion" type="text" placeholder="Ciudad, Departamento"/>
   </div>
       </div>
 
-      <!-- NUEVO: UbicaciÃ³n y Asunto -->
+      <!-- NUEVO: Ubicación y Asunto -->
 <div class="grid" style="margin-top:12px">
   <div>
           <label for="email" class="required">E-Mail</label>
@@ -273,13 +273,13 @@ input:focus,select:focus,textarea:focus{
         <div>
           <label for="garantia">GARANTIA</label>
           <select id="garantia">
-            <option selected>12 meses por defecto de fÃ¡brica.</option>
+            <option selected>12 meses por defecto de fábrica.</option>
             <option>No aplica.</option>
-            <option>6 meses por defecto de fÃ¡brica.</option>
-            <option>3 meses por defecto de fÃ¡brica.</option>
+            <option>6 meses por defecto de fábrica.</option>
+            <option>3 meses por defecto de fábrica.</option>
             <option value="__OTRO__">Otro</option>
           </select>
-          <input id="garantia_otro" class="hidden" type="text" placeholder="Escribe la garantÃ­aâ€¦"/>
+          <input id="garantia_otro" class="hidden" type="text" placeholder="Escribe la garantía…"/>
         </div>
 
         <!-- FORMA DE PAGO -->
@@ -291,10 +291,10 @@ input:focus,select:focus,textarea:focus{
             <option>Anticipo 50% saldo a la llegada de los equipos.</option>
             <option>Anticipo 30% saldo a la llegada de los equipos.</option>
             <option>A convenir.</option>
-            <option selected>CrÃ©dito 30 dÃ­as.</option>
+            <option selected>Crédito 30 días.</option>
             <option value="__OTRO__">Otro</option>
           </select>
-          <input id="formaPago_otro" class="hidden" type="text" placeholder="Escribe la forma de pagoâ€¦"/>
+          <input id="formaPago_otro" class="hidden" type="text" placeholder="Escribe la forma de pago…"/>
         </div>
 
         <!-- SITIO ENTREGA -->
@@ -305,19 +305,19 @@ input:focus,select:focus,textarea:focus{
             <option>Instalaciones ingetes.</option>
             <option value="__OTRO__">Otro</option>
           </select>
-          <input id="sitioEntrega_otro" class="hidden" type="text" placeholder="Escribe el sitio de entregaâ€¦"/>
+          <input id="sitioEntrega_otro" class="hidden" type="text" placeholder="Escribe el sitio de entrega…"/>
         </div>
 
         <!-- VALIDEZ DE LA OFERTA -->
         <div>
           <label for="validezOferta">VALIDEZ DE LA OFERTA</label>
           <select id="validezOferta">
-            <option selected>30 dÃ­as.</option>
-            <option>15 dÃ­as.</option>
+            <option selected>30 días.</option>
+            <option>15 días.</option>
             <option>Hasta final de mes.</option>
             <option value="__OTRO__">Otro</option>
           </select>
-          <input id="validezOferta_otro" class="hidden" type="text" placeholder="Escribe la validezâ€¦"/>
+          <input id="validezOferta_otro" class="hidden" type="text" placeholder="Escribe la validez…"/>
         </div>
 
         <!-- PRECIOS -->
@@ -325,15 +325,15 @@ input:focus,select:focus,textarea:focus{
           <label for="precios">PRECIOS</label>
           <select id="precios">
             <option selected>En pesos colombianos.</option>
-            <option>En dÃ³lar estadounidense.</option>
+            <option>En dólar estadounidense.</option>
             <option value="__OTRO__">Otro</option>
           </select>
-          <input id="precios_otro" class="hidden" type="text" placeholder="Escribe la monedaâ€¦"/>
+          <input id="precios_otro" class="hidden" type="text" placeholder="Escribe la moneda…"/>
         </div>
       </div>
 
       <div style="margin-top:12px">
-        <label for="obsExtra">Observaciones adicionales (cada renglÃ³n se aÃ±ade como Ã­tem)</label>
+        <label for="obsExtra">Observaciones adicionales (cada renglón se añade como ítem)</label>
         <textarea id="obsExtra" placeholder=""></textarea>
       </div>
     </section>
@@ -354,20 +354,20 @@ input:focus,select:focus,textarea:focus{
 <script>
 /* ========= Comerciales ========= */
 const COMERCIALES={
-  PCR:{ nombre:"PABLO CESAR RODRIGUEZ", cargo:"Gerente", email:"pcr@ingetes.com", telefono:"310-570-2228", office:"BOGOTÃ" },
-  CPR:{ nombre:"CLAUDIA PATRICIA RODRIGUEZ", cargo:"Ingeniera Comercial", email:"crodriguez@ingetes.com", telefono:"310-342-3006", office:"BOGOTÃ" },
-  JSG:{ nombre:"JUAN SEBASTIAN GARZON", cargo:"Director Comercial", email:"jgarzon@ingetes.com", telefono:"311-898-2684", office:"BOGOTÃ" },
-  JSO:{  nombre:"JHOAN SEBASTIAN ORTIZ", cargo:"Ingeniero Comercial - Especialista en automatizaciÃ³n y pesaje", email:"sortiz@ingetes.com.co",  telefono:"312-451-9098", office:"BOGOTÃ" },
-  KAC:{  nombre:"KAREN ARIANA CARRILLO", cargo:"Ingeniera Comercial", email:"kcarrillo@ingetes.com.co",  telefono:"312-326-3066", office:"BOGOTÃ" },
-  LNM:{  nombre:"LIZETH MARTINEZ", cargo:"Ingeniera Comercial", email:"lmartinez@ingetes.com,co",  telefono:"311-810-5540 - 317-381-0421", office:"BOGOTÃ" },
-  HBR:{  nombre:"HERNAN ROLDAN", cargo:"Ingeniero Comercial", email:"hbroldan@ingetes.com.co",  telefono:"314-336-8795", office:"BOGOTÃ" }
+  PCR:{ nombre:"PABLO CESAR RODRIGUEZ", cargo:"Gerente", email:"pcr@ingetes.com", telefono:"310-570-2228", office:"BOGOTÁ" },
+  CPR:{ nombre:"CLAUDIA PATRICIA RODRIGUEZ", cargo:"Ingeniera Comercial", email:"crodriguez@ingetes.com", telefono:"310-342-3006", office:"BOGOTÁ" },
+  JSG:{ nombre:"JUAN SEBASTIAN GARZON", cargo:"Director Comercial", email:"jgarzon@ingetes.com", telefono:"311-898-2684", office:"BOGOTÁ" },
+  JSO:{  nombre:"JHOAN SEBASTIAN ORTIZ", cargo:"Ingeniero Comercial - Especialista en automatización y pesaje", email:"sortiz@ingetes.com.co",  telefono:"312-451-9098", office:"BOGOTÁ" },
+  KAC:{  nombre:"KAREN ARIANA CARRILLO", cargo:"Ingeniera Comercial", email:"kcarrillo@ingetes.com.co",  telefono:"312-326-3066", office:"BOGOTÁ" },
+  LNM:{  nombre:"LIZETH MARTINEZ", cargo:"Ingeniera Comercial", email:"lmartinez@ingetes.com,co",  telefono:"311-810-5540 - 317-381-0421", office:"BOGOTÁ" },
+  HBR:{  nombre:"HERNAN ROLDAN", cargo:"Ingeniero Comercial", email:"hbroldan@ingetes.com.co",  telefono:"314-336-8795", office:"BOGOTÁ" }
 };
 
 function getComercial(){
   const sel = document.getElementById('comercial');
   const selectedValue = sel?.value;
   
-  // Si no hay valor seleccionado o es vacÃ­o, retornar null
+  // Si no hay valor seleccionado o es vacío, retornar null
   if (!selectedValue) {
     return null;
   }
@@ -375,7 +375,7 @@ function getComercial(){
   return COMERCIALES[selectedValue] || COMERCIALES.JSG;
 }
 
-/* ========= Carga librerÃ­as (CDN) ========= */
+/* ========= Carga librerías (CDN) ========= */
 (function(){
   function loadScript(u){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('No se pudo cargar '+u));document.head.appendChild(s);});}
   const DOCX_URLS=["https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js","https://unpkg.com/docx@8.5.0/build/index.umd.js"];
@@ -414,7 +414,7 @@ async function downscaleToJpeg(arrayBuffer, maxW=1024, maxH=1448, quality=0.6){
   return await res.arrayBuffer();
 }
 
-// ===== Fondo / Marca de agua (Ãºnico) =====
+// ===== Fondo / Marca de agua (único) =====
 let DEFAULT_BG_BUF = null;
 let DEFAULT_BG_NAME = '';
 
@@ -427,7 +427,7 @@ function showBgPicker(show){
   if (row) row.style.display = show ? '' : 'none';
 }
 
-// Carga automÃ¡tica desde archivos en la misma carpeta (con compresiÃ³n)
+// Carga automática desde archivos en la misma carpeta (con compresión)
 async function loadDefaultBackground(){
   const candidates = [
     'MarcaDeAgua.png','MarcaDeAgua.jpg',
@@ -440,11 +440,11 @@ async function loadDefaultBackground(){
       if (!resp.ok) continue;
       const buf = await resp.arrayBuffer();
 
-      // â†“â†“â†“ Comprimir SIEMPRE y guardar SOLO la versiÃ³n comprimida
+      // ↓↓↓ Comprimir SIEMPRE y guardar SOLO la versión comprimida
       DEFAULT_BG_BUF  = await downscaleToJpeg(buf, 1275, 1650, 0.72); // ~A4 a 150 dpi aprox.
       DEFAULT_BG_NAME = name;
 
-      setBgStatus(`Marca de agua cargada automÃ¡ticamente: ${name} âœ“`);
+      setBgStatus(`Marca de agua cargada automáticamente: ${name} ✓`);
       showBgPicker(false);
       return;
     }catch(_){}
@@ -470,7 +470,7 @@ function wireBackgroundInput(){
       const raw = await f.arrayBuffer();
       DEFAULT_BG_BUF  = await downscaleToJpeg(raw, 1275, 1650, 0.72);
       DEFAULT_BG_NAME = f.name.replace(/\.(png|jpg|jpeg)$/i, '.jpg');
-      setBgStatus(`Marca de agua cargada: ${DEFAULT_BG_NAME} âœ“`);
+      setBgStatus(`Marca de agua cargada: ${DEFAULT_BG_NAME} ✓`);
       showBgPicker(false);
     }catch(e){
       console.error(e);
@@ -480,9 +480,9 @@ function wireBackgroundInput(){
   });
 }
 
-// Reset â€œhumanoâ€
+// Reset “humano”
 function resetForm(){
-  // limpia campos bÃ¡sicos
+  // limpia campos básicos
   ['fecha','empresa','dirigido','area','office','tel','email','obsExtra'].forEach(id=>{
     const el=document.getElementById(id);
     if(el) el.value='';
@@ -499,9 +499,9 @@ function resetForm(){
   showBgPicker(true);
 }
 
-// ===== Listeners Ãºnicos =====
+// ===== Listeners únicos =====
 window.addEventListener('load', () => {
-  // â€œOtroâ€
+  // “Otro”
   ['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(bindOtroToggle);
 
   // Fondo
@@ -520,7 +520,7 @@ window.addEventListener('load', () => {
         const xlsFile = xlsEl && xlsEl.files && xlsEl.files[0];
         if (!xlsFile) throw new Error('Debe cargar un archivo Excel (.xlsx)');
 
-        // fondo: automÃ¡tico o manual (obligatorio)
+        // fondo: automático o manual (obligatorio)
         const bgBuf = DEFAULT_BG_BUF;
         if (!bgBuf) throw new Error('Debe cargar una imagen de fondo');
 
@@ -568,7 +568,7 @@ function validateRequiredFields() {
   requiredFields.forEach(fieldId => {
     let value;
     
-    // ValidaciÃ³n especial para el campo comercial
+    // Validación especial para el campo comercial
     if (fieldId === 'comercial') {
       const selectElement = document.getElementById(fieldId);
       value = selectElement ? selectElement.value : '';
@@ -578,7 +578,7 @@ function validateRequiredFields() {
     
     if (!value) {
       missingFields.push(fieldId);
-      // Resaltar campo vacÃ­o
+      // Resaltar campo vacío
       const element = document.getElementById(fieldId);
       if (element) {
         element.style.borderColor = '#dc2626';
@@ -610,7 +610,7 @@ function validateRequiredFields() {
   return true;
 }
 
-/* ========= FunciÃ³n para reiniciar formulario ========= */
+/* ========= Función para reiniciar formulario ========= */
 function resetForm() {
   // Reiniciar archivos
   const bgInput  = document.getElementById('bg');
@@ -624,11 +624,11 @@ function resetForm() {
 
   // Selects
   const selCom = document.getElementById('comercial');
-  if (selCom) selCom.selectedIndex = 0; // -Seleccionar opciÃ³n-
+  if (selCom) selCom.selectedIndex = 0; // -Seleccionar opción-
   const selGar = document.getElementById('garantia');
   if (selGar) selGar.selectedIndex = 0;
   const selFP  = document.getElementById('formaPago');
-  if (selFP)  selFP.selectedIndex  = 5; // CrÃ©dito 30 dÃ­as
+  if (selFP)  selFP.selectedIndex  = 5; // Crédito 30 días
   const selSit = document.getElementById('sitioEntrega');
   if (selSit) selSit.selectedIndex = 0;
   const selVal = document.getElementById('validezOferta');
@@ -677,13 +677,13 @@ CONTACTS_DB = { byEmpresa: new Map(), all: [] };
 
   // === Estado de la imagen de fondo ===
   const statusEl = document.getElementById('bgStatus');
-  // Si tenemos imagen por defecto precargada, seguimos usÃ¡ndola y ocultamos el input;
+  // Si tenemos imagen por defecto precargada, seguimos usándola y ocultamos el input;
   // si NO, mostramos el input para que el usuario elija una.
   if (typeof DEFAULT_BG_BUF !== 'undefined' && DEFAULT_BG_BUF) {
-    // seguir usando la cargada automÃ¡ticamente
+    // seguir usando la cargada automáticamente
     if (bgInput) bgInput.style.display = 'none';
-    if (statusEl) statusEl.textContent = 'Marca de agua cargada automÃ¡ticamente âœ“';
-    // tambiÃ©n resetea cualquier carga manual previa
+    if (statusEl) statusEl.textContent = 'Marca de agua cargada automáticamente ✓';
+    // también resetea cualquier carga manual previa
     window._bgBuf  = DEFAULT_BG_BUF;
     window._bgName = null;
   } else {
@@ -695,7 +695,7 @@ CONTACTS_DB = { byEmpresa: new Map(), all: [] };
   }
 
   // Mensaje final
-  const successMessage = 'Formulario reiniciado. Puedes comenzar una nueva cotizaciÃ³n.';
+  const successMessage = 'Formulario reiniciado. Puedes comenzar una nueva cotización.';
   if (window.parent !== window.self) {
     window.parent.postMessage({ __ingetes_alert:true, message: successMessage }, '*');
   } else {
@@ -725,7 +725,7 @@ async function downloadWithFilePicker(doc, fileName) {
     // Verificar si el navegador soporta la API de File System Access
     if ('showSaveFilePicker' in window) {
       try {
-        // Mostrar el diÃ¡logo para guardar archivo
+        // Mostrar el diálogo para guardar archivo
         const handle = await window.showSaveFilePicker({
           suggestedName: fileName,
           types: [{
@@ -759,7 +759,7 @@ async function downloadWithFilePicker(doc, fileName) {
   }
 }
 
-// MÃ©todo de respaldo para navegadores que no soportan la API
+// Método de respaldo para navegadores que no soportan la API
 function downloadWithFallback(blob, fileName) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -771,7 +771,7 @@ function downloadWithFallback(blob, fileName) {
   URL.revokeObjectURL(url);
 }
 
-// Select con opciÃ³n "Otro"
+// Select con opción "Otro"
 function choiceVal(id, def=''){
   const sel=document.getElementById(id);
   if(!sel) return def;
@@ -815,7 +815,7 @@ async function parseContactsWorkbook(arrayBuffer){
   const XLSX = await ensureXLSX();
   const wb = XLSX.read(arrayBuffer, { type:'array', cellStyles:false });
   const ws = wb.Sheets[wb.SheetNames[0]];
-  if(!ws) throw new Error('No se encontrÃ³ hoja de contactos');
+  if(!ws) throw new Error('No se encontró hoja de contactos');
 
   const range = XLSX.utils.decode_range(ws['!ref']||'A1');
   const getCell = (r,c) => {
@@ -826,7 +826,7 @@ async function parseContactsWorkbook(arrayBuffer){
     return cell.v==null ? '' : String(cell.v);
   };
 
-  // 1) Encontrar fila de encabezados (soporta "Nombre de la cuenta", "Nombre", "Apellidos", "Correo electrÃ³nico", "Ciudad o PaÃ­s", etc.)
+  // 1) Encontrar fila de encabezados (soporta "Nombre de la cuenta", "Nombre", "Apellidos", "Correo electrónico", "Ciudad o País", etc.)
   let headerRow = -1, cols = {};
   for(let r=range.s.r; r<=range.e.r; r++){
     const names = [];
@@ -835,9 +835,9 @@ async function parseContactsWorkbook(arrayBuffer){
     const idxNombre  = names.findIndex(v => v === 'nombre');
     const idxApell   = names.findIndex(v => v === 'apellidos');
     const idxCargo   = names.findIndex(v => v === 'cargo');
-    const idxTel     = names.findIndex(v => v.startsWith('telefono'));            // "TelÃ©fono"
-    const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));  // "Correo electrÃ³nico"
-    const idxCiudad  = names.findIndex(v => v.startsWith('ciudad'));              // "Ciudad o PaÃ­s"
+    const idxTel     = names.findIndex(v => v.startsWith('telefono'));            // "Teléfono"
+    const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));  // "Correo electrónico"
+    const idxCiudad  = names.findIndex(v => v.startsWith('ciudad'));              // "Ciudad o País"
     if (idxEmpresa>=0 && idxNombre>=0 && idxApell>=0 && idxEmail>=0){
       headerRow = r;
       cols = {empresa:idxEmpresa, nombre:idxNombre, apellidos:idxApell, cargo:idxCargo, telefono:idxTel, email:idxEmail, ciudadPais:idxCiudad};
@@ -858,7 +858,7 @@ async function parseContactsWorkbook(arrayBuffer){
     const vEmail   = _normStr(cols.email!=null ? getCell(r, cols.email) : '');
     const vCiudad  = _normStr(cols.ciudadPais!=null ? getCell(r, cols.ciudadPais) : '');
 
-    // saltar subtotales/filas vacÃ­as
+    // saltar subtotales/filas vacías
     const line = [vEmpresa, vNombre, vApell, vEmail].join(' ').toLowerCase();
     if (line.includes('subtotal') || (!vNombre && !vApell && !vEmail)) continue;
 
@@ -903,14 +903,14 @@ function fillEmpresaOptions(){
   const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
   empresas.forEach(e=>{
     const opt = document.createElement('option');
-    opt.value = e.toUpperCase();   // valor en mayÃºsculas
+    opt.value = e.toUpperCase();   // valor en mayúsculas
     opt.textContent = e.toUpperCase();
     opt.dataset.empraw = e;        // original para buscar contactos
     selEmp.appendChild(opt);
   });
 
   const status = document.getElementById('xlsDatosStatus');
-  if (status) status.textContent = `Empresas: ${empresas.length} â€¢ Contactos: ${CONTACTS_DB.all.length}`;
+  if (status) status.textContent = `Empresas: ${empresas.length} • Contactos: ${CONTACTS_DB.all.length}`;
 }
 
 function fillDirigidoOptions(){
@@ -929,8 +929,8 @@ function fillDirigidoOptions(){
     const etiqueta = (isIng ? 'ING ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
 
     const opt = document.createElement('option');
-    opt.value = etiqueta.toUpperCase();       // esto leerÃ¡ buildDocCommon
-    opt.textContent = etiqueta.toUpperCase(); // visual + forzado mayÃºsculas
+    opt.value = etiqueta.toUpperCase();       // esto leerá buildDocCommon
+    opt.textContent = etiqueta.toUpperCase(); // visual + forzado mayúsculas
     opt.dataset.cid = String(c.id);           // para autollenar el resto
     selDir.appendChild(opt);
   });
@@ -956,7 +956,7 @@ function onEmpresaChange(){
 
   fillDirigidoOptions();
 
-  // quitar marca de error si existÃ­a
+  // quitar marca de error si existía
   const emp = document.getElementById('empresa');
   if(emp){ emp.style.borderColor=''; emp.style.boxShadow=''; }
 }
@@ -978,7 +978,7 @@ function onDirigidoChange(){
     }
   }
 
-  // quitar marca de error si existÃ­a
+  // quitar marca de error si existía
   if(selDir){ selDir.style.borderColor=''; selDir.style.boxShadow=''; }
 }
 
@@ -1006,7 +1006,7 @@ function wireContactsInput(){
   if (selDir) selDir.addEventListener('change', onDirigidoChange);
 }
 
-// ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetecciÃ³n o carga exitosa =========
+// ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
 function findLabelFor(id){
   return document.querySelector(`label[for="${id}"]`);
 }
@@ -1016,9 +1016,9 @@ function hideContactsUploadUI(){
   if (row) row.remove(); // lo borra completo del DOM
 }
 
-// ========= NUEVO: AUTODETECCIÃ“N DE EXCEL DE CONTACTOS EN LA MISMA CARPETA =========
+// ========= NUEVO: AUTODETECCIÓN DE EXCEL DE CONTACTOS EN LA MISMA CARPETA =========
 
-// Utilidad: fecha en zona BogotÃ¡ (sin depender del SO del usuario)
+// Utilidad: fecha en zona Bogotá (sin depender del SO del usuario)
 function nowInBogota(){
   // America/Bogota sin DST: UTC-5
   const nowUTC = new Date();
@@ -1036,10 +1036,10 @@ function ymd(date){
 function buildContactFilenameCandidates(){
   const baseURL = new URL('.', location.href); // misma carpeta del HTML
 
-  // â¬…ï¸ PRIORIDAD 1: tu archivo EXACTO (el que me dijiste)
-  const EXACT = 'informedeContactos.xlsx';
+  // ⬅️ PRIORIDAD 1: tu archivo EXACTO (el que me dijiste)
+  const EXACT = 'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx';
 
-  // Utilidades de fecha (zona BogotÃ¡)
+  // Utilidades de fecha (zona Bogotá)
   function nowInBogota(){
     const nowUTC = new Date();
     return new Date(nowUTC.getTime() - (5*60*60*1000)); // -05:00
@@ -1052,17 +1052,17 @@ function buildContactFilenameCandidates(){
   }
 
   const today = nowInBogota();
-  const days = [0,1,2,3]; // hoy y Ãºltimos 3 dÃ­as
+  const days = [0,1,2,3]; // hoy y últimos 3 días
 
-  // Para HOY probamos minutos mÃ¡s comunes + 58 (por tu patrÃ³n)
+  // Para HOY probamos minutos más comunes + 58 (por tu patrón)
   const minutesToday = [58, 0, 30, 15, 45];
-  // Para dÃ­as previos mantenemos una bÃºsqueda liviana
+  // Para días previos mantenemos una búsqueda liviana
   const minutesPast = [0, 30];
   const hours = Array.from({length: 24}, (_,i)=> i); // 00..23
 
   const list = [];
 
-  // 0) EXACTO primero (si estÃ¡ en la carpeta lo encuentra de una)
+  // 0) EXACTO primero (si está en la carpeta lo encuentra de una)
   list.push(new URL(EXACT, baseURL).href);
 
   // 1) Pistas opcionales (si subes uno de estos al folder, acierta 100%)
@@ -1094,7 +1094,7 @@ function buildContactFilenameCandidates(){
       mins.forEach(m=>{
         const hh = String(h).padStart(2,'0');
         const mm = String(m).padStart(2,'0');
-        // segundos comunes + 01 por tu patrÃ³n
+        // segundos comunes + 01 por tu patrón
         ['00','30','01'].forEach(ss=>{
           list.push(new URL(`informe de Contactos para PORTAL-${stamp}-${hh}-${mm}-${ss}.xlsx`, baseURL).href);
         });
@@ -1106,7 +1106,7 @@ function buildContactFilenameCandidates(){
 }
 
 
-// Hace una peticiÃ³n ligera para ver si el archivo existe y luego lo lee como ArrayBuffer
+// Hace una petición ligera para ver si el archivo existe y luego lo lee como ArrayBuffer
 async function fetchExcelArrayBuffer(url){
   // Algunos hosts bloquean HEAD; probamos GET parcial con Range y si falla, GET completa
   try{
@@ -1122,18 +1122,18 @@ async function fetchExcelArrayBuffer(url){
     const partial = await fetch(url, { headers: { 'Range': 'bytes=0-1024' } });
     if (partial.ok) {
       const res = await fetch(url);
-      if (!res.ok) throw new Error('GET completa fallÃ³');
+      if (!res.ok) throw new Error('GET completa falló');
       return await res.arrayBuffer();
     }
   }catch(_e){ /* sigue */ }
 
-  // Ãšltimo intento: GET directa
+  // Último intento: GET directa
   const res = await fetch(url);
   if (!res.ok) throw new Error('GET directa no OK');
   return await res.arrayBuffer();
 }
 
-// Intenta usar contacts-latest.txt y contacts-index.json como â€œÃ­ndicesâ€
+// Intenta usar contacts-latest.txt y contacts-index.json como “índices”
 async function tryIndexHints(url){
   // contacts-latest.txt
   if (url.endsWith('contacts-latest.txt')) {
@@ -1151,11 +1151,11 @@ async function tryIndexHints(url){
     if (!res.ok) return null;
     const arr = await res.json();
     if (!Array.isArray(arr)) return null;
-    // Elegir primero el que mÃ¡s se parezca a tu patrÃ³n y tenga â€œmayorâ€ fecha dentro del nombre
+    // Elegir primero el que más se parezca a tu patrón y tenga “mayor” fecha dentro del nombre
     const scored = arr
       .filter(s => typeof s === 'string' && s.toLowerCase().endsWith('.xlsx'))
       .map(s=>{
-        // score simple por contener â€œinforme de Contactos para PORTALâ€
+        // score simple por contener “informe de Contactos para PORTAL”
         const base = s.toLowerCase().includes('informe de contactos para portal') ? 100 : 0;
         // extrae yyyy-mm-dd si existe
         const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
@@ -1175,11 +1175,11 @@ async function tryIndexHints(url){
   return null;
 }
 
-// Orquesta la autodetecciÃ³n; si encuentra, parsea y llena selects
+// Orquesta la autodetección; si encuentra, parsea y llena selects
 async function autoDetectContactsInSameFolder(){
   if (CONTACTS_DB.all.length) return; // ya cargado (p.ej. por input)
   const status = document.getElementById('xlsDatosStatus');
-  if (status) status.textContent = 'Buscando Excel de contactos en la carpetaâ€¦';
+  if (status) status.textContent = 'Buscando Excel de contactos en la carpeta…';
 
   const candidates = buildContactFilenameCandidates();
 
@@ -1198,14 +1198,10 @@ async function autoDetectContactsInSameFolder(){
         CONTACTS_DB = await parseContactsWorkbook(buf);
         fillEmpresaOptions();
         hideContactsUploadUI(); // NUEVO: oculta el bloque de carga de contactos
-        
 
-        // Mostrar al usuario cuÃ¡l se usÃ³
-        if (status) status.textContent = `Detectado automÃ¡ticamente: ${decodeURIComponent(url.split('/').pop())} â€¢ Empresas: ${CONTACTS_DB.byEmpresa.size} â€¢ Contactos: ${CONTACTS_DB.all.length}`;
-
-        // Si hay una sola empresa, dispara el cambio (y si hay 1 contacto, tambiÃ©n)
+        // Si hay una sola empresa, dispara el cambio (y si hay 1 contacto, también)
         const selEmp = document.getElementById('empresa');
-        if (selEmp && selEmp.options.length === 2) { // 1 opciÃ³n + placeholder
+        if (selEmp && selEmp.options.length === 2) { // 1 opción + placeholder
           selEmp.selectedIndex = 1;
           onEmpresaChange();
         }
@@ -1216,13 +1212,13 @@ async function autoDetectContactsInSameFolder(){
     }
   }
 
-  if (status) status.textContent = 'No se encontrÃ³ Excel de contactos automÃ¡ticamente. SelecciÃ³nalo manualmente.';
+  if (status) status.textContent = 'No se encontró Excel de contactos automáticamente. Selecciónalo manualmente.';
   return false;
 }
 
 // activar al cargar
 window.addEventListener('load', wireContactsInput);
-// NUEVO: intentar autodetecciÃ³n al cargar
+// NUEVO: intentar autodetección al cargar
 window.addEventListener('load', ()=>{ autoDetectContactsInSameFolder(); });
 
 /* ========= Excel helpers ========= */
@@ -1236,7 +1232,7 @@ function iterateMerges(wsE,cb){
   if(wsE && wsE._merges && typeof wsE._merges==='object'){ Object.keys(wsE._merges).forEach(k=>cb(k)); }
 }
 
-/* ========= Excel -> Tabla con estilos (detecciÃ³n AUTO de inicio) ========= */
+/* ========= Excel -> Tabla con estilos (detección AUTO de inicio) ========= */
 async function buildTableFromWorkbook(docx, arrayBuffer){
   const XLSX=await ensureXLSX();
   const ExcelJS=await ensureExcelJS();
@@ -1273,7 +1269,7 @@ async function buildTableFromWorkbook(docx, arrayBuffer){
   let eR=usedR.e.r, eC=usedR.e.c;
   while(eR>=sR){ let any=false; for(let c=sC;c<=eC;c++){ if(hasVal(eR,c)||hasStyle(eR,c)){ any=true; break; } } if(any)break; eR--; }
   while(eC>=sC){ let any=false; for(let r=sR;r<=eR;r++){ if(hasVal(r,eC)||hasStyle(r,eC)){ any=true; break; } } if(any)break; eC--; }
-  if(eR<sR || eC<sC) throw new Error('No se detectÃ³ una tabla con contenido/estilo en "VENTA".');
+  if(eR<sR || eC<sC) throw new Error('No se detectó una tabla con contenido/estilo en "VENTA".');
 
   // ---------- merges ----------
   function decodeCell2(a){const m=String(a).match(/^([A-Z]+)(\d+)$/i);if(!m)return null;const L=m[1].toUpperCase();let r=parseInt(m[2],10),c=0;for(let i=0;i<L.length;i++)c=c*26+(L.charCodeAt(i)-64);return{r:r-1,c:c-1};}
@@ -1291,12 +1287,12 @@ async function buildTableFromWorkbook(docx, arrayBuffer){
   for(let c=sC;c<=eC;c++){ const col=wsE.getColumn(c+1); const px=(col && col.width)?Math.round(col.width*7):80; colPx.push(px); totalPx+=px; }
   totalPx=totalPx||1; const colTwip=colPx.map(px=>Math.max(200,Math.floor(px/totalPx*contentTwip)));
 
-// Convierte "lÃ­neas\ncon\nsaltos" en runs con saltos duros de Word
+// Convierte "líneas\ncon\nsaltos" en runs con saltos duros de Word
 function runsWithBreaks(text, st) {
   const parts = String(text || '').split(/\r?\n/);
   const runs = [];
   parts.forEach((p, i) => {
-    if (i > 0) runs.push(new docx.TextRun({ break: 1 }));  // <-- salto de lÃ­nea
+    if (i > 0) runs.push(new docx.TextRun({ break: 1 }));  // <-- salto de línea
     if (p !== '') {
       runs.push(new docx.TextRun({
         text: p,
@@ -1307,7 +1303,7 @@ function runsWithBreaks(text, st) {
       }));
     }
   });
-  // Asegura al menos un run vacÃ­o para que la celda no quede sin contenido
+  // Asegura al menos un run vacío para que la celda no quede sin contenido
   return runs.length ? runs : [new docx.TextRun({ text: '' })];
 }
 
@@ -1361,7 +1357,7 @@ function runsWithBreaks(text, st) {
     if (p !== '') {
       runs.push(new docx.TextRun({
         text: p,
-        font: "Calibri",   // ðŸ‘ˆ tu fuente aquÃ­
+        font: "Calibri",   // 👈 tu fuente aquí
         size: 21,          // 10pt
         bold: !!st.bold,
         italics: !!st.italic,
@@ -1395,11 +1391,11 @@ function runsWithBreaks(text, st) {
   return new docx.Table({width:{size:100,type:docx.WidthType.PERCENTAGE},rows});
 }
 
-/* ========= ConstrucciÃ³n del documento ========= */
+/* ========= Construcción del documento ========= */
 function buildDocCommon(docx, fileName, bgBuf, excelTable){
   const widthIn=8.5,heightIn=11;
 
-  // Fondo (alineaciÃ³n segura)
+  // Fondo (alineación segura)
   const bgImage=new docx.ImageRun({
     data:bgBuf,
     transformation:{width:INCH_TO_PX(widthIn),height:INCH_TO_PX(heightIn)},
@@ -1413,7 +1409,7 @@ function buildDocCommon(docx, fileName, bgBuf, excelTable){
   // Encabezado (MSS 12 / TNR 12)
   const namePara=new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:fileName,font:'Microsoft Sans Serif',size:24,color:'000000'}) ],alignment:docx.AlignmentType.RIGHT});
   const pagePara=new docx.Paragraph({spacing:SPACING_SINGLE,children:[
-    new docx.TextRun({text:'PÃ¡gina ',bold:true,font:'Times New Roman',size:24,color:'000000'}),
+    new docx.TextRun({text:'Página ',bold:true,font:'Times New Roman',size:24,color:'000000'}),
     new docx.SimpleField('PAGE'),
     new docx.TextRun({text:' de ',bold:true,font:'Times New Roman',size:24,color:'000000'}),
     new docx.SimpleField('NUMPAGES')],alignment:docx.AlignmentType.RIGHT});
@@ -1428,7 +1424,7 @@ const fechaStr = (() => {
   // 1) Formato nativo del input: YYYY-MM-DD
   let m = el.value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
   if (m) {
-    const d = new Date(+m[1], +m[2]-1, +m[3]); // aÃ±o, mes(0-based), dÃ­a -> local
+    const d = new Date(+m[1], +m[2]-1, +m[3]); // año, mes(0-based), día -> local
     return new Intl.DateTimeFormat('es-CO', {
       day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Bogota'
     }).format(d);
@@ -1455,7 +1451,7 @@ const fechaStr = (() => {
   const ubicacionStr = val('ubicacion','');
   const asuntoStr    = val('asunto','');
 
-  // Tabla superior: izquierda sin tres bordes; derecha alineaciÃ³n izquierda y centrado vertical
+  // Tabla superior: izquierda sin tres bordes; derecha alineación izquierda y centrado vertical
   const tableIntro=new docx.Table({
     width:{size:100,type:docx.WidthType.PERCENTAGE},
     rows:[ new docx.TableRow({children:[
@@ -1467,7 +1463,7 @@ const fechaStr = (() => {
           right:{style:docx.BorderStyle.SINGLE,size:4,color:'000000'}
         },
         children:[
-          para([ run('SeÃ±ores:', FONTS.MSS12) ]),
+          para([ run('Señores:', FONTS.MSS12) ]),
           para([ run(empresaStr||'', FONTS.MSS12, {bold:true}) ]),
           para([ run('ATTE. '+(dirigidoStr||''), FONTS.MSS12) ]),
           para([ run(areaStr||'', FONTS.MSS12, {bold:true}) ]),
@@ -1477,15 +1473,15 @@ const fechaStr = (() => {
         verticalAlign: docx.VerticalAlign.CENTER,
         children:[
           new docx.Paragraph({alignment:docx.AlignmentType.LEFT,spacing:SPACING_SINGLE,children:[
-            run('â˜Žï¸ Office: ', FONTS.MSS9, {bold:true}),
+            run('☎️ Office: ', FONTS.MSS9, {bold:true}),
             run(officeStr, FONTS.MSS9, {color:'000000'})
           ]}),
           new docx.Paragraph({alignment:docx.AlignmentType.LEFT,spacing:SPACING_SINGLE,children:[
-            run('â˜Žï¸ Tel.: ', FONTS.MSS9, {bold:true}),
+            run('☎️ Tel.: ', FONTS.MSS9, {bold:true}),
             run(telStr, FONTS.MSS9, {color:'000000'})
           ]}),
           new docx.Paragraph({alignment:docx.AlignmentType.LEFT,spacing:SPACING_SINGLE,children:[
-            run('â˜Žï¸ E-Mail: ', FONTS.MSS9, {bold:true}),
+            run('☎️ E-Mail: ', FONTS.MSS9, {bold:true}),
             run(emailStr, FONTS.MSS9, {color:'000000'})
           ]})
         ]
@@ -1494,16 +1490,16 @@ const fechaStr = (() => {
   });
 
   const cuerpo=[
-    para([ run('BogotÃ¡, '+fechaStr, FONTS.MSS12) ]),
+    para([ run('Bogotá, '+fechaStr, FONTS.MSS12) ]),
     para([ run('', FONTS.MSS12) ]),
     tableIntro,
     para([ run(ubicacionStr, FONTS.MSS12) ]),
     para([ run('', FONTS.AR10) ]),
     para([ run('ASUNTO: '+ asuntoStr, FONTS.AR10, {bold:true}) ]),
     para([ run('', FONTS.AR10) ]),
-    para([ run('Apreciados seÃ±ores:', FONTS.AR10) ]),
+    para([ run('Apreciados señores:', FONTS.AR10) ]),
     para([ run('', FONTS.AR10) ]),
-    para([ run('Por medio de la presente estamos dando respuesta a su amable solicitud de cotizaciÃ³n de la siguiente manera:', FONTS.AR10) ])
+    para([ run('Por medio de la presente estamos dando respuesta a su amable solicitud de cotización de la siguiente manera:', FONTS.AR10) ])
   ];
 
   if(excelTable){ cuerpo.push(para([ run('', FONTS.AR10) ])); cuerpo.push(excelTable); }
@@ -1511,7 +1507,7 @@ const fechaStr = (() => {
   // OBSERVACIONES
   cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'',font:'Arial',size:20}) ]}));
   cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'OBSERVACIONES:',font:'Arial',size:20,bold:true}) ]}));
-  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'-  Una vez emitida la orden de compra NO se admiten devoluciones. Si se insiste en la devoluciÃ³n, se cargarÃ¡ una penalidad del 25% del valor de los equipos devueltos.',font:'Arial',size:20}) ]}));
+  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'-  Una vez emitida la orden de compra NO se admiten devoluciones. Si se insiste en la devolución, se cargará una penalidad del 25% del valor de los equipos devueltos.',font:'Arial',size:20}) ]}));
   (document.getElementById('obsExtra')?.value||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean)
     .forEach(line=>cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'-  '+line,font:'Arial',size:20}) ]})));
   cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'',font:'Arial',size:20}) ]}));
@@ -1521,10 +1517,10 @@ const fechaStr = (() => {
 cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'CONDICIONES COMERCIALES:', font:'Arial', size:20,bold:true}) ]}));
   const contentTwip=(8.5-2)*1440, leftW=Math.floor(contentTwip*0.35), rightW=contentTwip-leftW, rows=[];
   const pairs=[
-    ['GARANTIA:',             choiceVal('garantia','12 meses por defecto de fÃ¡brica.')],
-    ['FORMA DE PAGO:',        choiceVal('formaPago','CrÃ©dito 30 dÃ­as.')],
+    ['GARANTIA:',             choiceVal('garantia','12 meses por defecto de fábrica.')],
+    ['FORMA DE PAGO:',        choiceVal('formaPago','Crédito 30 días.')],
     ['SITIO ENTREGA:',        choiceVal('sitioEntrega','En sus instalaciones.')],
-    ['VALIDEZ DE LA OFERTA:', choiceVal('validezOferta','30 dÃ­as.')],
+    ['VALIDEZ DE LA OFERTA:', choiceVal('validezOferta','30 días.')],
     ['PRECIOS:',              choiceVal('precios','En pesos colombianos.')]
   ];
   for(const [lab,txt] of pairs){
@@ -1541,9 +1537,9 @@ cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextR
 
   // Firma
   const c=getComercial();
-  // Verificar si se seleccionÃ³ un comercial vÃ¡lido
+  // Verificar si se seleccionó un comercial válido
   if (!c) {
-    throw new Error('No se ha seleccionado un comercial vÃ¡lido');
+    throw new Error('No se ha seleccionado un comercial válido');
   }
   cuerpo.push(para([ run('', FONTS.AR10) ]));
   cuerpo.push(para([ run('Cordialmente,', FONTS.AR10) ]));
@@ -1563,7 +1559,7 @@ cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextR
   });
 }
 
-// Agregar al final del script, despuÃ©s de los event listeners existentes
+// Agregar al final del script, después de los event listeners existentes
 const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email', 'ubicacion', 'asunto'];
 requiredFields.forEach(fieldId => {
   const element = document.getElementById(fieldId);
