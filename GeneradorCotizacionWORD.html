@@ -497,54 +497,6 @@ function wireBackgroundInput(){
   });
 }
 
-// Reset “humano”
-function resetForm(){
-  // limpia campos básicos
-  ['fecha','empresa','dirigido','area','office','tel','email','obsExtra'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.value='';
-  });
-  const sel = document.getElementById('comercial');
-  if (sel) sel.selectedIndex = 0;
-  // ... ya tienes limpieza de idsTxt ...
-
-// NUEVO: limpiar buscadores y selects de los combos
-const empSearch = document.getElementById('empresaSearch');
-const dirSearch = document.getElementById('dirigidoSearch');
-if (empSearch) empSearch.value = '';
-if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = true; }
-
-const selEmp = document.getElementById('empresa');
-const selDir = document.getElementById('dirigido');
-
-if (selEmp && selEmp.tagName === 'SELECT') {
-  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
-  // si SIGUES teniendo CONTACTS_DB cargado, repuebla:
-  if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
-    const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
-    empresas.forEach(e=>{
-      const opt = document.createElement('option');
-      opt.value = e.toUpperCase();
-      opt.textContent = e.toUpperCase();
-      opt.dataset.empraw = e;
-      selEmp.appendChild(opt);
-    });
-  }
-}
-if (selDir && selDir.tagName === 'SELECT') {
-  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
-  selDir.disabled = true;
-}
-
-  // limpia fondo
-  const bg = document.getElementById('bg');
-  if (bg) bg.value = '';
-  DEFAULT_BG_BUF = null;
-  DEFAULT_BG_NAME = '';
-  setBgStatus('');
-  showBgPicker(true);
-}
-
 // ===== Listeners únicos =====
 window.addEventListener('load', () => {
   // “Otro”
@@ -969,7 +921,7 @@ function fillDirigidoOptions(){
   lista.forEach(c=>{
     const cargoNorm = _normKey(c.cargo);
     const isIng = cargoNorm.includes('ingeniero') || cargoNorm.includes('ingeniera');
-    const etiqueta = (isIng ? 'ING ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
+    const etiqueta = (isIng ? 'ING. ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
 
     const opt = document.createElement('option');
     opt.value = etiqueta.toUpperCase();
@@ -1739,6 +1691,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
