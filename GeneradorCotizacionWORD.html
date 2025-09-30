@@ -688,7 +688,40 @@ function resetForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
-  
+// --- LIMPIAR buscadores manuales ---
+const empSearch = document.getElementById('empresaSearch');
+const dirSearch = document.getElementById('dirigidoSearch');
+if (empSearch) empSearch.value = '';
+if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = true; }
+
+// --- LIMPIAR selects y borrar opción "custom" si existe ---
+const selEmp = document.getElementById('empresa');
+const selDir = document.getElementById('dirigido');
+
+if (selEmp && selEmp.tagName === 'SELECT') {
+  // elimina cualquier opción custom previa
+  Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+
+  // Si hay base cargada, repoblar empresas
+  if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
+    const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+    empresas.forEach(e=>{
+      const opt = document.createElement('option');
+      opt.value = e.toUpperCase();
+      opt.textContent = e.toUpperCase();
+      opt.dataset.empraw = e;
+      selEmp.appendChild(opt);
+    });
+  }
+}
+
+if (selDir && selDir.tagName === 'SELECT') {
+  // elimina cualquier opción custom previa
+  Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
+  selDir.disabled = true;
+}
 // NUEVO: limpiar archivo de contactos y selects
 const xlsDatos = document.getElementById('xlsDatos');
 if (xlsDatos) xlsDatos.value = '';
@@ -996,57 +1029,37 @@ function normalizeStr(s){
   return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
 }
 
-/**
- * Conecta un input de búsqueda a un select:
- * - Filtra opciones mientras se escribe.
- * - Si se confirma texto que NO existe, crea/usa una opción "custom" con ese valor.
- * - Llama onCommit() cuando se elige algo (o texto libre).
- */
-function attachSearchableCombo(selectId, inputId, { onCommit } = {}){
+function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'startsWith' } = {}){
   const sel = document.getElementById(selectId);
   const inp = document.getElementById(inputId);
   if (!sel || !inp) return;
 
-  // Mantén una opción "custom" para texto libre
   let customOpt = sel.querySelector('option[data-custom="1"]') || null;
 
+  function normalizeStr(s){
+    return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+  }
   function resetFilter(){
-    // mostrar todas las opciones
     Array.from(sel.options).forEach(opt => { opt.hidden = false; });
   }
-
-function filterOptions(q){
-  const Q = normalizeStr(q);
-  Array.from(sel.options).forEach((opt, idx)=>{
-    const txt = normalizeStr(opt.textContent||opt.value||'');
-    if (idx===0 && opt.disabled) { // placeholder siempre visible
-      opt.hidden = false;
-      return;
-    }
-    // Solo mostrar si comienza con lo escrito
-    opt.hidden = Q ? !txt.startsWith(Q) : false;
-  });
-}
-
-
-  function selectFirstVisibleOrNone(){
-    const first = Array.from(sel.options).find((o,idx)=> idx>0 && !o.hidden);
-    if (first){
-      sel.value = first.value;
-    }
+  function filterOptions(q){
+    const Q = normalizeStr(q);
+    Array.from(sel.options).forEach((opt, idx)=>{
+      const txt = normalizeStr(opt.textContent||opt.value||'');
+      if (idx===0 && opt.disabled) { opt.hidden = false; return; }
+      if (!Q) { opt.hidden = false; return; }
+      opt.hidden = (matchMode === 'startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
+    });
   }
-
   function commitFreeTextIfNeeded(){
     const valTyped = inp.value.toUpperCase().trim();
     if (!valTyped) return;
 
-    // ¿coincide exactamente con alguna opción visible?
     const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === valTyped);
     if (exact){
       sel.value = exact.value;
       return;
     }
-    // Crear/actualizar opción custom
     if (!customOpt){
       customOpt = document.createElement('option');
       customOpt.dataset.custom = '1';
@@ -1058,7 +1071,7 @@ function filterOptions(q){
     sel.value = customOpt.value;
   }
 
-  // Sincroniza input cuando cambia el select
+  // Sync input cuando cambia el select
   sel.addEventListener('change', ()=>{
     const opt = sel.selectedOptions[0];
     if (opt){
@@ -1067,19 +1080,30 @@ function filterOptions(q){
     }
   });
 
-  // Filtra mientras escribes
+  // Filtrar mientras se escribe
   inp.addEventListener('input', ()=>{
-    // Mantener mayúsculas y cursor
     const pos = inp.selectionStart;
     inp.value = inp.value.toUpperCase();
     if (typeof pos === 'number') inp.setSelectionRange(pos, pos);
 
     resetFilter();
     filterOptions(inp.value);
-    // No seleccionamos nada automáticamente; el usuario puede abrir el select y elegir
+
+    // --- Limpia autollenado si lo escrito NO coincide exactamente con ninguna opción ---
+    if (selectId === 'dirigido') {
+      const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === inp.value.trim());
+      if (!exact) {
+        const email  = document.getElementById('email');
+        const office = document.getElementById('office');
+        const ubic   = document.getElementById('ubicacion');
+        if (email)  email.value  = '';
+        if (office) office.value = '';
+        if (ubic)   ubic.value   = '';
+      }
+    }
   });
 
-  // Confirmación con Enter o al salir
+  // Confirmación con Enter / blur
   inp.addEventListener('keydown', (e)=>{
     if (e.key === 'Enter'){
       e.preventDefault();
@@ -1088,7 +1112,6 @@ function filterOptions(q){
     }
   });
   inp.addEventListener('blur', ()=>{
-    // si el usuario deja algo escrito, confirmarlo
     commitFreeTextIfNeeded();
     if (typeof onCommit === 'function') onCommit();
   });
@@ -1126,11 +1149,11 @@ function onDirigidoChange(){
   const office = document.getElementById('office');
   const ubic   = document.getElementById('ubicacion');
   const opt    = selDir && selDir.selectedOptions[0];
-  const dirSearch = document.getElementById('dirigidoSearch');
-if (dirSearch) {
-  dirSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : dirSearch.value.toUpperCase();
-}
 
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if (dirSearch) {
+    dirSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : dirSearch.value.toUpperCase();
+  }
 
   if (opt && opt.dataset.cid != null) {
     const idx = Number(opt.dataset.cid);
@@ -1140,6 +1163,11 @@ if (dirSearch) {
       if (office) office.value = c.telefono || '';
       if (ubic)   ubic.value   = c.ciudadPais || '';
     }
+  } else {
+    // Opción "custom" o no hay coincidencia real -> limpiar autollenado
+    if (email)  email.value  = '';
+    if (office) office.value = '';
+    if (ubic)   ubic.value   = '';
   }
 
   // quitar marca de error si existía
@@ -1171,8 +1199,8 @@ if (empSearch) empSearch.value = '';
   if (selEmp) selEmp.addEventListener('change', onEmpresaChange);
   if (selDir) selDir.addEventListener('change', onDirigidoChange);
   // Combos editables (empresa y dirigido)
-attachSearchableCombo('empresa','empresaSearch',{ onCommit: onEmpresaChange });
-attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange });
+attachSearchableCombo('empresa','empresaSearch',  { onCommit: onEmpresaChange,  matchMode: 'startsWith' });
+attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange, matchMode: 'includes'   });
 }
 
 // ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
@@ -1747,6 +1775,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
