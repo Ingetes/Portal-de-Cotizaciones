@@ -1001,8 +1001,188 @@ function wireContactsInput(){
   if (selDir) selDir.addEventListener('change', onDirigidoChange);
 }
 
+// ========= NUEVO: AUTODETECCIÓN DE EXCEL DE CONTACTOS EN LA MISMA CARPETA =========
+
+// Utilidad: fecha en zona Bogotá (sin depender del SO del usuario)
+function nowInBogota(){
+  // America/Bogota sin DST: UTC-5
+  const nowUTC = new Date();
+  const bogota = new Date(nowUTC.getTime() - (5*60*60*1000));
+  return bogota;
+}
+function ymd(date){
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth()+1).padStart(2,'0');
+  const dd = String(date.getUTCDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// Construye candidatos de nombre de archivo muy comunes en tu flujo
+function buildContactFilenameCandidates(){
+  const baseURL = new URL('.', location.href); // misma carpeta del HTML
+  const today = nowInBogota();
+  const days = [0,1,2,3]; // hoy y últimos 3 días
+  const minutesSlots = [0,30]; // para reducir combinaciones
+  const hours = Array.from({length: 15}, (_,i)=> i+6); // 06..20
+
+  const list = [];
+
+  // 0) Pistas externas opcionales (si existen en la carpeta)
+  //    - contacts-latest.txt : contiene exactamente el nombre del .xlsx (una línea)
+  //    - contacts-index.json : array de strings de archivos en la carpeta
+  list.push(new URL('contacts-latest.txt', baseURL).href);
+  list.push(new URL('contacts-index.json', baseURL).href);
+
+  // 1) Nombres fijos probables
+  [
+    'informe de Contactos para PORTAL.xlsx',
+    'informe de Contactos para PORTAL-latest.xlsx',
+    'Contactos_PORTAL.xlsx',
+    'Contactos.xlsx'
+  ].forEach(n => list.push(new URL(n, baseURL).href));
+
+  // 2) Con fecha YYYY-MM-DD
+  days.forEach(d=>{
+    const dt = new Date(today.getTime() - d*24*60*60*1000);
+    const stamp = ymd(dt);
+    list.push(new URL(`informe de Contactos para PORTAL-${stamp}.xlsx`, baseURL).href);
+  });
+
+  // 3) Con fecha y hora aproximada (reduce combinaciones)
+  days.forEach(d=>{
+    const dt = new Date(today.getTime() - d*24*60*60*1000);
+    const stamp = ymd(dt);
+    hours.forEach(h=>{
+      minutesSlots.forEach(m=>{
+        const hh = String(h).padStart(2,'0');
+        const mm = String(m).padStart(2,'0');
+        // segundos 00 y 30 para aumentar chances
+        ['00','30'].forEach(ss=>{
+          list.push(new URL(`informe de Contactos para PORTAL-${stamp}-${hh}-${mm}-${ss}.xlsx`, baseURL).href);
+        });
+      });
+    });
+  });
+
+  return list;
+}
+
+// Hace una petición ligera para ver si el archivo existe y luego lo lee como ArrayBuffer
+async function fetchExcelArrayBuffer(url){
+  // Algunos hosts bloquean HEAD; probamos GET parcial con Range y si falla, GET completa
+  try{
+    const head = await fetch(url, { method:'HEAD' });
+    if (head.ok) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('GET no OK tras HEAD');
+      return await res.arrayBuffer();
+    }
+  }catch(_e){ /* sigue */ }
+
+  try{
+    const partial = await fetch(url, { headers: { 'Range': 'bytes=0-1024' } });
+    if (partial.ok) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('GET completa falló');
+      return await res.arrayBuffer();
+    }
+  }catch(_e){ /* sigue */ }
+
+  // Último intento: GET directa
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('GET directa no OK');
+  return await res.arrayBuffer();
+}
+
+// Intenta usar contacts-latest.txt y contacts-index.json como “índices”
+async function tryIndexHints(url){
+  // contacts-latest.txt
+  if (url.endsWith('contacts-latest.txt')) {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const name = (await res.text()).trim();
+    if (!name) return null;
+    const fileURL = new URL(name, new URL('.', location.href)).href;
+    return await fetchExcelArrayBuffer(fileURL);
+  }
+
+  // contacts-index.json (array de strings)
+  if (url.endsWith('contacts-index.json')) {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arr = await res.json();
+    if (!Array.isArray(arr)) return null;
+    // Elegir primero el que más se parezca a tu patrón y tenga “mayor” fecha dentro del nombre
+    const scored = arr
+      .filter(s => typeof s === 'string' && s.toLowerCase().endsWith('.xlsx'))
+      .map(s=>{
+        // score simple por contener “informe de Contactos para PORTAL”
+        const base = s.toLowerCase().includes('informe de contactos para portal') ? 100 : 0;
+        // extrae yyyy-mm-dd si existe
+        const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+        let when = 0;
+        if (m) {
+          when = Date.UTC(+m[1], +m[2]-1, +m[3]);
+        }
+        return { s, score: base + when };
+      })
+      .sort((a,b)=>b.score - a.score);
+    if (!scored.length) return null;
+    const best = scored[0].s;
+    const fileURL = new URL(best, new URL('.', location.href)).href;
+    return await fetchExcelArrayBuffer(fileURL);
+  }
+
+  return null;
+}
+
+// Orquesta la autodetección; si encuentra, parsea y llena selects
+async function autoDetectContactsInSameFolder(){
+  if (CONTACTS_DB.all.length) return; // ya cargado (p.ej. por input)
+  const status = document.getElementById('xlsDatosStatus');
+  if (status) status.textContent = 'Buscando Excel de contactos en la carpeta…';
+
+  const candidates = buildContactFilenameCandidates();
+
+  for (const url of candidates) {
+    try{
+      let buf = null;
+      if (url.endsWith('.txt') || url.endsWith('.json')) {
+        buf = await tryIndexHints(url);
+        if (!buf) { continue; }
+      } else {
+        buf = await fetchExcelArrayBuffer(url);
+      }
+
+      if (buf) {
+        // parsear y llenar
+        CONTACTS_DB = await parseContactsWorkbook(buf);
+        fillEmpresaOptions();
+
+        // Mostrar al usuario cuál se usó
+        if (status) status.textContent = `Detectado automáticamente: ${decodeURIComponent(url.split('/').pop())} • Empresas: ${CONTACTS_DB.byEmpresa.size} • Contactos: ${CONTACTS_DB.all.length}`;
+
+        // Si hay una sola empresa, dispara el cambio (y si hay 1 contacto, también)
+        const selEmp = document.getElementById('empresa');
+        if (selEmp && selEmp.options.length === 2) { // 1 opción + placeholder
+          selEmp.selectedIndex = 1;
+          onEmpresaChange();
+        }
+        return true;
+      }
+    }catch(_e){
+      // continuar con el siguiente candidato
+    }
+  }
+
+  if (status) status.textContent = 'No se encontró Excel de contactos automáticamente. Selecciónalo manualmente.';
+  return false;
+}
+
 // activar al cargar
 window.addEventListener('load', wireContactsInput);
+// NUEVO: intentar autodetección al cargar
+window.addEventListener('load', ()=>{ autoDetectContactsInSameFolder(); });
 
 /* ========= Excel helpers ========= */
 function decodeCell(a){const m=String(a).match(/^([A-Z]+)(\d+)$/i);if(!m)return null;const L=m[1].toUpperCase();let r=parseInt(m[2],10),c=0;for(let i=0;i<L.length;i++)c=c*26+(L.charCodeAt(i)-64);return{r:r-1,c:c-1};}
@@ -1358,6 +1538,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
