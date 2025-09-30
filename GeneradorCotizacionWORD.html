@@ -932,11 +932,17 @@ function fillDirigidoOptions(){
     const isIng = cargoNorm.includes('ingeniero') || cargoNorm.includes('ingeniera');
     const etiqueta = (isIng ? 'ING. ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
 
-    const opt = document.createElement('option');
-    opt.value = etiqueta.toUpperCase();
-    opt.textContent = etiqueta.toUpperCase();
-    opt.dataset.cid = String(c.id);
-    selDir.appendChild(opt);
+const opt = document.createElement('option');
+opt.value = etiqueta.toUpperCase();
+opt.textContent = etiqueta.toUpperCase();
+opt.dataset.cid    = String(c.id);                  // por si haces fallback
+// 👇 Embebe los datos reales para que onDirigidoChange los lea directo
+opt.dataset.tel    = (c.telefono   || '').trim();
+opt.dataset.movil  = (c.movil      || '').trim();
+opt.dataset.email  = (c.email      || '').trim();
+opt.dataset.ciudad = (c.ciudadPais || '').trim();
+
+selDir.appendChild(opt);
   });
 
   selDir.disabled = lista.length === 0;
@@ -1741,6 +1747,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
