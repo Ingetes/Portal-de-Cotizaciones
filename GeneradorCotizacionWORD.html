@@ -217,15 +217,13 @@ input:focus,select:focus,textarea:focus{
       <div class="grid" style="margin-top:12px">
 <div>
   <label for="empresa" class="required">Nombre de la empresa</label>
-  <select id="empresa">
-    <option value="" selected disabled>-Seleccionar empresa-</option>
-  </select>
+  <input id="empresa" list="empresaList" placeholder="Escriba o seleccione empresa"/>
+  <datalist id="empresaList"></datalist>
 </div>
 <div>
   <label for="dirigido" class="required">Dirigido a</label>
-  <select id="dirigido" disabled>
-    <option value="" selected disabled>-Selecciona primero una empresa-</option>
-  </select>
+  <input id="dirigido" list="dirigidoList" placeholder="Escriba o seleccione persona" disabled/>
+  <datalist id="dirigidoList"></datalist>
 </div>
       </div>
 
@@ -890,23 +888,24 @@ async function parseContactsWorkbook(arrayBuffer){
 }
 
 function fillEmpresaOptions(){
-  const selEmp = document.getElementById('empresa');
-  const selDir = document.getElementById('dirigido');
-  if(!selEmp || selEmp.tagName!=='SELECT') return;
+  const dlEmp = document.getElementById('empresaList');
+  const inpEmp = document.getElementById('empresa');
+  const dlDir = document.getElementById('dirigidoList');
+  const inpDir = document.getElementById('dirigido');
 
-  // limpiar
-  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
-  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
-  selDir.disabled = true;
+  if (!dlEmp || !inpEmp) return;
+
+  dlEmp.innerHTML = '';
+  dlDir.innerHTML = '';
+  inpDir.value = '';
+  inpDir.disabled = true;
 
   // opciones
   const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
   empresas.forEach(e=>{
     const opt = document.createElement('option');
-    opt.value = e.toUpperCase();   // valor en mayúsculas
-    opt.textContent = e.toUpperCase();
-    opt.dataset.empraw = e;        // original para buscar contactos
-    selEmp.appendChild(opt);
+    opt.value = e.toUpperCase();
+    dlEmp.appendChild(opt);
   });
 
   const status = document.getElementById('xlsDatosStatus');
@@ -914,13 +913,17 @@ function fillEmpresaOptions(){
 }
 
 function fillDirigidoOptions(){
-  const selEmp = document.getElementById('empresa');
-  const selDir = document.getElementById('dirigido');
-  if(!selEmp || !selDir) return;
+  const inpEmp = document.getElementById('empresa');
+  const dlDir = document.getElementById('dirigidoList');
+  const inpDir = document.getElementById('dirigido');
+  if(!inpEmp || !dlDir || !inpDir) return;
 
-  const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
-  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
-  selDir.disabled = true;
+  dlDir.innerHTML = '';
+  inpDir.value = '';
+  inpDir.disabled = false;
+
+  const empRaw = inpEmp.value.trim();
+  if (!empRaw) return;
 
   const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
   lista.forEach(c=>{
@@ -929,19 +932,10 @@ function fillDirigidoOptions(){
     const etiqueta = (isIng ? 'ING ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
 
     const opt = document.createElement('option');
-    opt.value = etiqueta.toUpperCase();       // esto leerá buildDocCommon
-    opt.textContent = etiqueta.toUpperCase(); // visual + forzado mayúsculas
-    opt.dataset.cid = String(c.id);           // para autollenar el resto
-    selDir.appendChild(opt);
+    opt.value = etiqueta.toUpperCase();
+    opt.dataset.cid = String(c.id);
+    dlDir.appendChild(opt);
   });
-
-  selDir.disabled = lista.length === 0;
-
-  // si solo hay 1 contacto, seleccionarlo y autollenar
-  if (lista.length === 1) {
-    selDir.selectedIndex = 1;
-    onDirigidoChange();
-  }
 }
 
 function onEmpresaChange(){
@@ -962,21 +956,34 @@ function onEmpresaChange(){
 }
 
 function onDirigidoChange(){
-  const selDir = document.getElementById('dirigido');
+  const inpDir = document.getElementById('dirigido');
   const email  = document.getElementById('email');
   const office = document.getElementById('office');
   const ubic   = document.getElementById('ubicacion');
-  const opt    = selDir && selDir.selectedOptions[0];
+  if (!inpDir) return;
 
-  if (opt && opt.dataset.cid != null) {
-    const idx = Number(opt.dataset.cid);
+  const valDir = inpDir.value.trim().toUpperCase();
+  if (!valDir) return;
+
+  // busca en datalist dirigidoList si coincide
+  const dl = document.getElementById('dirigidoList');
+  const match = Array.from(dl.options).find(o=>o.value===valDir);
+
+  if (match && match.dataset.cid != null) {
+    const idx = Number(match.dataset.cid);
     const c   = CONTACTS_DB.all[idx];
     if (c) {
       if (email)  email.value  = c.email || '';
       if (office) office.value = c.telefono || '';
       if (ubic)   ubic.value   = c.ciudadPais || '';
     }
+  } else {
+    // si no coincide, deja los datos en blanco
+    if (email)  email.value  = '';
+    if (office) office.value = '';
+    if (ubic)   ubic.value   = '';
   }
+}
 
   // quitar marca de error si existía
   if(selDir){ selDir.style.borderColor=''; selDir.style.boxShadow=''; }
@@ -1000,10 +1007,18 @@ function wireContactsInput(){
   });
 
   // eventos de selects
-  const selEmp = document.getElementById('empresa');
-  const selDir = document.getElementById('dirigido');
-  if (selEmp) selEmp.addEventListener('change', onEmpresaChange);
-  if (selDir) selDir.addEventListener('change', onDirigidoChange);
+const inpEmp = document.getElementById('empresa');
+const inpDir = document.getElementById('dirigido');
+if (inpEmp) {
+  inpEmp.addEventListener('input', () => {
+    fillDirigidoOptions();
+  });
+}
+if (inpDir) {
+  inpDir.addEventListener('input', () => {
+    onDirigidoChange();
+  });
+}
 }
 
 // ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
@@ -1575,6 +1590,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
