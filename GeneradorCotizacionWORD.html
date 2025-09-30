@@ -653,11 +653,15 @@ function resetForm() {
     if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
       const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
       empresas.forEach(e=>{
-        const opt = document.createElement('option');
-        opt.value = e.toUpperCase();
-        opt.textContent = e.toUpperCase();
-        opt.dataset.empraw = e;
-        selEmp.appendChild(opt);
+const opt = document.createElement('option');
+opt.value = etiqueta.toUpperCase();
+opt.textContent = etiqueta.toUpperCase();
+opt.dataset.cid = String(c.id);           // puedes dejarlo, pero ya no dependemos de él
+opt.dataset.tel = (c.telefono || '').trim();
+opt.dataset.movil = (c.movil || '').trim();
+opt.dataset.email = (c.email || '').trim();
+opt.dataset.ciudad = (c.ciudadPais || '').trim();
+selDir.appendChild(opt);
       });
     }
   }
@@ -948,6 +952,7 @@ function fillDirigidoOptions(){
     selDir.selectedIndex = 1;
     onDirigidoChange();
   }
+  
 }
 
 // ========= Combo editable con filtro para <select> =========
@@ -1074,7 +1079,7 @@ if (empSearch) {
 function onDirigidoChange(){
   const selDir = document.getElementById('dirigido');
   const email  = document.getElementById('email');
-  const office = document.getElementById('office'); // debe quedar lleno si hay alguno
+  const office = document.getElementById('office');
   const tel    = document.getElementById('tel');
   const ubic   = document.getElementById('ubicacion');
   const opt    = selDir && selDir.selectedOptions[0];
@@ -1084,50 +1089,55 @@ function onDirigidoChange(){
     dirSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : dirSearch.value.toUpperCase();
   }
 
-  if (opt && opt.dataset.cid != null) {
-    const idx = Number(opt.dataset.cid);
-    const c   = CONTACTS_DB.all[idx];
-    if (c) {
-      // E-mail y ubicación directos
-      if (email) email.value = c.email || '';
-      if (ubic)  ubic.value  = c.ciudadPais || '';
-
-      // Reglas de TELÉFONOS:
-      const tFijo   = (c.telefono || '').trim();
-      const tMovil  = (c.movil    || '').trim();
-
-      // 1) Si hay Teléfono → va a OFFICE
-      // 2) Si hay Móvil → va a TEL
-      // 3) Si NO hay Teléfono pero SÍ hay Móvil → ese Móvil va a OFFICE
-      // 4) Si ninguno → ambos vacíos
-      let officeVal = '';
-      let telVal    = '';
-
-      if (tFijo) {
-        officeVal = tFijo;
-        telVal    = tMovil || '';
-      } else if (tMovil) {
-        officeVal = tMovil; // prioridad: que OFFICE quede lleno
-        telVal    = tMovil; // opcional: lo ponemos también en Tel si quieres verlo ahí
-      } else {
-        officeVal = '';
-        telVal    = '';
-      }
-
-      if (office) office.value = officeVal;
-      if (tel)    tel.value    = telVal;
-    }
-  } else {
-    // Opción “custom” o no coincide → limpiar autollenado
+  // helper para “limpiar”
+  const clearAuto = () => {
     if (email)  email.value  = '';
     if (office) office.value = '';
     if (ubic)   ubic.value   = '';
-    if (tel)    tel.value    = ''; // opcional: si prefieres conservar, elimina esta línea
+    if (tel)    tel.value    = '';
+  };
+
+  if (!opt) { clearAuto(); return; }
+
+  // Si la opción viene de la base: usa data-*
+  const tFijo  = (opt.dataset.tel   || '').trim();
+  const tMovil = (opt.dataset.movil || '').trim();
+  const mail   = (opt.dataset.email || '').trim();
+  const city   = (opt.dataset.ciudad|| '').trim();
+
+  // Si no hay ningún dato embebido, trátalo como “custom” y limpia
+  if (!tFijo && !tMovil && !mail && !city && opt.dataset.cid == null) {
+    clearAuto();
+    return;
   }
+
+  // E-mail y ubicación
+  if (email) email.value = mail;
+  if (ubic)  ubic.value  = city;
+
+  // Reglas de teléfonos:
+  // 1) Si hay Teléfono => va a OFFICE
+  // 2) Si hay Móvil    => va a TEL
+  // 3) Si NO hay Teléfono pero SÍ hay Móvil => ese Móvil va a OFFICE
+  // 4) Si ninguno => ambos vacíos
+  let officeVal = '';
+  let telVal    = '';
+
+  if (tFijo) {
+    officeVal = tFijo;
+    telVal    = tMovil || '';
+  } else if (tMovil) {
+    officeVal = tMovil;  // prioridad: que OFFICE quede lleno
+    telVal    = tMovil;  // si prefieres dejar Tel vacío en este caso, borra esta línea
+  } // else ambos quedan ''
+
+  if (office) office.value = officeVal;
+  if (tel)    tel.value    = telVal;
 
   // quitar marca de error si existía
   if(selDir){ selDir.style.borderColor=''; selDir.style.boxShadow=''; }
 }
+
 
 function wireContactsInput(){
   const input = document.getElementById('xlsDatos');
@@ -1730,6 +1740,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
