@@ -154,6 +154,8 @@ input:focus,select:focus,textarea:focus{
   margin-bottom:14px;
 }
 
+#empresa, #dirigido { text-transform: uppercase; }
+  
 </style>
 </head>
 <body>
@@ -178,6 +180,9 @@ input:focus,select:focus,textarea:focus{
 
       <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
       <input id="xls" type="file" accept=".xlsx,.xls"/>
+      <label for="xlsDatos" style="margin-top:12px">Excel datos de contacto (.xlsx)</label>
+      <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
+      <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
     </section>
 
     <!-- Columna derecha -->
@@ -205,14 +210,18 @@ input:focus,select:focus,textarea:focus{
       </div>
 
       <div class="grid" style="margin-top:12px">
-        <div>
-          <label for="empresa" class="required">Nombre de la empresa</label>
-          <input id="empresa" type="text" placeholder="Nombre de la empresa"/>
-        </div>
-        <div>
-          <label for="dirigido" class="required">Dirigido a</label>
-          <input id="dirigido" type="text" placeholder="Dirigido a"/>
-        </div>
+<div>
+  <label for="empresa" class="required">Nombre de la empresa</label>
+  <select id="empresa">
+    <option value="" selected disabled>-Seleccionar empresa-</option>
+  </select>
+</div>
+<div>
+  <label for="dirigido" class="required">Dirigido a</label>
+  <select id="dirigido" disabled>
+    <option value="" selected disabled>-Selecciona primero una empresa-</option>
+  </select>
+</div>
       </div>
 
       <div class="grid" style="margin-top:12px">
@@ -628,6 +637,22 @@ function resetForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  
+// NUEVO: limpiar archivo de contactos y selects
+const xlsDatos = document.getElementById('xlsDatos');
+if (xlsDatos) xlsDatos.value = '';
+
+const selEmp = document.getElementById('empresa');
+const selDir = document.getElementById('dirigido');
+
+if (selEmp && selEmp.tagName === 'SELECT') {
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+}
+if (selDir && selDir.tagName === 'SELECT') {
+  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
+  selDir.disabled = true;
+}
+CONTACTS_DB = { byEmpresa: new Map(), all: [] };
 
   // Quitar resaltados de obligatorios
   const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email','ubicacion', 'asunto'];
@@ -768,6 +793,216 @@ function bindOtroToggle(id){
   sel.addEventListener('change',sync);
   sync(); // inicializa
 }
+
+// ========= NUEVO: Excel de contactos y listas dependientes =========
+
+let CONTACTS_DB = { byEmpresa: new Map(), all: [] };
+
+function _normStr(s){
+  return (s||'').toString().trim();
+}
+function _normKey(s){
+  return _normStr(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // sin acentos
+}
+
+async function parseContactsWorkbook(arrayBuffer){
+  const XLSX = await ensureXLSX();
+  const wb = XLSX.read(arrayBuffer, { type:'array', cellStyles:false });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if(!ws) throw new Error('No se encontró hoja de contactos');
+
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  const getCell = (r,c) => {
+    const a = XLSX.utils.encode_cell({r,c});
+    const cell = ws[a];
+    if(!cell) return '';
+    if(typeof cell.w === 'string') return cell.w;
+    return cell.v==null ? '' : String(cell.v);
+  };
+
+  // 1) Encontrar fila de encabezados (soporta "Nombre de la cuenta", "Nombre", "Apellidos", "Correo electrónico", "Ciudad o País", etc.)
+  let headerRow = -1, cols = {};
+  for(let r=range.s.r; r<=range.e.r; r++){
+    const names = [];
+    for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
+    const idxEmpresa = names.findIndex(v => v.includes('nombre de la cuenta'));
+    const idxNombre  = names.findIndex(v => v === 'nombre');
+    const idxApell   = names.findIndex(v => v === 'apellidos');
+    const idxCargo   = names.findIndex(v => v === 'cargo');
+    const idxTel     = names.findIndex(v => v.startsWith('telefono'));            // "Teléfono"
+    const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));  // "Correo electrónico"
+    const idxCiudad  = names.findIndex(v => v.startsWith('ciudad'));              // "Ciudad o País"
+    if (idxEmpresa>=0 && idxNombre>=0 && idxApell>=0 && idxEmail>=0){
+      headerRow = r;
+      cols = {empresa:idxEmpresa, nombre:idxNombre, apellidos:idxApell, cargo:idxCargo, telefono:idxTel, email:idxEmail, ciudadPais:idxCiudad};
+      break;
+    }
+  }
+  if(headerRow < 0) throw new Error('No se detectaron encabezados en el Excel de contactos');
+
+  // 2) Recorrer filas con "arrastre" de empresa y omitir "Subtotal"
+  const rows = [];
+  let lastEmpresa = '';
+  for(let r=headerRow+1; r<=range.e.r; r++){
+    const vEmpresa = _normStr(getCell(r, cols.empresa));
+    const vNombre  = _normStr(getCell(r, cols.nombre));
+    const vApell   = _normStr(getCell(r, cols.apellidos));
+    const vCargo   = _normStr(cols.cargo!=null ? getCell(r, cols.cargo) : '');
+    const vTel     = _normStr(cols.telefono!=null ? getCell(r, cols.telefono) : '');
+    const vEmail   = _normStr(cols.email!=null ? getCell(r, cols.email) : '');
+    const vCiudad  = _normStr(cols.ciudadPais!=null ? getCell(r, cols.ciudadPais) : '');
+
+    // saltar subtotales/filas vacías
+    const line = [vEmpresa, vNombre, vApell, vEmail].join(' ').toLowerCase();
+    if (line.includes('subtotal') || (!vNombre && !vApell && !vEmail)) continue;
+
+    if (vEmpresa) lastEmpresa = vEmpresa;     // "arrastre"
+    const empresa = lastEmpresa;
+    if (!empresa) continue;
+
+    rows.push({
+      id: rows.length,
+      empresa,
+      nombre: vNombre,
+      apellidos: vApell,
+      cargo: vCargo,
+      telefono: vTel,
+      email: vEmail,
+      ciudadPais: vCiudad
+    });
+  }
+
+  // 3) Agrupar por empresa
+  const byEmpresa = new Map();
+  rows.forEach(r=>{
+    const key = r.empresa;
+    if(!byEmpresa.has(key)) byEmpresa.set(key, []);
+    byEmpresa.get(key).push(r);
+  });
+
+  return { byEmpresa, all: rows };
+}
+
+function fillEmpresaOptions(){
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+  if(!selEmp || selEmp.tagName!=='SELECT') return;
+
+  // limpiar
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
+  selDir.disabled = true;
+
+  // opciones
+  const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+  empresas.forEach(e=>{
+    const opt = document.createElement('option');
+    opt.value = e.toUpperCase();   // valor en mayúsculas
+    opt.textContent = e.toUpperCase();
+    opt.dataset.empraw = e;        // original para buscar contactos
+    selEmp.appendChild(opt);
+  });
+
+  const status = document.getElementById('xlsDatosStatus');
+  if (status) status.textContent = `Empresas: ${empresas.length} • Contactos: ${CONTACTS_DB.all.length}`;
+}
+
+function fillDirigidoOptions(){
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+  if(!selEmp || !selDir) return;
+
+  const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
+  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+  selDir.disabled = true;
+
+  const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
+  lista.forEach(c=>{
+    const cargoNorm = _normKey(c.cargo);
+    const isIng = cargoNorm.includes('ingeniero') || cargoNorm.includes('ingeniera');
+    const etiqueta = (isIng ? 'ING ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
+
+    const opt = document.createElement('option');
+    opt.value = etiqueta.toUpperCase();       // esto leerá buildDocCommon
+    opt.textContent = etiqueta.toUpperCase(); // visual + forzado mayúsculas
+    opt.dataset.cid = String(c.id);           // para autollenar el resto
+    selDir.appendChild(opt);
+  });
+
+  selDir.disabled = lista.length === 0;
+
+  // si solo hay 1 contacto, seleccionarlo y autollenar
+  if (lista.length === 1) {
+    selDir.selectedIndex = 1;
+    onDirigidoChange();
+  }
+}
+
+function onEmpresaChange(){
+  const selDir = document.getElementById('dirigido');
+  const email = document.getElementById('email');
+  const office = document.getElementById('office');
+  const ubic = document.getElementById('ubicacion');
+  if (selDir) { selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>'; selDir.disabled = true; }
+  if (email) email.value = '';
+  if (office) office.value = '';
+  if (ubic) ubic.value = '';
+
+  fillDirigidoOptions();
+
+  // quitar marca de error si existía
+  const emp = document.getElementById('empresa');
+  if(emp){ emp.style.borderColor=''; emp.style.boxShadow=''; }
+}
+
+function onDirigidoChange(){
+  const selDir = document.getElementById('dirigido');
+  const email  = document.getElementById('email');
+  const office = document.getElementById('office');
+  const ubic   = document.getElementById('ubicacion');
+  const opt    = selDir && selDir.selectedOptions[0];
+
+  if (opt && opt.dataset.cid != null) {
+    const idx = Number(opt.dataset.cid);
+    const c   = CONTACTS_DB.all[idx];
+    if (c) {
+      if (email)  email.value  = c.email || '';
+      if (office) office.value = c.telefono || '';
+      if (ubic)   ubic.value   = c.ciudadPais || '';
+    }
+  }
+
+  // quitar marca de error si existía
+  if(selDir){ selDir.style.borderColor=''; selDir.style.boxShadow=''; }
+}
+
+function wireContactsInput(){
+  const input = document.getElementById('xlsDatos');
+  if (!input) return;
+
+  input.addEventListener('change', async ()=>{
+    const f = input.files && input.files[0];
+    if (!f) { CONTACTS_DB = {byEmpresa:new Map(), all:[]}; fillEmpresaOptions(); return; }
+    try{
+      const buf = await f.arrayBuffer();
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      fillEmpresaOptions();
+    }catch(e){
+      console.error(e);
+      alert('No se pudo leer el Excel de contactos: ' + (e.message||e));
+    }
+  });
+
+  // eventos de selects
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+  if (selEmp) selEmp.addEventListener('change', onEmpresaChange);
+  if (selDir) selDir.addEventListener('change', onDirigidoChange);
+}
+
+// activar al cargar
+window.addEventListener('load', wireContactsInput);
 
 /* ========= Excel helpers ========= */
 function decodeCell(a){const m=String(a).match(/^([A-Z]+)(\d+)$/i);if(!m)return null;const L=m[1].toUpperCase();let r=parseInt(m[2],10),c=0;for(let i=0;i<L.length;i++)c=c*26+(L.charCodeAt(i)-64);return{r:r-1,c:c-1};}
@@ -1123,6 +1358,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
