@@ -1020,20 +1020,41 @@ function ymd(date){
 // Construye candidatos de nombre de archivo muy comunes en tu flujo
 function buildContactFilenameCandidates(){
   const baseURL = new URL('.', location.href); // misma carpeta del HTML
+
+  // ⬅️ PRIORIDAD 1: tu archivo EXACTO (el que me dijiste)
+  const EXACT = 'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx';
+
+  // Utilidades de fecha (zona Bogotá)
+  function nowInBogota(){
+    const nowUTC = new Date();
+    return new Date(nowUTC.getTime() - (5*60*60*1000)); // -05:00
+  }
+  function ymd(date){
+    const yyyy = date.getUTCFullYear();
+    const mm = String(date.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(date.getUTCDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
   const today = nowInBogota();
   const days = [0,1,2,3]; // hoy y últimos 3 días
-  const minutesSlots = [0,30]; // para reducir combinaciones
-  const hours = Array.from({length: 15}, (_,i)=> i+6); // 06..20
+
+  // Para HOY probamos minutos más comunes + 58 (por tu patrón)
+  const minutesToday = [58, 0, 30, 15, 45];
+  // Para días previos mantenemos una búsqueda liviana
+  const minutesPast = [0, 30];
+  const hours = Array.from({length: 24}, (_,i)=> i); // 00..23
 
   const list = [];
 
-  // 0) Pistas externas opcionales (si existen en la carpeta)
-  //    - contacts-latest.txt : contiene exactamente el nombre del .xlsx (una línea)
-  //    - contacts-index.json : array de strings de archivos en la carpeta
+  // 0) EXACTO primero (si está en la carpeta lo encuentra de una)
+  list.push(new URL(EXACT, baseURL).href);
+
+  // 1) Pistas opcionales (si subes uno de estos al folder, acierta 100%)
   list.push(new URL('contacts-latest.txt', baseURL).href);
   list.push(new URL('contacts-index.json', baseURL).href);
 
-  // 1) Nombres fijos probables
+  // 2) Nombres fijos probables
   [
     'informe de Contactos para PORTAL.xlsx',
     'informe de Contactos para PORTAL-latest.xlsx',
@@ -1041,23 +1062,25 @@ function buildContactFilenameCandidates(){
     'Contactos.xlsx'
   ].forEach(n => list.push(new URL(n, baseURL).href));
 
-  // 2) Con fecha YYYY-MM-DD
+  // 3) Con fecha YYYY-MM-DD (sin hora)
   days.forEach(d=>{
     const dt = new Date(today.getTime() - d*24*60*60*1000);
     const stamp = ymd(dt);
     list.push(new URL(`informe de Contactos para PORTAL-${stamp}.xlsx`, baseURL).href);
   });
 
-  // 3) Con fecha y hora aproximada (reduce combinaciones)
+  // 4) Con fecha y hora
   days.forEach(d=>{
     const dt = new Date(today.getTime() - d*24*60*60*1000);
     const stamp = ymd(dt);
+    const mins = d === 0 ? minutesToday : minutesPast; // hoy incluye 58
+
     hours.forEach(h=>{
-      minutesSlots.forEach(m=>{
+      mins.forEach(m=>{
         const hh = String(h).padStart(2,'0');
         const mm = String(m).padStart(2,'0');
-        // segundos 00 y 30 para aumentar chances
-        ['00','30'].forEach(ss=>{
+        // segundos comunes + 01 por tu patrón
+        ['00','30','01'].forEach(ss=>{
           list.push(new URL(`informe de Contactos para PORTAL-${stamp}-${hh}-${mm}-${ss}.xlsx`, baseURL).href);
         });
       });
@@ -1066,6 +1089,7 @@ function buildContactFilenameCandidates(){
 
   return list;
 }
+
 
 // Hace una petición ligera para ver si el archivo existe y luego lo lee como ArrayBuffer
 async function fetchExcelArrayBuffer(url){
@@ -1538,6 +1562,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
