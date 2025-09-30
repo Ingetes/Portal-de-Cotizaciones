@@ -183,9 +183,11 @@ input:focus,select:focus,textarea:focus{
 
       <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
       <input id="xls" type="file" accept=".xlsx,.xls"/>
-      <label for="xlsDatos" style="margin-top:12px">Excel datos de contacto (.xlsx)</label>
-      <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
-      <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
+<div id="xlsDatosRow">
+  <label for="xlsDatos" style="margin-top:12px">Excel datos de contacto (.xlsx)</label>
+  <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
+  <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
+</div>
     </section>
 
     <!-- Columna derecha -->
@@ -1010,15 +1012,8 @@ function findLabelFor(id){
 }
 
 function hideContactsUploadUI(){
-  const lbl = document.querySelector('label[for="xlsDatos"]');
-  const inp = document.getElementById('xlsDatos');
-  const sm  = document.getElementById('xlsDatosStatus');
-
-  // Ocultra los tres elementos
-  [lbl, inp, sm].forEach(el=>{
-    if (!el) return;
-    el.style.display = 'none';
-  });
+  const row = document.getElementById('xlsDatosRow');
+  if (row) row.remove(); // lo borra completo del DOM
 }
 
 // ========= NUEVO: AUTODETECCIÓN DE EXCEL DE CONTACTOS EN LA MISMA CARPETA =========
@@ -1580,6 +1575,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
