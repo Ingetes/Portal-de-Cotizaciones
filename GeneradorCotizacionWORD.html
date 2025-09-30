@@ -657,122 +657,86 @@ function validateRequiredFields() {
 }
 
 /* ========= Función para reiniciar formulario ========= */
+/* ========= Función para reiniciar formulario ========= */
 function resetForm() {
-  // Reiniciar archivos
-  const bgInput  = document.getElementById('bg');
+  // 1) Archivos: NO tocar imagen de fondo ni Excel de contactos
+  //    -> solo limpiamos el Excel de VENTA porque es el que cambia por cotización
   const xlsInput = document.getElementById('xls');
-  if (bgInput)  bgInput.value = '';
   if (xlsInput) xlsInput.value = '';
 
-  // Reiniciar fecha
+  // 2) Fecha
   const fechaEl = document.getElementById('fecha');
   if (fechaEl) fechaEl.value = '';
 
-  // Selects
+  // 3) Selects de condiciones
   const selCom = document.getElementById('comercial');
   if (selCom) selCom.selectedIndex = 0; // -Seleccionar opción-
-  const selGar = document.getElementById('garantia');
-  if (selGar) selGar.selectedIndex = 0;
-  const selFP  = document.getElementById('formaPago');
-  if (selFP)  selFP.selectedIndex  = 5; // Crédito 30 días
-  const selSit = document.getElementById('sitioEntrega');
-  if (selSit) selSit.selectedIndex = 0;
-  const selVal = document.getElementById('validezOferta');
-  if (selVal) selVal.selectedIndex = 0;
-  const selPre = document.getElementById('precios');
-  if (selPre) selPre.selectedIndex = 0;
+  const selGar = document.getElementById('garantia');      if (selGar) selGar.selectedIndex = 0;
+  const selFP  = document.getElementById('formaPago');     if (selFP)  selFP.selectedIndex  = 5; // Crédito 30 días
+  const selSit = document.getElementById('sitioEntrega');  if (selSit) selSit.selectedIndex = 0;
+  const selVal = document.getElementById('validezOferta'); if (selVal) selVal.selectedIndex = 0;
+  const selPre = document.getElementById('precios');       if (selPre) selPre.selectedIndex = 0;
 
-  // Textos
-  const idsTxt = ['empresa','dirigido','area','office','tel','email','ubicacion', 'asunto'];
-  idsTxt.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-// --- LIMPIAR buscadores manuales ---
-const empSearch = document.getElementById('empresaSearch');
-const dirSearch = document.getElementById('dirigidoSearch');
-if (empSearch) empSearch.value = '';
-if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = true; }
+  // 4) Textos
+  const idsTxt = ['empresa','dirigido','area','office','tel','email','ubicacion','asunto','obsExtra'];
+  idsTxt.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 
-// --- LIMPIAR selects y borrar opción "custom" si existe ---
-const selEmp = document.getElementById('empresa');
-const selDir = document.getElementById('dirigido');
+  // 5) Combos editables (buscadores + selects)
+  //    - Mantener CONTACTS_DB tal cual (no tocarlo)
+  //    - Repoblar EMPRESA desde CONTACTS_DB
+  const empSearch = document.getElementById('empresaSearch');
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if (empSearch) empSearch.value = '';
+  if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = true; }
 
-if (selEmp && selEmp.tagName === 'SELECT') {
-  // elimina cualquier opción custom previa
-  Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
 
-  // Si hay base cargada, repoblar empresas
-  if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
-    const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
-    empresas.forEach(e=>{
-      const opt = document.createElement('option');
-      opt.value = e.toUpperCase();
-      opt.textContent = e.toUpperCase();
-      opt.dataset.empraw = e;
-      selEmp.appendChild(opt);
-    });
+  if (selEmp && selEmp.tagName === 'SELECT') {
+    // quitar opción "custom" si la había
+    Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+    // placeholder
+    selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+    // repoblar empresas desde CONTACTS_DB (si existe)
+    if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
+      const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+      empresas.forEach(e=>{
+        const opt = document.createElement('option');
+        opt.value = e.toUpperCase();
+        opt.textContent = e.toUpperCase();
+        opt.dataset.empraw = e;
+        selEmp.appendChild(opt);
+      });
+    }
   }
-}
 
-if (selDir && selDir.tagName === 'SELECT') {
-  // elimina cualquier opción custom previa
-  Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
-  selDir.disabled = true;
-}
-// NUEVO: limpiar archivo de contactos y selects
-const xlsDatos = document.getElementById('xlsDatos');
-if (xlsDatos) xlsDatos.value = '';
+  if (selDir && selDir.tagName === 'SELECT') {
+    // quitar opción "custom" si la había
+    Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+    // placeholder y deshabilitar hasta que elijan empresa
+    selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
+    selDir.disabled = true;
+  }
 
-const selEmp = document.getElementById('empresa');
-const selDir = document.getElementById('dirigido');
-
-if (selEmp && selEmp.tagName === 'SELECT') {
-  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
-}
-if (selDir && selDir.tagName === 'SELECT') {
-  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
-  selDir.disabled = true;
-}
-  // Quitar resaltados de obligatorios
+  // 6) Quitar resaltados de campos obligatorios
   const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email','ubicacion', 'asunto'];
   requiredFields.forEach(id => {
     const el = document.getElementById(id);
-    if (el) {
-      el.style.borderColor = '';
-      el.style.boxShadow = '';
-    }
+    if (el) { el.style.borderColor = ''; el.style.boxShadow = ''; }
   });
 
-  // Ocultar campos "otro" y limpiarlos
+  // 7) Ocultar inputs "Otro" y limpiar sus textos
   ['garantia_otro','formaPago_otro','sitioEntrega_otro','validezOferta_otro','precios_otro'].forEach(id=>{
     const el = document.getElementById(id);
     if (el) { el.value=''; el.classList.add('hidden'); }
   });
 
-  // === Estado de la imagen de fondo ===
-  const statusEl = document.getElementById('bgStatus');
-  // Si tenemos imagen por defecto precargada, seguimos usándola y ocultamos el input;
-  // si NO, mostramos el input para que el usuario elija una.
-  if (typeof DEFAULT_BG_BUF !== 'undefined' && DEFAULT_BG_BUF) {
-    // seguir usando la cargada automáticamente
-    if (bgInput) bgInput.style.display = 'none';
-    if (statusEl) statusEl.textContent = 'Marca de agua cargada automáticamente ✓';
-    // también resetea cualquier carga manual previa
-    window._bgBuf  = DEFAULT_BG_BUF;
-    window._bgName = null;
-  } else {
-    // no hay imagen por defecto: permitir seleccionar
-    if (bgInput) bgInput.style.display = '';
-    if (statusEl) statusEl.textContent = 'Sin imagen seleccionada.';
-    window._bgBuf  = null;
-    window._bgName = null;
-  }
+  // 8) Fondo: NO tocar DEFAULT_BG_BUF / DEFAULT_BG_NAME ni el estado visual
+  //    (se mantiene la imagen cargada automática o manual previamente)
+  //    Tampoco tocar el bloque de subida de contactos (ya está oculto si se autodetectó).
 
   // Mensaje final
-  const successMessage = 'Formulario reiniciado. Puedes comenzar una nueva cotización.';
+  const successMessage = 'Formulario reiniciado (se conserva la imagen de fondo y el Excel de contactos).';
   if (window.parent !== window.self) {
     window.parent.postMessage({ __ingetes_alert:true, message: successMessage }, '*');
   } else {
@@ -1775,6 +1739,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
