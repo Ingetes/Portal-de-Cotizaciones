@@ -206,12 +206,16 @@ input:focus,select:focus,textarea:focus{
 
       <div class="grid" style="margin-top:12px">
         <div>
-          <label for="empresa" class="required">Nombre de la empresa</label>
-          <input id="empresa" type="text" placeholder="Nombre de la empresa"/>
+<label for="empresa" class="required">Nombre de la empresa</label>
+<select id="empresa">
+  <option value="" selected disabled>-Seleccionar empresa-</option>
+</select>
         </div>
         <div>
-          <label for="dirigido" class="required">Dirigido a</label>
-          <input id="dirigido" type="text" placeholder="Dirigido a"/>
+<label for="dirigido" class="required">Dirigido a</label>
+<select id="dirigido">
+  <option value="" selected disabled>-Seleccionar persona-</option>
+</select>
         </div>
       </div>
 
@@ -379,6 +383,140 @@ const para=(children,align)=>new docx.Paragraph({children,spacing:SPACING_SINGLE
 const capFirst=s=>{s=(s||'').toString().trim();return s? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';};
 const val=(id,def='')=>{const el=document.getElementById(id);const v=(el&&typeof el.value==='string')?el.value.trim():'';return v!==''?v:def;};
 
+/* ========= Contactos desde Excel (para Empresa / Dirigido a) ========= */
+let CONTACTS = { byCompany: new Map(), headers: {} };
+
+async function parseContactsFromExcel(arrayBuffer){
+  const XLSX = await ensureXLSX();
+  const wb = XLSX.read(arrayBuffer, { type:'array' });
+  // Usamos la primera hoja (tu archivo se llama "informe de Contactos para PORTA...")
+  const sheetName = Object.keys(wb.Sheets)[0];
+  const ws = wb.Sheets[sheetName];
+  if(!ws) throw new Error('No se encontró la hoja del informe de contactos');
+
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  // Buscar fila de encabezados (aparece “Nombre”, “Correo”, “Ciudad o País”)
+  let headerRow = -1;
+  for(let r = range.s.r; r <= Math.min(range.e.r, range.s.r+60); r++){
+    let joined = '';
+    for(let c = range.s.c; c <= range.e.c; c++){
+      const cell = ws[XLSX.utils.encode_cell({r,c})];
+      joined += ' ' + (cell ? String(cell.v||'').trim() : '');
+    }
+    if(/\bNombre\b/i.test(joined) && /Correo/i.test(joined) && /(Ciudad|Pa[ií]s)/i.test(joined)){
+      headerRow = r; break;
+    }
+  }
+  if(headerRow < 0) throw new Error('No se encontró la fila de encabezados del informe de contactos');
+
+  // Mapa de encabezados => índice de columna
+  const headers = {};
+  for(let c = range.s.c; c <= range.e.c; c++){
+    const cell = ws[XLSX.utils.encode_cell({r:headerRow, c})];
+    const label = cell ? String(cell.v||'').trim() : '';
+    if(label) headers[label] = c;
+  }
+  // Helper para localizar posibles nombres de columna
+  const pick = (labels)=> {
+    for(const k of labels){ if(headers[k] != null) return headers[k]; }
+    return null;
+  };
+
+  const C_EMP  = pick(['Nombre de la cuenta  ↑','Nombre de la cuenta','Cuenta','Empresa']);
+  const C_NOM  = pick(['Nombre']);
+  const C_APE  = pick(['Apellidos','Apellido']);
+  const C_CAR  = pick(['Cargo']);
+  const C_MAIL = pick(['Correo electrónico','Correo electronico','Email']);
+  const C_TEL  = pick(['Teléfono','Telefono']);
+  const C_MOV  = pick(['Móvil','Celular','Mobile']);
+  const C_CITY = pick(['Ciudad o País','Ciudad o pais','Ciudad','País']);
+  if([C_EMP,C_NOM,C_APE,C_MAIL,C_CITY].some(v=>v==null)){
+    throw new Error('El archivo no tiene las columnas mínimas (Empresa, Nombre, Apellidos, Correo, Ciudad o País).');
+  }
+
+  const byCompany = new Map();
+  const val = (r,c)=> {
+    const cell = ws[XLSX.utils.encode_cell({r,c})];
+    return cell ? String(cell.v||'').trim() : '';
+  };
+
+  for(let r = headerRow+1; r <= range.e.r; r++){
+    const empresa = val(r, C_EMP);
+    const nombre  = val(r, C_NOM);
+    if(!empresa || !nombre) continue;
+
+    const row = {
+      empresa,
+      nombre,
+      apellidos: val(r, C_APE),
+      cargo:     val(r, C_CAR),
+      email:     val(r, C_MAIL),
+      telefono:  val(r, C_TEL) || val(r, C_MOV),
+      ciudad:    val(r, C_CITY)
+    };
+    if(!byCompany.has(empresa)) byCompany.set(empresa, []);
+    byCompany.get(empresa).push(row);
+  }
+
+  CONTACTS = { byCompany, headers };
+  return CONTACTS;
+}
+
+function populateEmpresas(){
+  const sel = document.getElementById('empresa');
+  if(!sel) return;
+  sel.innerHTML = '<option value="" disabled selected>-Seleccionar empresa-</option>';
+  const names = Array.from(CONTACTS.byCompany.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+  for(const n of names){
+    const opt = document.createElement('option');
+    opt.value = n;
+    opt.textContent = n.toUpperCase(); // forzado a MAYÚSCULAS
+    sel.appendChild(opt);
+  }
+}
+
+function populateDirigidos(empresa){
+  const sel = document.getElementById('dirigido');
+  sel.innerHTML = '<option value="" disabled selected>-Seleccionar persona-</option>';
+  const list = CONTACTS.byCompany.get(empresa) || [];
+
+  list.forEach((row, idx) => {
+    const esIng = /ingenier/i.test(row.cargo || '');
+    const pref  = esIng ? 'ING ' : 'SR(A). ';
+    const label = (pref + (row.nombre||'') + ' ' + (row.apellidos||'')).toUpperCase(); // forzado a MAYÚSCULAS
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = label;
+    sel.appendChild(opt);
+  });
+
+  // Si hay exactamente 1, preselecciona y aplica datos
+  if(list.length === 1){
+    sel.selectedIndex = 1;
+    applyContactRow(empresa, 0);
+  }
+}
+
+function applyContactRow(empresa, idx){
+  const list = CONTACTS.byCompany.get(empresa) || [];
+  const row = list[idx]; if(!row) return;
+
+  // Forzamos MAYÚSCULAS para empresa (dirigido ya viene en mayúsculas en la opción)
+  const empEl = document.getElementById('empresa');
+  if(empEl) empEl.value = empresa;
+
+  const dirEl = document.getElementById('dirigido');
+  if(dirEl) dirEl.value = String(idx);
+
+  const ubi = document.getElementById('ubicacion');
+  if(ubi) ubi.value = row.ciudad || '';
+
+  const mail = document.getElementById('email');
+  if(mail) mail.value = row.email || '';
+
+  const off = document.getElementById('office');
+  if(off) off.value = row.telefono || '';
+}
 /* === Fondo por defecto (misma carpeta del HTML) === */
 let _bgBuf = null;           // buffer si el usuario elige archivo
 let _bgName = null;
@@ -542,6 +680,58 @@ window.addEventListener('load', () => {
       resetForm();
     });
   }
+  // === Contactos: leer XLS cuando el usuario lo seleccione y poblar empresas ===
+  const xlsEl = document.getElementById('xls');
+  if (xlsEl){
+    xlsEl.addEventListener('change', async () => {
+      try{
+        const f = xlsEl.files && xlsEl.files[0];
+        if(!f) return;
+        const buf = await f.arrayBuffer();
+        await parseContactsFromExcel(buf);
+        populateEmpresas();
+      }catch(err){
+        console.error(err);
+        // No detenemos el flujo del otro uso del Excel (tabla de VENTA),
+        // solo avisamos si no se pudo leer contactos.
+        alert('No se pudieron cargar los contactos del Excel: ' + (err.message || err));
+      }
+    });
+  }
+
+  // Cuando el usuario cambia de empresa, llenamos la lista de "Dirigido a"
+  const selEmp = document.getElementById('empresa');
+  if (selEmp){
+    selEmp.addEventListener('change', () => {
+      const empresa = selEmp.value;
+      populateDirigidos(empresa);
+      // limpiar resaltado de requerido
+      selEmp.style.borderColor = '';
+      selEmp.style.boxShadow = '';
+    });
+  }
+
+  // Cuando el usuario elige un contacto en "Dirigido a", ponemos sus datos
+  const selDir = document.getElementById('dirigido');
+  if (selDir){
+    selDir.addEventListener('change', () => {
+      const empresa = (document.getElementById('empresa')||{}).value || '';
+      const idx = parseInt(selDir.value, 10);
+      if(empresa && !isNaN(idx)) applyContactRow(empresa, idx);
+      // limpiar resaltado de requerido
+      selDir.style.borderColor = '';
+      selDir.style.boxShadow = '';
+    });
+  }
+
+  // Forzar mayúsculas si el usuario escribe manualmente (seguridad)
+  // (en selects no aplica, pero por si cambias a input en el futuro)
+  ['empresa'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el){
+      el.addEventListener('input', ()=>{ el.value = (el.value||'').toUpperCase(); });
+    }
+  });
 });
 
 function validateRequiredFields() {
@@ -1120,9 +1310,22 @@ requiredFields.forEach(fieldId => {
     });
   }
 });
+// Para selects (empresa, dirigido, comercial), limpiar estilo al cambiar
+['empresa','dirigido','comercial'].forEach(id=>{
+  const el = document.getElementById(id);
+  if(el){
+    el.addEventListener('change', function(){
+      if ((this.value||'').trim()){
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+      }
+    });
+  }
+});
 </script>
 </body>
 </html>
+
 
 
 
