@@ -506,6 +506,35 @@ function resetForm(){
   });
   const sel = document.getElementById('comercial');
   if (sel) sel.selectedIndex = 0;
+  // ... ya tienes limpieza de idsTxt ...
+
+// NUEVO: limpiar buscadores y selects de los combos
+const empSearch = document.getElementById('empresaSearch');
+const dirSearch = document.getElementById('dirigidoSearch');
+if (empSearch) empSearch.value = '';
+if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = true; }
+
+const selEmp = document.getElementById('empresa');
+const selDir = document.getElementById('dirigido');
+
+if (selEmp && selEmp.tagName === 'SELECT') {
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  // si SIGUES teniendo CONTACTS_DB cargado, repuebla:
+  if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
+    const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+    empresas.forEach(e=>{
+      const opt = document.createElement('option');
+      opt.value = e.toUpperCase();
+      opt.textContent = e.toUpperCase();
+      opt.dataset.empraw = e;
+      selEmp.appendChild(opt);
+    });
+  }
+}
+if (selDir && selDir.tagName === 'SELECT') {
+  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
+  selDir.disabled = true;
+}
 
   // limpia fondo
   const bg = document.getElementById('bg');
@@ -674,8 +703,6 @@ if (selDir && selDir.tagName === 'SELECT') {
   selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
   selDir.disabled = true;
 }
-CONTACTS_DB = { byEmpresa: new Map(), all: [] };
-
   // Quitar resaltados de obligatorios
   const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email','ubicacion', 'asunto'];
   requiredFields.forEach(id => {
@@ -933,16 +960,13 @@ function fillEmpresaOptions(){
 function fillDirigidoOptions(){
   const selEmp = document.getElementById('empresa');
   const selDir = document.getElementById('dirigido');
+  const dirSearch = document.getElementById('dirigidoSearch');
   if(!selEmp || !selDir) return;
-
-  // Combos editables (empresa y dirigido)
-attachSearchableCombo('empresa','empresaSearch',{ onCommit: onEmpresaChange });
-attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange });
-
 
   const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
   selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
   selDir.disabled = true;
+  if (dirSearch) { dirSearch.value=''; dirSearch.disabled = true; }
 
   const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
   lista.forEach(c=>{
@@ -951,9 +975,9 @@ attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange }
     const etiqueta = (isIng ? 'ING ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
 
     const opt = document.createElement('option');
-    opt.value = etiqueta.toUpperCase();       // esto leerá buildDocCommon
-    opt.textContent = etiqueta.toUpperCase(); // visual + forzado mayúsculas
-    opt.dataset.cid = String(c.id);           // para autollenar el resto
+    opt.value = etiqueta.toUpperCase();
+    opt.textContent = etiqueta.toUpperCase();
+    opt.dataset.cid = String(c.id);
     selDir.appendChild(opt);
   });
 
@@ -991,17 +1015,19 @@ function attachSearchableCombo(selectId, inputId, { onCommit } = {}){
     Array.from(sel.options).forEach(opt => { opt.hidden = false; });
   }
 
-  function filterOptions(q){
-    const Q = normalizeStr(q);
-    Array.from(sel.options).forEach((opt, idx)=>{
-      const txt = normalizeStr(opt.textContent||opt.value||'');
-      if (idx===0 && opt.disabled) { // placeholder siempre visible
-        opt.hidden = false;
-        return;
-      }
-      opt.hidden = Q ? !txt.includes(Q) : false;
-    });
-  }
+function filterOptions(q){
+  const Q = normalizeStr(q);
+  Array.from(sel.options).forEach((opt, idx)=>{
+    const txt = normalizeStr(opt.textContent||opt.value||'');
+    if (idx===0 && opt.disabled) { // placeholder siempre visible
+      opt.hidden = false;
+      return;
+    }
+    // Solo mostrar si comienza con lo escrito
+    opt.hidden = Q ? !txt.startsWith(Q) : false;
+  });
+}
+
 
   function selectFirstVisibleOrNone(){
     const first = Array.from(sel.options).find((o,idx)=> idx>0 && !o.hidden);
@@ -1721,5 +1747,6 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
