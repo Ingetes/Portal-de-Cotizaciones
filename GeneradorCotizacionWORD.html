@@ -566,54 +566,42 @@ function comboVal(selectId, inputId, def=''){
 }
 
 function validateRequiredFields() {
-  const requiredFields = [
-  'fecha', 'comercial', 'empresa', 'dirigido','area', 'ubicacion', 'email', 'asunto', 'office'
-  ];
-  
-  const missingFields = [];
-  
-  requiredFields.forEach(fieldId => {
-    let value;
-    
-    // Validación especial para el campo comercial
-    if (fieldId === 'comercial') {
-      const selectElement = document.getElementById(fieldId);
-      value = selectElement ? selectElement.value : '';
-    } else {
-      value = val(fieldId);
-    }
-    
-    if (!value) {
-      missingFields.push(fieldId);
-      // Resaltar campo vacío
-      const element = document.getElementById(fieldId);
-      if (element) {
-        element.style.borderColor = '#dc2626';
-        element.style.boxShadow = '0 0 0 2px rgba(220, 38, 38, 0.2)';
-      }
-    }
-  });
-  
-  if (missingFields.length > 0) {
-    const errorMessage = 'Por favor complete los siguientes campos obligatorios:\n' + 
-      missingFields.map(id => {
-        const label = document.querySelector(`label[for="${id}"]`);
-        return label ? label.textContent.replace(' *', '') : id;
-      }).join('\n');
-    
-    // Si estamos en un iframe, enviar el mensaje al padre
+  const requiredIds = ['fecha','comercial','area','office','email','ubicacion','asunto'];
+  const missing = [];
+
+  // fecha
+  if (!val('fecha')) missing.push('fecha');
+
+  // comercial
+  const selCom = document.getElementById('comercial');
+  if (!selCom || !selCom.value) missing.push('comercial');
+
+  // empresa y dirigido: considerar select + input editable
+  const empresaOk  = comboVal('empresa','empresaSearch','');
+  const dirigidoOk = comboVal('dirigido','dirigidoSearch','');
+  if (!empresaOk)  missing.push('empresa');
+  if (!dirigidoOk) missing.push('dirigido');
+
+  // el resto
+  requiredIds.forEach(id => { if (!val(id)) missing.push(id); });
+
+  if (missing.length) {
+    const msg = 'Por favor complete los siguientes campos obligatorios:\n' +
+      missing.map(id => (document.querySelector(`label[for="${id}"]`)?.textContent||id).replace(' *','')).join('\n');
+
+    // resaltar
+    missing.forEach(id => {
+      const el = document.getElementById(id);
+      if (el){ el.style.borderColor='#dc2626'; el.style.boxShadow='0 0 0 2px rgba(220,38,38,0.2)'; }
+    });
+
     if (window.parent !== window.self) {
-      window.parent.postMessage({
-        __ingetes_alert: true,
-        message: errorMessage
-      }, '*');
+      window.parent.postMessage({ __ingetes_alert:true, message: msg }, '*');
     } else {
-      alert(errorMessage);
+      alert(msg);
     }
-    
     return false;
   }
-  
   return true;
 }
 
@@ -645,6 +633,7 @@ function resetForm() {
   //    - Mantener CONTACTS_DB tal cual (no tocarlo)
   //    - Repoblar EMPRESA desde CONTACTS_DB
   const empSearch = document.getElementById('empresaSearch');
+  const dirSearch = document.getElementById('dirigidoSearch');
   if (empSearch) empSearch.value = '';
   if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = false; }
 
@@ -652,11 +641,8 @@ function resetForm() {
   const selDir = document.getElementById('dirigido');
 
 if (selEmp && selEmp.tagName === 'SELECT') {
-  // quitar opción "custom" si la había
   Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-  // placeholder
   selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
-  // repoblar empresas desde CONTACTS_DB (si existe)
   if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
     const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
     empresas.forEach(e=>{
@@ -671,11 +657,8 @@ if (selEmp && selEmp.tagName === 'SELECT') {
 
 if (selDir && selDir.tagName === 'SELECT') {
   Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
-selDir.disabled = false;
-const dirSearch = document.getElementById('dirigidoSearch');
-if (dirSearch){ dirSearch.value=''; dirSearch.disabled=false; }
-
+  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+  selDir.disabled = false; // siempre habilitado
 }
 
   // 6) Quitar resaltados de campos obligatorios
@@ -1624,8 +1607,8 @@ const fechaStr = (() => {
   return '';
 })();
 
-  const empresaStr=val('empresa','empresaSearch','');           // respetar placeholders actuales
-  const dirigidoStr=val('dirigido','dirigidoSearch','');
+const empresaStr  = comboVal('empresa','empresaSearch','');   // usa el texto del input si el select está vacío
+const dirigidoStr = comboVal('dirigido','dirigidoSearch','');
   const areaStr=capFirst(val('area',''));
   const officeStr=val('office','');
   const telStr=val('tel','');
@@ -1757,6 +1740,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
