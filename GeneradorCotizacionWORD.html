@@ -1618,8 +1618,8 @@ const fechaStr = (() => {
   return '';
 })();
 
-  const empresaStr=val('empresa','').toUpperCase();           // respetar placeholders actuales
-  const dirigidoStr=val('dirigido','').toUpperCase();
+  const empresaStr=val('empresa','empresaSearch','');           // respetar placeholders actuales
+  const dirigidoStr=val('dirigido','dirigidoSearch','');
   const areaStr=capFirst(val('area',''));
   const officeStr=val('office','');
   const telStr=val('tel','');
@@ -1751,6 +1751,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
