@@ -67,14 +67,14 @@
 /* --- Responsive --- */
 @media (max-width: 640px){           /* móviles */
   .ref-grid{
-    grid-template-columns: 1fr;      /* todo en columna */
+    grid-template-columns: 1fr 1fr;      /* todo en columna */
   }
   .ref-grid .btn{
     width:100%;                      /* botones de ancho completo */
     white-space:normal;              /* permite salto de línea en textos largos */
   }
   .ref-grid > input{
-    font-size:16px;                  /* evita zoom en iOS */
+    grid-column: 1 / -1;                  /* evita zoom en iOS */
   }
 } 
   </style>
@@ -388,6 +388,7 @@ $("ref").addEventListener("input", () => {
 </script>
 </body>
 </html>
+
 
 
 
