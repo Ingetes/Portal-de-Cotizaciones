@@ -1113,6 +1113,7 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
     if (items > 0){
       for (let r=firstData; r<firstData+items; r++){
         for (let c=1; c<=6; c++) ws.getCell(r,c).border = box;
+        ws.getCell(r,4).numFmt = '"$" #,##0';
         ws.getCell(r,6).value  = { formula:`D${r}*E${r}` };
         ws.getCell(r,6).numFmt = '"$" #,##0';
       }
