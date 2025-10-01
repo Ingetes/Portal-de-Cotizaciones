@@ -661,13 +661,13 @@ if (selEmp && selEmp.tagName === 'SELECT') {
   }
 }
 
-  if (selDir && selDir.tagName === 'SELECT') {
-    // quitar opción "custom" si la había
-    Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-    // placeholder y deshabilitar hasta que elijan empresa
-    selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
-    selDir.disabled = true;
-  }
+if (selDir && selDir.tagName === 'SELECT') {
+  Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+  selDir.disabled = false; // ← NO deshabilitar
+}
+const dirSearch = document.getElementById('dirigidoSearch');
+if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; } // ← NO deshabilitar
 
   // 6) Quitar resaltados de campos obligatorios
   const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email','ubicacion', 'asunto'];
@@ -1744,6 +1744,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
