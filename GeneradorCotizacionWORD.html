@@ -556,6 +556,15 @@ window.addEventListener('load', () => {
   }
 });
 
+function comboVal(selectId, inputId, def=''){
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  const sv  = sel && typeof sel.value==='string' ? sel.value.trim() : '';
+  const iv  = inp && typeof inp.value==='string' ? inp.value.trim() : '';
+  // si el select tiene valor, gana el select; si está vacío, usa lo escrito en el input
+  return (sv || iv || def).toUpperCase();
+}
+
 function validateRequiredFields() {
   const requiredFields = [
   'fecha', 'comercial', 'empresa', 'dirigido','area', 'ubicacion', 'email', 'asunto', 'office'
@@ -1742,6 +1751,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
