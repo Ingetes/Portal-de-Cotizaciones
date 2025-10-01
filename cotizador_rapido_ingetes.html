@@ -137,6 +137,7 @@
   const API_BASE = 'https://portal-api-nine.vercel.app'; // tu backend en Vercel
 
   // Helpers
+  let lastRefUsedForDesc = ""; // referencia para la que llenamos la descripción
   const $ = (id) => document.getElementById(id);
   const moneyCOP = (v) => (v == null || isNaN(v))
     ? "—"
@@ -198,6 +199,7 @@
         alert('No se encontró una descripción clara en el Mall. Usé un texto de apoyo.');
       } else {
         $("desc").value = cleanDesc(desc);
+        lastRefUsedForDesc = ref; // esta descripción corresponde a esta referencia
       }
       compute();
     } catch (e) {
@@ -297,12 +299,23 @@
   // Eventos
   $("fetchMall").addEventListener("click", fetchMallDescription);
   $("mallLink").addEventListener("click", (e) => { if (!$("ref").value.trim()) e.preventDefault(); });
-  $("ref").addEventListener("input", () => {
-    const ref = $("ref").value.trim();
-    $("mallLink").href = ref
-      ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
-      : "#";
-  });
+$("ref").addEventListener("input", () => {
+  const ref = $("ref").value.trim();
+
+  // limpia descripción si el usuario cambia la referencia
+  if (ref !== lastRefUsedForDesc && $("desc").value) {
+    $("desc").value = "";
+    $("preview").textContent = "(Completa referencia, descripción y valores para ver el bloque final)";
+    $("copyMsg").textContent = "";
+    $("copyMsg").className = "text-sm ml-auto";
+  }
+
+  $("mallLink").href = ref
+    ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
+    : "#";
+
+  compute();
+});
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
     $(id).addEventListener("change", compute);
@@ -316,6 +329,7 @@
 </script>
 </body>
 </html>
+
 
 
 
