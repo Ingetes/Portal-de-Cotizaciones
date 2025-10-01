@@ -1087,6 +1087,8 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
     const ws = wb.addWorksheet('INGENIERIA');
     rows.forEach(r => ws.addRow(r));
     ws.columns = [{width:33},{width:33},{width:30},{width:14},{width:10},{width:16}];
+    // Mostrar moneda en la columna PRECIO (D)
+    ws.getColumn(4).numFmt = '"$" #,##0';
 
     // Filas 1–4: título en A, valor en B:F combinado
     for (let r=1; r<=5; r++){
