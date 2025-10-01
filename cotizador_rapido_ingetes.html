@@ -133,6 +133,16 @@
   </div>
 
 <script>
+
+const API_BASE = 'https://portal-api-git-main-ingetes-projects.vercel.app/';
+if (!desc || desc.length < 10) {
+  $("desc").value = `Referencia: ${ref}. Ver ficha: ${j.source}`;
+  alert('No se encontró una descripción clara en el Mall. Usé el título como referencia.');
+} else {
+  $("desc").value = cleanDesc(desc);
+}
+compute();
+
   const $ = (id) => document.getElementById(id);
 
   function moneyCOP(v) {
@@ -319,4 +329,5 @@
 </script>
 </body>
 </html>
+
 
