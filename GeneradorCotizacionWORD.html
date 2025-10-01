@@ -239,8 +239,8 @@ input:focus,select:focus,textarea:focus{
 </div>
 <div>
   <label for="dirigido" class="required">Dirigido a</label>
-  <input id="dirigidoSearch" type="text" placeholder="Escribe para filtrar o ingresar nuevo destinatario" class="combo-input" disabled/>
-  <select id="dirigido" disabled>
+  <input id="dirigidoSearch" type="text" placeholder="Escribe para filtrar o ingresar nuevo destinatario" class="combo-input"/>
+  <select id="dirigido">
     <option value="" selected disabled>-Selecciona primero una empresa-</option>
   </select>
 </div>
@@ -921,10 +921,10 @@ function fillDirigidoOptions(){
   const dirSearch = document.getElementById('dirigidoSearch');
   if(!selEmp || !selDir) return;
 
-  const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
-  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
-  selDir.disabled = true;
-  if (dirSearch) { dirSearch.value=''; dirSearch.disabled = true; }
+const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
+selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+selDir.disabled = false;                       // <- SIEMPRE habilitado
+if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; } // <- SIEMPRE habilitado
 
   const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
   lista.forEach(c=>{
@@ -944,9 +944,6 @@ opt.dataset.ciudad = (c.ciudadPais || '').trim();
 
 selDir.appendChild(opt);
   });
-
-  selDir.disabled = lista.length === 0;
-  if (dirSearch) dirSearch.disabled = (lista.length === 0);
 
   // si solo hay 1 contacto, seleccionarlo y autollenar
   if (lista.length === 1) {
@@ -1062,7 +1059,7 @@ if (empSearch) {
   const opt = selEmp && selEmp.selectedOptions[0];
   empSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : '';
 }
-  if (selDir) { selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>'; selDir.disabled = true; }
+  if (selDir) { selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>'; selDir.disabled = false; }
   if (email) email.value = '';
   if (office) office.value = '';
   if (ubic) ubic.value = '';
@@ -1747,6 +1744,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
