@@ -986,11 +986,11 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     }
 
     // Si no existe, crear/actualizar opción custom
-    if (!customOpt){
-      customOpt = document.createElement('option');
-      customOpt.dataset.custom = '1';
-      sel.appendChild(customOpt);
-    }
+if (!customOpt || !sel.contains(customOpt)) {
+  customOpt = document.createElement('option');
+  customOpt.dataset.custom = '1';
+  sel.appendChild(customOpt);
+}
     customOpt.value = valTyped;
     customOpt.textContent = valTyped;
     customOpt.hidden = false;
@@ -1740,6 +1740,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
