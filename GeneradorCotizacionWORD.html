@@ -645,7 +645,6 @@ function resetForm() {
   //    - Mantener CONTACTS_DB tal cual (no tocarlo)
   //    - Repoblar EMPRESA desde CONTACTS_DB
   const empSearch = document.getElementById('empresaSearch');
-  const dirSearch = document.getElementById('dirigidoSearch');
   if (empSearch) empSearch.value = '';
   if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = false; }
 
@@ -672,11 +671,12 @@ if (selEmp && selEmp.tagName === 'SELECT') {
 
 if (selDir && selDir.tagName === 'SELECT') {
   Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
-  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
-  selDir.disabled = false; // ← NO deshabilitar
-}
+selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+selDir.disabled = false;
+const dirSearch = document.getElementById('dirigidoSearch');
+if (dirSearch){ dirSearch.value=''; dirSearch.disabled=false; }
 
-if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; }
+}
 
   // 6) Quitar resaltados de campos obligatorios
   const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email','ubicacion', 'asunto'];
@@ -972,32 +972,37 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
   const inp = document.getElementById(inputId);
   if (!sel || !inp) return;
 
+  // opción "custom" persistente
   let customOpt = sel.querySelector('option[data-custom="1"]') || null;
 
-  function normalizeStr(s){
-    return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
-  }
-  function resetFilter(){ Array.from(sel.options).forEach(opt => { opt.hidden = false; }); }
+  const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+
+  function resetFilter(){ Array.from(sel.options).forEach(o=>o.hidden=false); }
+
   function filterOptions(q){
-    const Q = normalizeStr(q);
+    const Q = norm(q);
     Array.from(sel.options).forEach((opt, idx)=>{
-      const txt = normalizeStr(opt.textContent||opt.value||'');
-      if (idx===0 && opt.disabled) { opt.hidden = false; return; }
-      if (!Q) { opt.hidden = false; return; }
-      opt.hidden = (matchMode === 'startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
+      const txt = norm(opt.textContent||opt.value||'');
+      if (idx===0 && opt.disabled){ opt.hidden=false; return; }
+      if (!Q){ opt.hidden=false; return; }
+      opt.hidden = (matchMode==='startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
     });
   }
 
-  // → devuelve el texto confirmado (opción existente o "custom")
-  function commitFreeTextIfNeeded(){
-    const valTyped = inp.value.toUpperCase().trim();
+  // Crea/selecciona opción del select con el texto actual del input.
+  // Devuelve el texto confirmado (si no hay texto, devuelve '').
+  function commitFreeTextToSelect(){
+    const valTyped = norm(inp.value);
     if (!valTyped) return '';
 
-    const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === valTyped);
+    // Si existe una opción EXACTA, seleccionar esa
+    const exact = Array.from(sel.options).find(o => norm(o.textContent||o.value||'') === valTyped);
     if (exact){
       sel.value = exact.value;
       return (exact.textContent||exact.value||'').toUpperCase();
     }
+
+    // Si no existe, crear/actualizar opción custom
     if (!customOpt){
       customOpt = document.createElement('option');
       customOpt.dataset.custom = '1';
@@ -1006,11 +1011,12 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     customOpt.value = valTyped;
     customOpt.textContent = valTyped;
     customOpt.hidden = false;
-    sel.value = customOpt.value;
+
+    sel.value = customOpt.value;          // ← SELECCIONA EN EL SELECT
     return valTyped;
   }
 
-  // Sync input ← select
+  // Sincroniza input cuando cambia el select
   sel.addEventListener('change', ()=>{
     const opt = sel.selectedOptions[0];
     if (opt){
@@ -1019,8 +1025,8 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     }
   });
 
-  // Filtrar mientras se escribe
-  inp.addEventListener('input', (e)=>{
+  // Filtra mientras escribes
+  inp.addEventListener('input', ()=>{
     const pos = inp.selectionStart;
     inp.value = inp.value.toUpperCase();
     if (typeof pos === 'number') inp.setSelectionRange(pos, pos);
@@ -1028,29 +1034,29 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     resetFilter();
     filterOptions(inp.value);
 
-    // Si es "dirigido": limpiar autollenado si no hay match exacto
-    if (selectId === 'dirigido') {
-      const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === inp.value.trim());
-      if (!exact) {
+    // Para "dirigido": si lo escrito NO coincide exactamente, limpia autollenado
+    if (selectId === 'dirigido'){
+      const exact = Array.from(sel.options).find(o => norm(o.textContent||o.value||'') === norm(inp.value));
+      if (!exact){
         ['email','office','ubicacion','tel'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
       }
     }
   });
 
-  // ENTER → confirmar y CONSERVAR lo escrito
+  // ENTER → confirmar en el SELECT, conservar texto y luego onCommit
   inp.addEventListener('keydown', (e)=>{
     if (e.key === 'Enter'){
       e.preventDefault(); e.stopPropagation();
-      const confirmed = commitFreeTextIfNeeded();
-      if (confirmed) inp.value = confirmed;  // ← no se borra tras Enter
-      if (typeof onCommit === 'function') onCommit();
+      const confirmed = commitFreeTextToSelect();     // 1) fija select
+      if (confirmed) inp.value = confirmed;           // 2) conserva texto
+      if (typeof onCommit === 'function') onCommit(); // 3) rellena dependientes
     }
   });
 
-  // BLUR → confirmar y CONSERVAR lo escrito
+  // BLUR → mismo flujo que ENTER
   inp.addEventListener('blur', ()=>{
-    const confirmed = commitFreeTextIfNeeded();
-    if (confirmed) inp.value = confirmed;    // ← no se borra al salir
+    const confirmed = commitFreeTextToSelect();
+    if (confirmed) inp.value = confirmed;
     if (typeof onCommit === 'function') onCommit();
   });
 }
@@ -1751,6 +1757,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
