@@ -43,7 +43,7 @@
 <div class="flex gap-2 mt-1">
   <input id="ref" class="w-full border rounded-lg px-3 py-2" placeholder="ej. 3VA1220-5EF32-0AA0">
   <a id="mallLink" class="btn-soft primary" target="_blank" rel="noreferrer">🔎 Industry Mall ↗</a>
-  <button id="fetchMall" type="button" class="btn-soft">🪄 Traer descripción</button>
+  <button id="fetchMall" type="button" class="btn-soft primary">🪄 Traer descripción</button>
 </div>
         </div>
 
@@ -123,7 +123,7 @@
         <pre id="preview" class="text-sm whitespace-pre-wrap leading-6 border rounded-xl p-3 bg-white">(Completa referencia, descripción y valores para ver el bloque final)</pre>
 
         <div class="flex flex-wrap gap-2 items-center">
-          <button id="copyBtn" class="btn-soft primary">📋 Copiar</button>
+          <button id="copyBtn" class="btn-soft">📋 Copiar</button>
           <button id="downloadBtn" class="btn-soft">⬇️ Descargar .txt</button>
           <button id="resetBtn" class="btn-soft">🔄 Reiniciar</button>
           <div id="copyMsg" class="text-sm ml-auto"></div>
@@ -329,6 +329,7 @@ $("ref").addEventListener("input", () => {
 </script>
 </body>
 </html>
+
 
 
 
