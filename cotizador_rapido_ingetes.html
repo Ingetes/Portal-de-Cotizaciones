@@ -133,76 +133,14 @@
   </div>
 
 <script>
+  // ⬅️ Ajusta esto si tu dominio es otro
+  const API_BASE = 'https://portal-api-nine.vercel.app'; // tu backend en Vercel
 
-const API_BASE = 'https://portal-api-git-main-ingetes-projects.vercel.app/';
-if (!desc || desc.length < 10) {
-  $("desc").value = `Referencia: ${ref}. Ver ficha: ${j.source}`;
-  alert('No se encontró una descripción clara en el Mall. Usé el título como referencia.');
-} else {
-  $("desc").value = cleanDesc(desc);
-}
-compute();
-
+  // Helpers
   const $ = (id) => document.getElementById(id);
-
-  function moneyCOP(v) {
-    if (v == null || isNaN(v)) return "—";
-    return v.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
-  }
-
-   // === AUTOFILL descripción desde tu API de Vercel ===
-  const API_BASE = 'https://portal-api-nine.vercel.app'; // tu dominio del backend
-
-  async function fetchMallDescription() {
-    const ref = $("ref").value.trim();
-    if (!ref) {
-      alert("Escribe una referencia (MLFB) primero.");
-      return;
-    }
-
-    try {
-      // feedback visual
-      const btn = document.getElementById('fetchMall');
-      const oldText = btn.textContent;
-      btn.disabled = true;
-      btn.textContent = 'Buscando…';
-
-      const url = `${API_BASE}/api/industry-mall?mlfb=${encodeURIComponent(ref)}`;
-      const r = await fetch(url, { method: 'GET' });
-      const j = await r.json().catch(()=> ({}));
-
-      btn.disabled = false;
-      btn.textContent = oldText;
-
-      if (!r.ok) {
-        alert(`No se pudo consultar (${r.status}).`);
-        return;
-      }
-
-      const desc = (j && j.description || '').trim();
-      if (!desc) {
-        alert('No se encontró descripción. Ábrelo con el botón "Industry Mall" y copia manualmente.');
-        return;
-      }
-
-      // Limpieza y pegado
-      $("desc").value = cleanDesc(desc);
-      compute(); // refresca la previsualización
-    } catch (e) {
-      alert('Error consultando la API. Revisa la consola o el backend.');
-    }
-  }
-
-  // Enlaza el botón
-  document.getElementById('fetchMall')?.addEventListener('click', fetchMallDescription);
-
-  // Mantén actualizado el link al Mall al tipear la referencia
-  $("ref").addEventListener("input", () => {
-    const ref = $("ref").value.trim();
-    $("mallLink").href = ref 
-      ? `https://mall.industry.siemens.com/mall/en/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
-      : "#";
-  });
+  const moneyCOP = (v) => (v == null || isNaN(v))
+    ? "—"
+    : v.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 
   function cleanDesc(text) {
     if (!text) return "";
@@ -218,8 +156,7 @@ compute();
   function normalizeAvailability(input) {
     const raw = (input || "").trim();
     if (!raw) return "(sin confirmar)";
-    const digits = raw.match(/\d+/g)?.map(n => parseInt(n, 10)) || [];
-    const n = digits[0];
+    const n = (raw.match(/\d+/)?.[0]) ? parseInt(raw.match(/\d+/)[0], 10) : NaN;
     if (!Number.isFinite(n)) return raw;
     if (n >= 1 && n <= 5) return "3-5 días. (Salvo venta previa)";
     if (n >= 30 && n <= 45) return "30-45 días. (Salvo venta previa)";
@@ -229,13 +166,56 @@ compute();
     return raw;
   }
 
+  // === AUTOFILL: pedir descripción a tu API ===
+  async function fetchMallDescription() {
+    const ref = $("ref").value.trim();
+    if (!ref) {
+      alert("Escribe una referencia (MLFB) primero.");
+      return;
+    }
+
+    const btn = $("fetchMall");
+    const oldText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Buscando…';
+
+    try {
+      const url = `${API_BASE}/api/industry-mall?mlfb=${encodeURIComponent(ref)}`;
+      const r = await fetch(url, { method: 'GET' });
+      const j = await r.json().catch(() => ({}));
+
+      btn.disabled = false;
+      btn.textContent = oldText;
+
+      if (!r.ok) {
+        alert(`No se pudo consultar (${r.status}). Abre el Industry Mall y copia manualmente.`);
+        return;
+      }
+
+      const desc = (j && j.description || '').trim();
+      if (!desc) {
+        $("desc").value = `Referencia: ${ref}. Ver ficha: ${j.source || 'N/A'}`;
+        alert('No se encontró una descripción clara en el Mall. Usé un texto de apoyo.');
+      } else {
+        $("desc").value = cleanDesc(desc);
+      }
+      compute();
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = oldText;
+      alert('Error consultando la API. Revisa la consola o el backend.');
+      console.error(e);
+    }
+  }
+
+  // Cálculos y previsualización
   function compute() {
     const ref = $("ref").value.trim();
-    $("mallLink").href = ref ? `https://mall.industry.siemens.com/mall/en/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}` : "#";
+    $("mallLink").href = ref
+      ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
+      : "#";
 
-    const descRaw = $("desc").value;
-    const desc = cleanDesc(descRaw);
-
+    const desc = cleanDesc($("desc").value);
     const priceMode = $("priceMode").value;
     const price = Number($("price").value || 0);
     const trm = Number($("trm").value || 0);
@@ -262,7 +242,7 @@ compute();
       : "(Completa referencia, descripción y valores para ver el bloque final)";
     $("preview").textContent = block;
 
-    return block !== "(Completa referencia, descripción y valores para ver el bloque final)" ? block : "";
+    return block.includes("Completa referencia") ? "" : block;
   }
 
   async function copyBlock() {
@@ -274,9 +254,9 @@ compute();
         await navigator.clipboard.writeText(txt);
         $("copyMsg").textContent = "✅ Copiado al portapapeles";
         $("copyMsg").className = "text-sm ml-auto text-emerald-600";
-        return;
+      } else {
+        throw new Error("clipboard not available");
       }
-      throw new Error("clipboard not available");
     } catch {
       $("copyMsg").textContent = "⚠️ Copia manual: selecciona el texto y presiona Ctrl/Cmd+C";
       $("copyMsg").className = "text-sm ml-auto text-amber-600";
@@ -314,6 +294,15 @@ compute();
     compute();
   }
 
+  // Eventos
+  $("fetchMall").addEventListener("click", fetchMallDescription);
+  $("mallLink").addEventListener("click", (e) => { if (!$("ref").value.trim()) e.preventDefault(); });
+  $("ref").addEventListener("input", () => {
+    const ref = $("ref").value.trim();
+    $("mallLink").href = ref
+      ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
+      : "#";
+  });
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
     $(id).addEventListener("change", compute);
@@ -321,13 +310,12 @@ compute();
   $("copyBtn").addEventListener("click", copyBlock);
   $("downloadBtn").addEventListener("click", downloadTxt);
   $("resetBtn").addEventListener("click", resetAll);
-  $("mallLink").addEventListener("click", (e) => {
-    if (!$("ref").value.trim()) e.preventDefault();
-  });
 
+  // Init
   compute();
 </script>
 </body>
 </html>
+
 
 
