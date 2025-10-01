@@ -638,7 +638,7 @@ function resetForm() {
   const empSearch = document.getElementById('empresaSearch');
   const dirSearch = document.getElementById('dirigidoSearch');
   if (empSearch) empSearch.value = '';
-  if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = true; }
+  if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = false; }
 
   const selEmp = document.getElementById('empresa');
   const selDir = document.getElementById('dirigido');
@@ -666,8 +666,8 @@ if (selDir && selDir.tagName === 'SELECT') {
   selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
   selDir.disabled = false; // ← NO deshabilitar
 }
-const dirSearch = document.getElementById('dirigidoSearch');
-if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; } // ← NO deshabilitar
+
+if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; }
 
   // 6) Quitar resaltados de campos obligatorios
   const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email','ubicacion', 'asunto'];
@@ -899,7 +899,7 @@ function fillEmpresaOptions(){
   // limpiar
   selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
   selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
-  selDir.disabled = true;
+  selDir.disabled = false;
 
   // opciones
   const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
@@ -979,7 +979,7 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     });
   }
 
-  // Devuelve el texto confirmado (sea opción existente o custom)
+  // → devuelve el texto confirmado (opción existente o "custom")
   function commitFreeTextIfNeeded(){
     const valTyped = inp.value.toUpperCase().trim();
     if (!valTyped) return '';
@@ -1010,7 +1010,7 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     }
   });
 
-  // Filtrar mientras escribe
+  // Filtrar mientras se escribe
   inp.addEventListener('input', (e)=>{
     const pos = inp.selectionStart;
     inp.value = inp.value.toUpperCase();
@@ -1019,7 +1019,7 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     resetFilter();
     filterOptions(inp.value);
 
-    // Si es el de dirigido: limpiar autollenado si no hay match exacto
+    // Si es "dirigido": limpiar autollenado si no hay match exacto
     if (selectId === 'dirigido') {
       const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === inp.value.trim());
       if (!exact) {
@@ -1028,20 +1028,20 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     }
   });
 
-  // Enter: confirmar y CONSERVAR lo escrito
+  // ENTER → confirmar y CONSERVAR lo escrito
   inp.addEventListener('keydown', (e)=>{
     if (e.key === 'Enter'){
       e.preventDefault(); e.stopPropagation();
       const confirmed = commitFreeTextIfNeeded();
-      if (confirmed) inp.value = confirmed;  // <- asegura que no se borre
+      if (confirmed) inp.value = confirmed;  // ← no se borra tras Enter
       if (typeof onCommit === 'function') onCommit();
     }
   });
 
-  // Blur: confirmar y CONSERVAR lo escrito
+  // BLUR → confirmar y CONSERVAR lo escrito
   inp.addEventListener('blur', ()=>{
     const confirmed = commitFreeTextIfNeeded();
-    if (confirmed) inp.value = confirmed;    // <- asegura que no se borre
+    if (confirmed) inp.value = confirmed;    // ← no se borra al salir
     if (typeof onCommit === 'function') onCommit();
   });
 }
@@ -1742,6 +1742,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
