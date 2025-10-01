@@ -968,9 +968,7 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
   function normalizeStr(s){
     return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
   }
-  function resetFilter(){
-    Array.from(sel.options).forEach(opt => { opt.hidden = false; });
-  }
+  function resetFilter(){ Array.from(sel.options).forEach(opt => { opt.hidden = false; }); }
   function filterOptions(q){
     const Q = normalizeStr(q);
     Array.from(sel.options).forEach((opt, idx)=>{
@@ -980,14 +978,16 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
       opt.hidden = (matchMode === 'startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
     });
   }
+
+  // Devuelve el texto confirmado (sea opción existente o custom)
   function commitFreeTextIfNeeded(){
     const valTyped = inp.value.toUpperCase().trim();
-    if (!valTyped) return;
+    if (!valTyped) return '';
 
     const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === valTyped);
     if (exact){
       sel.value = exact.value;
-      return;
+      return (exact.textContent||exact.value||'').toUpperCase();
     }
     if (!customOpt){
       customOpt = document.createElement('option');
@@ -998,9 +998,10 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     customOpt.textContent = valTyped;
     customOpt.hidden = false;
     sel.value = customOpt.value;
+    return valTyped;
   }
 
-  // Sync input cuando cambia el select
+  // Sync input ← select
   sel.addEventListener('change', ()=>{
     const opt = sel.selectedOptions[0];
     if (opt){
@@ -1009,8 +1010,8 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     }
   });
 
-  // Filtrar mientras se escribe
-  inp.addEventListener('input', ()=>{
+  // Filtrar mientras escribe
+  inp.addEventListener('input', (e)=>{
     const pos = inp.selectionStart;
     inp.value = inp.value.toUpperCase();
     if (typeof pos === 'number') inp.setSelectionRange(pos, pos);
@@ -1018,32 +1019,29 @@ function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'start
     resetFilter();
     filterOptions(inp.value);
 
-    // --- Limpia autollenado si lo escrito NO coincide exactamente con ninguna opción ---
+    // Si es el de dirigido: limpiar autollenado si no hay match exacto
     if (selectId === 'dirigido') {
       const exact = Array.from(sel.options).find(o => (o.textContent||o.value||'').toUpperCase().trim() === inp.value.trim());
       if (!exact) {
-    const email  = document.getElementById('email');
-    const office = document.getElementById('office');
-    const ubic   = document.getElementById('ubicacion');
-    const tel    = document.getElementById('tel');
-    if (email)  email.value  = '';
-    if (office) office.value = '';
-    if (ubic)   ubic.value   = '';
-    if (tel)    tel.value    = ''; 
+        ['email','office','ubicacion','tel'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
       }
     }
   });
 
-  // Confirmación con Enter / blur
+  // Enter: confirmar y CONSERVAR lo escrito
   inp.addEventListener('keydown', (e)=>{
     if (e.key === 'Enter'){
-      e.preventDefault();
-      commitFreeTextIfNeeded();
+      e.preventDefault(); e.stopPropagation();
+      const confirmed = commitFreeTextIfNeeded();
+      if (confirmed) inp.value = confirmed;  // <- asegura que no se borre
       if (typeof onCommit === 'function') onCommit();
     }
   });
+
+  // Blur: confirmar y CONSERVAR lo escrito
   inp.addEventListener('blur', ()=>{
-    commitFreeTextIfNeeded();
+    const confirmed = commitFreeTextIfNeeded();
+    if (confirmed) inp.value = confirmed;    // <- asegura que no se borre
     if (typeof onCommit === 'function') onCommit();
   });
 }
@@ -1744,6 +1742,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
