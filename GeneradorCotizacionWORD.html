@@ -921,7 +921,8 @@ if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; } // <- SIEMPRE
   const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
   lista.forEach(c=>{
     const cargoNorm = _normKey(c.cargo);
-    const isIng = /(ingenier[oaí]|ing\.)/.test(cargoNorm);
+    // detecta: INGENIERO, INGENIERA, INGENIERIA (con/sin tilde), y la abreviatura ING o ING.
+    const isIng = /\b(ing(\.?|\b)|ingenier\w*)/.test(cargoNorm);
     const etiqueta = (isIng ? 'ING. ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
 
 const opt = document.createElement('option');
@@ -1740,6 +1741,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
