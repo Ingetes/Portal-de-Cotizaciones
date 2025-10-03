@@ -630,6 +630,19 @@ window.addEventListener('message', async (ev)=>{
     window.downloadFallback(buffer, filename, mime);
   }
 });
+/* ===== El portal abre el Mall en top cuando lo pida el iframe ===== */
+window.addEventListener('message', (ev) => {
+  const d = ev.data || {};
+  if (d && d.__openMallTop && typeof d.url === 'string') {
+    try {
+      // Navegación top-level (lo más compatible con SSO)
+      window.location.href = d.url;
+    } catch (_) {
+      // Fallback por si algo raro impide cambiar location
+      window.open(d.url, '_blank', 'noopener');
+    }
+  }
+});
 
 </script>
 </body>
