@@ -98,7 +98,9 @@
   <label for="ref">Referencia (MLFB)</label>
   <div class="ref-grid">
     <input id="ref" type="text" placeholder="Ej. 6ES7131-6BH01-0BA0" />
-    <a id="mallLink" class="btn ghost" target="_blank" rel="noopener noreferrer">🔎 Industry Mall ↗</a>
+    <a id="mallLink" class="btn ghost" target="_blank" rel="noopener noreferrer">
+  🔎 Industry Mall ↗
+</a>
     <button id="fetchMall" class="btn primary">✨ Traer descripción</button>
   </div>
 </div>
@@ -355,13 +357,26 @@
   $("fetchMall").addEventListener("click", fetchMallDescription);
 $("mallLink").addEventListener("click", (e) => {
   const ref = $("ref").value.trim();
-  if (!ref) {               // sin referencia, no dejes navegar
+  if (!ref) {               // sin referencia, no navegues
     e.preventDefault();
     return;
   }
-  // Asegura que el href esté correcto justo antes del click
-  e.currentTarget.href = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
-  // No hagas preventDefault. Deja que el <a target="_blank"> abra la pestaña.
+  const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
+
+  // Si estamos embebidos en un iframe, navega la ventana superior (_top)
+  if (window.top !== window.self) {
+    e.preventDefault();
+    try {
+      // lo más compatible con SSO/IdP
+      window.top.location.href = url;
+    } catch (_) {
+      // si el contenedor bloquea top-navigation, cae al plan B
+      window.open(url, "_blank", "noopener");
+    }
+  } else {
+    // sin iframe: deja que el <a target="_blank"> haga su trabajo
+    e.currentTarget.href = url;
+  }
 });
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
@@ -376,6 +391,7 @@ $("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
