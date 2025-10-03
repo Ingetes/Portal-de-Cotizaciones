@@ -357,24 +357,16 @@
   $("fetchMall").addEventListener("click", fetchMallDescription);
 $("mallLink").addEventListener("click", (e) => {
   const ref = $("ref").value.trim();
-  if (!ref) {               // sin referencia, no navegues
-    e.preventDefault();
-    return;
-  }
+  if (!ref) { e.preventDefault(); return; }
+
   const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
 
-  // Si estamos embebidos en un iframe, navega la ventana superior (_top)
   if (window.top !== window.self) {
+    // Estamos embebidos → que el PADRE haga la navegación
     e.preventDefault();
-    try {
-      // lo más compatible con SSO/IdP
-      window.top.location.href = url;
-    } catch (_) {
-      // si el contenedor bloquea top-navigation, cae al plan B
-      window.open(url, "_blank", "noopener");
-    }
+    window.top.postMessage({ __openMallTop: true, url }, "*");
   } else {
-    // sin iframe: deja que el <a target="_blank"> haga su trabajo
+    // Standalone → deja que el <a target="_blank"> funcione normal
     e.currentTarget.href = url;
   }
 });
@@ -391,6 +383,7 @@ $("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
