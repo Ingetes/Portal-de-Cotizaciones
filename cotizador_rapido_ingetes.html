@@ -98,7 +98,9 @@
   <label for="ref">Referencia (MLFB)</label>
   <div class="ref-grid">
     <input id="ref" type="text" placeholder="Ej. 6ES7131-6BH01-0BA0" />
-    <a id="mallLink" class="btn ghost">🔎 Industry Mall ↗</a>
+    <a id="mallLink" class="btn ghost" target="_blank" rel="noopener noreferrer">
+      🔎 Industry Mall ↗
+    </a>
     <button id="fetchMall" class="btn primary">✨ Traer descripción</button>
   </div>
 </div>
@@ -353,23 +355,20 @@
 
   // Eventos
   $("fetchMall").addEventListener("click", fetchMallDescription);
-  $("mallLink").addEventListener("click", (e) => { if (!$("ref").value.trim()) e.preventDefault(); });
-$("ref").addEventListener("input", () => {
+$("mallLink").addEventListener("click", (e) => {
   const ref = $("ref").value.trim();
+  if (!ref) { e.preventDefault(); return; }
 
-  // limpia descripción si el usuario cambia la referencia
-  if (ref !== lastRefUsedForDesc && $("desc").value) {
-    $("desc").value = "";
-    $("preview").textContent = "(Completa referencia, descripción y valores para ver el bloque final)";
-    $("copyMsg").textContent = "";
-    $("copyMsg").className = "text-sm ml-auto";
+  const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
+
+  // Si el cotizador está dentro de un iframe, forzamos nueva pestaña
+  if (window.top !== window.self) {
+    e.preventDefault();
+    window.open(url, "_blank", "noopener");
+  } else {
+    // si no está en iframe, deja que el <a target="_blank"> haga su trabajo
+    $("mallLink").href = url;
   }
-
-  $("mallLink").href = ref
-    ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
-    : "#";
-
-  compute();
 });
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
@@ -384,6 +383,7 @@ $("ref").addEventListener("input", () => {
 </script>
 </body>
 </html>
+
 
 
 
