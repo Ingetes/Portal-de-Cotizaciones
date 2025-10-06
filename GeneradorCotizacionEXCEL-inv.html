@@ -375,7 +375,21 @@ function pickSheetByNameLike(wb, names){
 }
 
   let parsedRows=[], headers=[];
-  (async function init(){ try{ setStatus('Cargando librerías…'); await ensureXLSX(); await ensureExcelJS(); setStatus('Listo. Carga tu archivo.'); }catch(e){ setStatus('Error al iniciar'); setEngineInfo(e.message,'error'); } bindEvents(); updateOutName(); })();
+(async function init(){ 
+  try{ 
+    setStatus('Cargando librerías…'); 
+    await ensureXLSX(); 
+    await ensureExcelJS(); 
+    setStatus('Listo. Carga tu archivo.'); 
+  }catch(e){ 
+    setStatus('Error al iniciar'); 
+    setEngineInfo(e.message,'error'); 
+  } 
+  bindEvents(); 
+  updateOutName();
+  // === Carga automática del Excel de contactos (igual que en Word) ===
+  tryAutoLoadContactsFromFolder();
+})();
 
   function limitYearDigits(input) {
     if (input.value.length > 2) {
@@ -494,6 +508,40 @@ function fillClienteOptions(){
 function hideContactsUploadUI(){
   const row = document.getElementById('xlsDatosRow');
   if (row) row.style.display = 'none';
+}
+
+// Intenta cargar automáticamente el Excel de contactos desde la misma carpeta
+async function tryAutoLoadContactsFromFolder(){
+  // rutas candidatas relativas a este HTML (ajusta si usas otra subcarpeta)
+  const CANDIDATES = [
+    'CONTACTOS.xlsx','Contactos.xlsx','contactos.xlsx',
+    'CLIENTES.xlsx','Clientes.xlsx','clientes.xlsx',
+    'EMPRESAS.xlsx','Empresas.xlsx','empresas.xlsx',
+    'DatosContactos.xlsx','datos_contactos.xlsx',
+    'data/Contactos.xlsx','data/clientes.xlsx','xls/Contactos.xlsx','assets/Contactos.xlsx','assets/xls/Contactos.xlsx'
+  ];
+
+  for (const rel of CANDIDATES){
+    try{
+      const url = new URL(rel, location.href).href + `?v=${Date.now()}`; // evita caché
+      const resp = await fetch(url, { cache:'no-store' });
+      if (!resp.ok) continue;
+
+      const buf = await resp.arrayBuffer();
+      // Si pesa "algo", lo intentamos parsear
+      if (buf.byteLength < 1024) continue;
+
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      if (CONTACTS_DB?.byEmpresa?.size){
+        fillClienteOptions();
+        hideContactsUploadUI();                        // oculta el cargador "Excel datos de contacto"
+        const st = document.getElementById('xlsDatosStatus');
+        if (st) st.textContent = `Empresas: ${CONTACTS_DB.byEmpresa.size} (carga automática)`;
+        return true;
+      }
+    }catch(_){ /* intenta con el siguiente */ }
+  }
+  return false;
 }
 
 // Sincroniza el input #cliente desde el select
@@ -1613,3 +1661,4 @@ if (!saved) {
 </body>
 
 </html>
+
