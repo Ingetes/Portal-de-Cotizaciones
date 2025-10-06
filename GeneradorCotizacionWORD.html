@@ -1,0 +1,1843 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Generador .docx — INGETES</title>
+<style>
+  :root{
+    --bg:#f6f8fb;          /* fondo general */
+    --card:#ffffff;        /* tarjetas / contenedores */
+    --border:#e5e7eb;      /* líneas y bordes suaves */
+    --muted:#6b7280;       /* texto secundario */
+    --text:#0b1020;        /* texto principal */
+    --input-bg:#ffffff;    
+    --input-border:#d1d5db;
+    --input-placeholder:#9ca3af;
+    --btn:#111827;         
+    --btn-border:#0b0f19;
+    --btnText:#ffffff;
+    --pill-bg:#eef2f7;     
+    --pill-text:#111827;
+    --table-head:#f1f5f9;  
+    --radius:16px;
+  }
+
+  body{
+    margin:0;
+    font-family: Inter,system-ui,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+
+label.required::after {
+  content: " *";
+  color: #dc2626;
+}
+
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Ubuntu,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+/* contenedor */
+.wrap{max-width:1100px;margin:28px auto;padding:0 16px;}
+
+/* tarjeta */
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow: 0 6px 14px rgba(0,0,0,.04);
+  margin-bottom:20px;   /* separa cada card */
+}
+
+/* encabezado de tarjeta */
+header{
+  padding:24px 16px;
+  border-bottom:1px solid var(--border);
+  background:#ffffff;
+}
+header h1{margin:0;font-size:24px;font-weight:800;color:var(--text)}
+
+main{max-width:1100px;margin:0 auto;padding:24px 16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px}
+.pad{padding:16px}
+
+/* títulos de sección */
+h2{font-size:18px;margin:22px 0 10px 0;color:var(--text);font-weight:700}
+
+/* etiquetas y controles */
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+input,select,textarea{
+  width:100%;padding:10px 12px;background:var(--input-bg);color:var(--text);
+  border:1px solid var(--input-border);border-radius:10px;outline:none;
+}
+input::placeholder,textarea::placeholder{color:var(--input-placeholder)}
+input:focus,select:focus,textarea:focus{
+  border-color:#9aa7b4; box-shadow:0 0 0 3px rgba(2,132,199,.15);
+}
+
+textarea{min-height:140px;resize:vertical}
+
+/* placeholder gris claro */
+input::placeholder, textarea::placeholder{color:var(--muted)}
+
+/* foco accesible */
+input:focus,select:focus,textarea:focus{
+  border-color:var(--ring);
+  box-shadow:0 0 0 4px color-mix(in srgb, var(--ring) 20%, transparent);
+}
+
+/* grid de 2 columnas con gap amplio */
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:720px){ .grid{grid-template-columns:1fr} }
+
+/* fila de botones */
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+
+/* botón principal oscuro (como el de la imagen) */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 14px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:#f3f4f6;                /* base clara */
+  color:var(--text);
+  cursor:pointer;font-weight:600;
+}
+.btn.primary{
+  background:var(--btn);
+  color:var(--btnText);
+  border-color:var(--btnBorder);
+}
+.btn.primary:hover{filter:brightness(1.05)}
+.btn:hover{background:#eef1f5}
+
+.btn.reset{background:#eef1f5} /* Color rojo para el botón de reinicio */
+
+.btn:focus{outline:2px solid var(--ring);outline-offset:2px}
+.btn.secondary{background:#fff;color:var(--text);border:1px solid var(--line)}
+
+/* Evita desbordes y permite que los inputs encojan correctamente */
+*{ box-sizing: border-box; }
+.grid > *{ min-width: 0; }
+.card{ overflow: hidden; }
+
+/* Hace que un item ocupe las DOS columnas de la grilla */
+.stretch{ grid-column: 1 / -1; }
+
+/* Ocultar campos "otro" hasta que se elija la opción correspondiente */
+.hidden{ display:none !important; }
+
+/* === Cards por sección (2 columnas, responsivo) === */
+/* === Cards por sección (una sola columna) === */
+.cards{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:24px;
+}
+
+/* Card individual de cada sección */
+.card-section{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(0,0,0,.06);
+  padding:20px;
+}
+.card-section h2{
+  margin-top:0;
+  margin-bottom:14px;
+}
+
+#empresa, #dirigido { text-transform: uppercase; }
+  /* NUEVO: utilidad para ocultar */
+.hidden { display: none !important; }
+
+.combo-input{
+  width:100%;
+  margin-bottom:8px;
+  padding:10px 12px;
+  background:var(--input-bg);
+  color:var(--text);
+  border:1px solid var(--input-border);
+  border-radius:10px;
+  outline:none;
+  text-transform: uppercase; /* forzar mayúsculas al escribir */
+}
+.combo-input:focus{
+  border-color:#9aa7b4;
+  box-shadow:0 0 0 3px rgba(2,132,199,.15);
+}
+  
+</style>
+</head>
+<body>
+<header>
+  <h1>Generador de cotizaciones en word</h1>
+  <div>INGETES SAS</div>
+</header>
+
+<div class="wrap">
+
+  <div class="cards">
+
+    <!-- Columna izquierda -->
+    <section class="card-section">
+      <h2>1) Archivo de entrada</h2>
+
+      <div id="bgRow">
+        <label for="bg">Imagen de fondo</label>
+        <input id="bg" type="file" accept="image/png,image/jpeg"/>
+        <small id="bgStatus" style="margin-left:6px;color:#6b7280"></small>
+      </div>
+
+      <label for="xls" style="margin-top:12px">Excel (.xlsx) — hoja “VENTA”</label>
+      <input id="xls" type="file" accept=".xlsx,.xls"/>
+<div id="xlsDatosRow">
+  <label for="xlsDatos" style="margin-top:12px">Excel datos de contacto (.xlsx)</label>
+  <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
+  <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
+</div>
+    </section>
+
+    <!-- Columna derecha -->
+    <section class="card-section">
+      <h2>2) Parámetros iniciales</h2>
+
+      <div class="grid">
+        <div>
+          <label for="fecha" class="required">Fecha</label>
+          <input id="fecha" type="date"/>
+        </div>
+        <div>
+          <label for="comercial" class="required">Comercial</label>
+          <select id="comercial">
+            <option value="" selected disabled>-SELECCIONAR COMERCIAL-</option>
+            <option value="PCR">PABLO CESAR RODRIGUEZ</option>
+            <option value="CPR">CLAUDIA PATRICIA RODRIGUEZ</option>
+            <option value="JSG">JUAN SEBASTIAN GARZON</option>
+            <option value="JSO">JHOAN SEBASTIAN ORTIZ</option>
+            <option value="KAC">KAREN ARIANA CARRILLO</option>
+            <option value="LNM">LIZETH MARTINEZ</option>
+            <option value="HBR">HERNAN ROLDAN</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid" style="margin-top:12px">
+<div>
+  <label for="empresa" class="required">Nombre de la empresa</label>
+  <input id="empresaSearch" type="text" placeholder="Escribe para filtrar o ingresar nueva empresa" class="combo-input"/>
+  <select id="empresa">
+    <option value="" selected disabled>-Seleccionar empresa-</option>
+  </select>
+</div>
+<div>
+  <label for="dirigido" class="required">Dirigido a</label>
+  <input id="dirigidoSearch" type="text" placeholder="Escribe para filtrar o ingresar nuevo destinatario" class="combo-input"/>
+  <select id="dirigido">
+    <option value="" selected disabled>-Selecciona primero una empresa-</option>
+  </select>
+</div>
+      </div>
+
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label for="area" class="required">Área</label>
+          <input id="area" type="text" placeholder="Área"/>
+        </div>
+        <div>
+    <label for="ubicacion" class="required">Ubicación</label>
+    <input id="ubicacion" type="text" placeholder="Ciudad, Departamento"/>
+  </div>
+      </div>
+
+      <!-- NUEVO: Ubicación y Asunto -->
+<div class="grid" style="margin-top:12px">
+  <div>
+          <label for="email" class="required">E-Mail</label>
+          <input id="email" type="text" placeholder=""/>
+        </div>
+  <div>
+    <label for="asunto" class="required">Asunto</label>
+    <input id="asunto" type="text" placeholder="OFERTA SUMINISTRO DE EQUIPOS"/>
+  </div>
+</div>
+
+      <div class="grid" style="margin-top:12px">
+        <div>
+          <label for="office" class="required">Office</label>
+          <input id="office" type="text" placeholder=""/>
+        </div>
+        <div>
+          <label for="tel">Tel.</label>
+          <input id="tel" type="text" placeholder=""/>
+        </div>
+      </div>
+    </section>
+
+    <!-- Columna izquierda (abajo) -->
+    <section class="card-section">
+      <h2>3) Condiciones comerciales</h2>
+
+      <div class="grid" id="condicionesGrid">
+<!-- GARANTIA -->
+<div>
+  <label for="garantia" class="required">GARANTIA</label>
+  <select id="garantia">
+    <option value="" selected disabled>-SELECCIONAR OPCIÓN-</option>
+    <option>12 meses por defecto de fábrica.</option>
+    <option>No aplica.</option>
+    <option>6 meses por defecto de fábrica.</option>
+    <option>3 meses por defecto de fábrica.</option>
+    <option value="__OTRO__">Otro</option>
+  </select>
+  <input id="garantia_otro" class="hidden" type="text" placeholder="Escribe la garantía…"/>
+</div>
+
+<!-- FORMA DE PAGO -->
+<div>
+  <label for="formaPago" class="required">FORMA DE PAGO</label>
+  <select id="formaPago">
+    <option value="" selected disabled>-SELECCIONAR OPCIÓN-</option>
+    <option>Convenido.</option>
+    <option>Anticipado 100%.</option>
+    <option>Anticipo 50% saldo a la llegada de los equipos.</option>
+    <option>Anticipo 30% saldo a la llegada de los equipos.</option>
+    <option>A convenir.</option>
+    <option>Crédito 30 días.</option>
+    <option value="__OTRO__">Otro</option>
+  </select>
+  <input id="formaPago_otro" class="hidden" type="text" placeholder="Escribe la forma de pago…"/>
+</div>
+
+<!-- SITIO ENTREGA -->
+<div>
+  <label for="sitioEntrega" class="required">SITIO ENTREGA</label>
+  <select id="sitioEntrega">
+    <option value="" selected disabled>-SELECCIONAR OPCIÓN-</option>
+    <option>En sus instalaciones.</option>
+    <option>Instalaciones ingetes.</option>
+    <option value="__OTRO__">Otro</option>
+  </select>
+  <input id="sitioEntrega_otro" class="hidden" type="text" placeholder="Escribe el sitio de entrega…"/>
+</div>
+
+<!-- VALIDEZ DE LA OFERTA -->
+<div>
+  <label for="validezOferta" class="required">VALIDEZ DE LA OFERTA</label>
+  <select id="validezOferta">
+    <option value="" selected disabled>-SELECCIONAR OPCIÓN-</option>
+    <option>30 días.</option>
+    <option>15 días.</option>
+    <option>Hasta final de mes.</option>
+    <option value="__OTRO__">Otro</option>
+  </select>
+  <input id="validezOferta_otro" class="hidden" type="text" placeholder="Escribe la validez…"/>
+</div>
+
+<!-- PRECIOS -->
+<div>
+  <label for="precios" class="required">PRECIOS</label>
+  <select id="precios">
+    <option value="" selected disabled>-SELECCIONAR OPCIÓN-</option>
+    <option>En pesos colombianos.</option>
+    <option>En dólar estadounidense.</option>
+    <option value="__OTRO__">Otro</option>
+  </select>
+  <input id="precios_otro" class="hidden" type="text" placeholder="Escribe la moneda…"/>
+</div>
+
+      <div style="margin-top:12px">
+        <label for="obsExtra">Observaciones adicionales (cada renglón se añade como ítem)</label>
+        <textarea id="obsExtra" placeholder=""></textarea>
+      </div>
+    </section>
+
+    <!-- Columna derecha (abajo) -->
+    <section class="card-section">
+      <h2>4) Generar documento</h2>
+      <div class="row">
+        <button id="make" class="btn">Descargar .DOCX</button>
+        <button id="reset" class="btn">Reiniciar formulario</button>
+      </div>
+    </section>
+
+  </div><!-- /.cards -->
+
+</div>
+
+<script>
+/* ========= Comerciales ========= */
+const COMERCIALES={
+  PCR:{ nombre:"PABLO CESAR RODRIGUEZ", cargo:"Gerente", email:"pcr@ingetes.com", telefono:"310-570-2228", office:"BOGOTÁ" },
+  CPR:{ nombre:"CLAUDIA PATRICIA RODRIGUEZ", cargo:"Ingeniera Comercial", email:"crodriguez@ingetes.com", telefono:"310-342-3006", office:"BOGOTÁ" },
+  JSG:{ nombre:"JUAN SEBASTIAN GARZON", cargo:"Director Comercial", email:"jgarzon@ingetes.com", telefono:"311-898-2684", office:"BOGOTÁ" },
+  JSO:{  nombre:"JHOAN SEBASTIAN ORTIZ", cargo:"Ingeniero Comercial - Especialista en automatización y pesaje", email:"sortiz@ingetes.com.co",  telefono:"312-451-9098", office:"BOGOTÁ" },
+  KAC:{  nombre:"KAREN ARIANA CARRILLO", cargo:"Ingeniera Comercial", email:"kcarrillo@ingetes.com.co",  telefono:"312-326-3066", office:"BOGOTÁ" },
+  LNM:{  nombre:"LIZETH MARTINEZ", cargo:"Ingeniera Comercial", email:"lmartinez@ingetes.com,co",  telefono:"311-810-5540 - 317-381-0421", office:"BOGOTÁ" },
+  HBR:{  nombre:"HERNAN ROLDAN", cargo:"Ingeniero Comercial", email:"hbroldan@ingetes.com.co",  telefono:"314-336-8795", office:"BOGOTÁ" }
+};
+
+function getComercial(){
+  const sel = document.getElementById('comercial');
+  const selectedValue = sel?.value;
+  
+  // Si no hay valor seleccionado o es vacío, retornar null
+  if (!selectedValue) {
+    return null;
+  }
+  
+  return COMERCIALES[selectedValue] || COMERCIALES.JSG;
+}
+
+/* ========= Carga librerías (CDN) ========= */
+(function(){
+  function loadScript(u){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=u;s.onload=res;s.onerror=()=>rej(new Error('No se pudo cargar '+u));document.head.appendChild(s);});}
+  const DOCX_URLS=["https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js","https://unpkg.com/docx@8.5.0/build/index.umd.js"];
+  window.ensureDocx=async()=>{if(window.docx) return docx; for(const u of DOCX_URLS){try{await loadScript(u); if(window.docx) return docx;}catch(e){}} throw new Error('docx no disponible');};
+  window.ensureXLSX=async()=>{if(window.XLSX) return XLSX; await loadScript("https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"); if(!window.XLSX) throw new Error('XLSX no disponible'); return XLSX;};
+  window.ensureExcelJS=async()=>{if(window.ExcelJS) return ExcelJS; await loadScript("https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"); if(!window.ExcelJS) throw new Error('ExcelJS no disponible'); return ExcelJS;};
+})();
+
+/* ========= Utilidades ========= */
+const INCH_TO_TWIP=i=>Math.round(i*1440), INCH_TO_PX=i=>Math.round(i*96), CM_TO_TWIP=cm=>Math.round((cm/2.54)*1440);
+const SPACING_SINGLE={line:240,before:0,after:0}; // 1.0
+const FONTS={ MSS12:{font:'Microsoft Sans Serif',size:24}, TNR12:{font:'Times New Roman',size:24}, AR10:{font:'Arial',size:20}, MSS9:{font:'Microsoft Sans Serif',size:18} };
+const run=(text,spec,opts={})=>new docx.TextRun(Object.assign({text},spec,opts));
+const para=(children,align)=>new docx.Paragraph({children,spacing:SPACING_SINGLE,alignment:align});
+const capFirst=s=>{s=(s||'').toString().trim();return s? s.charAt(0).toUpperCase()+s.slice(1).toLowerCase():'';};
+const val=(id,def='')=>{const el=document.getElementById(id);const v=(el&&typeof el.value==='string')?el.value.trim():'';return v!==''?v:def;};
+
+/* === Fondo por defecto (misma carpeta del HTML) === */
+let _bgBuf = null;           // buffer si el usuario elige archivo
+let _bgName = null;
+
+async function downscaleToJpeg(arrayBuffer, maxW=1024, maxH=1448, quality=0.6){
+  const blob = new Blob([arrayBuffer]);
+  const img  = await createImageBitmap(blob);
+
+  const ratio = Math.min(maxW / img.width, maxH / img.height, 1);
+  const w = Math.round(img.width * ratio), h = Math.round(img.height * ratio);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, w, h);
+
+  const dataUrl = canvas.toDataURL('image/jpeg', quality);
+  const res = await fetch(dataUrl);
+  return await res.arrayBuffer();
+}
+
+// ===== Fondo / Marca de agua (único) =====
+let DEFAULT_BG_BUF = null;
+let DEFAULT_BG_NAME = '';
+
+function setBgStatus(msg){
+  const el = document.getElementById('bgStatus');
+  if (el) el.textContent = msg || '';
+}
+function showBgPicker(show){
+  const row = document.getElementById('bgRow');
+  if (row) row.style.display = show ? '' : 'none';
+}
+
+// Carga automática desde archivos en la misma carpeta (con compresión)
+async function loadDefaultBackground(){
+  const candidates = [
+    'MarcaDeAgua.png','MarcaDeAgua.jpg',
+    'marcadeagua.png','marcadeagua.jpg',
+    'fondo.png','background.png'
+  ];
+  for (const name of candidates){
+    try{
+      const resp = await fetch(name, { cache: 'no-store' });
+      if (!resp.ok) continue;
+      const buf = await resp.arrayBuffer();
+
+      // ↓↓↓ Comprimir SIEMPRE y guardar SOLO la versión comprimida
+      DEFAULT_BG_BUF  = await downscaleToJpeg(buf, 1275, 1650, 0.72); // ~A4 a 150 dpi aprox.
+      DEFAULT_BG_NAME = name;
+
+      setBgStatus(`Marca de agua cargada automáticamente: ${name} ✓`);
+      showBgPicker(false);
+      return;
+    }catch(_){}
+  }
+  setBgStatus('Sube una imagen para Marca de agua.');
+  showBgPicker(true);
+}
+
+// Manejo del input manual (siempre comprimir)
+function wireBackgroundInput(){
+  const input = document.getElementById('bg');
+  if (!input) return;
+  input.addEventListener('change', async () => {
+    const f = input.files && input.files[0];
+    if (!f){
+      setBgStatus('Sin imagen seleccionada.');
+      DEFAULT_BG_BUF = null;
+      DEFAULT_BG_NAME = '';
+      showBgPicker(true);
+      return;
+    }
+    try{
+      const raw = await f.arrayBuffer();
+      DEFAULT_BG_BUF  = await downscaleToJpeg(raw, 1275, 1650, 0.72);
+      DEFAULT_BG_NAME = f.name.replace(/\.(png|jpg|jpeg)$/i, '.jpg');
+      setBgStatus(`Marca de agua cargada: ${DEFAULT_BG_NAME} ✓`);
+      showBgPicker(false);
+    }catch(e){
+      console.error(e);
+      setBgStatus('Error leyendo la imagen.');
+      showBgPicker(true);
+    }
+  });
+}
+
+// ===== Listeners únicos =====
+window.addEventListener('load', () => {
+  // “Otro”
+  ['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(bindOtroToggle);
+
+  // Fondo
+  wireBackgroundInput();
+  loadDefaultBackground();
+
+  // Descargar
+  const btnMake = document.getElementById('make');
+  if (btnMake){
+    btnMake.addEventListener('click', async () => {
+      try{
+        if (!validateRequiredFields()) return;
+
+        const docx = await ensureDocx();
+        const xlsEl = document.getElementById('xls');
+        const xlsFile = xlsEl && xlsEl.files && xlsEl.files[0];
+        if (!xlsFile) throw new Error('Debe cargar un archivo Excel (.xlsx)');
+
+        // fondo: automático o manual (obligatorio)
+        const bgBuf = DEFAULT_BG_BUF;
+        if (!bgBuf) throw new Error('Debe cargar una imagen de fondo');
+
+        const xlsBuf = await xlsFile.arrayBuffer();
+        const table  = await buildTableFromWorkbook(docx, xlsBuf);
+
+        const baseName = xlsFile.name.replace(/\.[^.]+$/, '');
+        const doc = buildDocCommon(docx, baseName, bgBuf, table);
+
+        // descarga con FS Access si existe; si no, fallback a <a>
+        if (typeof downloadWithFilePicker === 'function'){
+          await downloadWithFilePicker(doc, baseName + '.docx');
+        }else{
+          const blob = await docx.Packer.toBlob(doc);
+          const url  = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = baseName + '.docx';
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+        }
+      }catch(e){
+        console.error(e);
+        alert('Error: ' + (e.message || e));
+      }
+    });
+  }
+
+  // Reiniciar
+  const btnReset = document.getElementById('reset');
+  if (btnReset){
+    btnReset.addEventListener('click', (ev)=>{
+      ev.preventDefault();
+      resetForm();
+    });
+  }
+});
+
+function comboVal(selectId, inputId, def=''){
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  const sv  = sel && typeof sel.value==='string' ? sel.value.trim() : '';
+  const iv  = inp && typeof inp.value==='string' ? inp.value.trim() : '';
+  // si el select tiene valor, gana el select; si está vacío, usa lo escrito en el input
+  return (sv || iv || def).toUpperCase();
+}
+
+function validateRequiredFields() {
+  const requiredIds = ['fecha','comercial','area','office','email','ubicacion','asunto'];
+  const missing = [];
+
+  // fecha
+  if (!val('fecha')) missing.push('fecha');
+
+  // comercial
+  const selCom = document.getElementById('comercial');
+  if (!selCom || !selCom.value) missing.push('comercial');
+
+  // empresa y dirigido: considerar select + input editable
+  const empresaOk  = comboVal('empresa','empresaSearch','');
+  const dirigidoOk = comboVal('dirigido','dirigidoSearch','');
+  if (!empresaOk)  missing.push('empresa');
+  if (!dirigidoOk) missing.push('dirigido');
+
+// Condiciones comerciales: todas obligatorias
+['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(id => {
+  const sel = document.getElementById(id);
+  if (!sel || !sel.value) {
+    missing.push(id);
+  } else if (sel.value === '__OTRO__') {
+    const inp = document.getElementById(id + '_otro');
+    if (!inp || !inp.value.trim()) missing.push(id + '_otro');
+  }
+});
+
+  // el resto
+  requiredIds.forEach(id => { if (!val(id)) missing.push(id); });
+
+  if (missing.length) {
+    const msg = 'Por favor complete los siguientes campos obligatorios:\n' +
+      missing.map(id => (document.querySelector(`label[for="${id}"]`)?.textContent||id).replace(' *','')).join('\n');
+
+    // resaltar
+    missing.forEach(id => {
+      const el = document.getElementById(id);
+      if (el){ el.style.borderColor='#dc2626'; el.style.boxShadow='0 0 0 2px rgba(220,38,38,0.2)'; }
+    });
+
+    if (window.parent !== window.self) {
+      window.parent.postMessage({ __ingetes_alert:true, message: msg }, '*');
+    } else {
+      alert(msg);
+    }
+    return false;
+  }
+  return true;
+}
+
+/* ========= Función para reiniciar formulario ========= */
+function resetForm() {
+  // 1) Archivos: NO tocar imagen de fondo ni Excel de contactos
+  //    -> solo limpiamos el Excel de VENTA porque es el que cambia por cotización
+  const xlsInput = document.getElementById('xls');
+  if (xlsInput) xlsInput.value = '';
+
+  // 2) Fecha
+  const fechaEl = document.getElementById('fecha');
+  if (fechaEl) fechaEl.value = '';
+
+  // 3) Selects de condiciones
+const selCom = document.getElementById('comercial');
+if (selCom) selCom.selectedIndex = 0;
+
+['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(id=>{
+  const sel = document.getElementById(id);
+  if (sel) sel.selectedIndex = 0; // vuelve al placeholder
+  const inp = document.getElementById(id + '_otro');
+  if (inp) { inp.value = ''; inp.classList.add('hidden'); }
+});
+  const selGar = document.getElementById('garantia');      if (selGar) selGar.selectedIndex = 0;
+  const selFP  = document.getElementById('formaPago');     if (selFP)  selFP.selectedIndex  = 5; // Crédito 30 días
+  const selSit = document.getElementById('sitioEntrega');  if (selSit) selSit.selectedIndex = 0;
+  const selVal = document.getElementById('validezOferta'); if (selVal) selVal.selectedIndex = 0;
+  const selPre = document.getElementById('precios');       if (selPre) selPre.selectedIndex = 0;
+
+  // 4) Textos
+  const idsTxt = ['empresa','dirigido','area','office','tel','email','ubicacion','asunto','obsExtra'];
+  idsTxt.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  // 5) Combos editables (buscadores + selects)
+  //    - Mantener CONTACTS_DB tal cual (no tocarlo)
+  //    - Repoblar EMPRESA desde CONTACTS_DB
+  const empSearch = document.getElementById('empresaSearch');
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if (empSearch) empSearch.value = '';
+  if (dirSearch) { dirSearch.value = ''; dirSearch.disabled = false; }
+
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+
+if (selEmp && selEmp.tagName === 'SELECT') {
+  Array.from(selEmp.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  if (CONTACTS_DB && CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
+    const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+    empresas.forEach(e=>{
+      const opt = document.createElement('option');
+      opt.value = e.toUpperCase();
+      opt.textContent = e.toUpperCase();
+      opt.dataset.empraw = e;
+      selEmp.appendChild(opt);
+    });
+  }
+}
+
+if (selDir && selDir.tagName === 'SELECT') {
+  Array.from(selDir.querySelectorAll('option[data-custom="1"]')).forEach(o=>o.remove());
+  selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+  selDir.disabled = false; // siempre habilitado
+}
+
+  // 6) Quitar resaltados de campos obligatorios
+  const requiredFields = [
+  'fecha','comercial','empresa','dirigido','area','office','email','ubicacion','asunto',
+  'garantia','formaPago','sitioEntrega','validezOferta','precios',
+  'garantia_otro','formaPago_otro','sitioEntrega_otro','validezOferta_otro','precios_otro'
+  ];
+  requiredFields.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.borderColor = ''; el.style.boxShadow = ''; }
+  });
+
+  // 7) Ocultar inputs "Otro" y limpiar sus textos
+  ['garantia_otro','formaPago_otro','sitioEntrega_otro','validezOferta_otro','precios_otro'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) { el.value=''; el.classList.add('hidden'); }
+  });
+
+  // 8) Fondo: NO tocar DEFAULT_BG_BUF / DEFAULT_BG_NAME ni el estado visual
+  //    (se mantiene la imagen cargada automática o manual previamente)
+  //    Tampoco tocar el bloque de subida de contactos (ya está oculto si se autodetectó).
+
+  // Mensaje final
+  const successMessage = 'Formulario reiniciado (se conserva la imagen de fondo y el Excel de contactos).';
+  if (window.parent !== window.self) {
+    window.parent.postMessage({ __ingetes_alert:true, message: successMessage }, '*');
+  } else {
+    alert(successMessage);
+  }
+}
+
+/* ========= Descarga con File System Access API ========= */
+async function downloadWithFilePicker(doc, fileName) {
+  try {
+    // Crear el blob del documento
+    const blob = await docx.Packer.toBlob(doc);
+    const buffer = await blob.arrayBuffer();
+    
+    // Verificar si estamos dentro de un iframe (portal)
+    if (window.parent !== window.self) {
+      // Enviar mensaje al padre para manejar la descarga
+      window.parent.postMessage({
+        __ingetes_download: true,
+        filename: fileName,
+        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        buffer: buffer
+      }, '*');
+      return;
+    }
+    
+    // Verificar si el navegador soporta la API de File System Access
+    if ('showSaveFilePicker' in window) {
+      try {
+        // Mostrar el diálogo para guardar archivo
+        const handle = await window.showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{
+            description: 'Documento Word',
+            accept: {
+              'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+            }
+          }]
+        });
+        
+        // Crear un stream para escribir el archivo
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        
+        console.log('Archivo guardado exitosamente');
+      } catch (err) {
+        if (err.name !== 'AbortError') {
+          console.error('Error al guardar el archivo:', err);
+          // Fallback a descarga tradicional si hay error
+          downloadWithFallback(blob, fileName);
+        }
+      }
+    } else {
+      // Fallback para navegadores que no soportan la API
+      downloadWithFallback(blob, fileName);
+    }
+  } catch (error) {
+    console.error('Error al generar el documento:', error);
+    alert('Error al generar el documento: ' + error.message);
+  }
+}
+
+// Método de respaldo para navegadores que no soportan la API
+function downloadWithFallback(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Select con opción "Otro"
+function choiceVal(id, def=''){
+  const sel=document.getElementById(id);
+  if(!sel) return def;
+  const v=sel.value||'';
+  if(v==='__OTRO__'){
+    const other=document.getElementById(id+'_otro');
+    return (other && other.value.trim()) ? other.value.trim() : def;
+  }
+  return v.trim()||def;
+}
+
+function bindOtroToggle(id){
+  const sel=document.getElementById(id);
+  const other=document.getElementById(id+'_otro');
+  if(!sel||!other) return;
+  const sync=()=>{
+    if(sel.value==='__OTRO__'){
+      other.classList.remove('hidden');
+      other.focus();
+    } else {
+      other.classList.add('hidden');
+    }
+  };
+  sel.addEventListener('change',sync);
+  sync(); // inicializa
+}
+
+// ========= NUEVO: Excel de contactos y listas dependientes =========
+
+let CONTACTS_DB = { byEmpresa: new Map(), all: [] };
+
+function _normStr(s){
+  return (s||'').toString().trim();
+}
+function _normKey(s){
+  return _normStr(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // sin acentos
+}
+
+async function parseContactsWorkbook(arrayBuffer){
+  const XLSX = await ensureXLSX();
+  const wb = XLSX.read(arrayBuffer, { type:'array', cellStyles:false });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if(!ws) throw new Error('No se encontró hoja de contactos');
+
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  const getCell = (r,c) => {
+    const a = XLSX.utils.encode_cell({r,c});
+    const cell = ws[a];
+    if(!cell) return '';
+    if(typeof cell.w === 'string') return cell.w;
+    return cell.v==null ? '' : String(cell.v);
+  };
+
+// 1) Encontrar fila de encabezados
+let headerRow = -1, cols = {};
+for(let r=range.s.r; r<=range.e.r; r++){
+  const names = [];
+  for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
+  const idxEmpresa = names.findIndex(v => v.includes('nombre de la cuenta'));
+  const idxNombre  = names.findIndex(v => v === 'nombre');
+  const idxApell   = names.findIndex(v => v === 'apellidos');
+  const idxCargo   = names.findIndex(v => v === 'cargo');
+
+  // Teléfono / Móvil (normalizados sin acentos)
+  const idxTel     = names.findIndex(v => v.startsWith('telefono'));  // Teléfono
+  const idxMovil   = names.findIndex(v => v.startsWith('movil'));     // Móvil
+
+  const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));
+  const idxCiudad  = names.findIndex(v => v.startsWith('ciudad')); // “Ciudad o País”
+
+  if (idxEmpresa>=0 && idxNombre>=0 && idxApell>=0 && idxEmail>=0){
+    headerRow = r;
+    cols = {
+      empresa:idxEmpresa, nombre:idxNombre, apellidos:idxApell, cargo:idxCargo,
+      telefono:idxTel, movil:idxMovil, email:idxEmail, ciudadPais:idxCiudad
+    };
+    break;
+  }
+}
+if(headerRow < 0) throw new Error('No se detectaron encabezados en el Excel de contactos');
+
+  // 2) Recorrer filas con "arrastre" de empresa y omitir "Subtotal"
+  const rows = [];
+  let lastEmpresa = '';
+  for(let r=headerRow+1; r<=range.e.r; r++){
+const vEmpresa = _normStr(getCell(r, cols.empresa));
+const vNombre  = _normStr(getCell(r, cols.nombre));
+const vApell   = _normStr(getCell(r, cols.apellidos));
+const vCargo   = _normStr(cols.cargo!=null ? getCell(r, cols.cargo) : '');
+const vTel     = _normStr(cols.telefono!=null ? getCell(r, cols.telefono) : '');
+const vMovil   = _normStr(cols.movil!=null ? getCell(r, cols.movil) : '');
+const vEmail   = _normStr(cols.email!=null ? getCell(r, cols.email) : '');
+const vCiudad  = _normStr(cols.ciudadPais!=null ? getCell(r, cols.ciudadPais) : '');
+
+    // saltar subtotales/filas vacías
+    const line = [vEmpresa, vNombre, vApell, vEmail].join(' ').toLowerCase();
+    if (line.includes('subtotal') || (!vNombre && !vApell && !vEmail)) continue;
+
+    if (vEmpresa) lastEmpresa = vEmpresa;     // "arrastre"
+    const empresa = lastEmpresa;
+    if (!empresa) continue;
+
+rows.push({
+  id: rows.length,
+  empresa,
+  nombre: vNombre,
+  apellidos: vApell,
+  cargo: vCargo,
+  telefono: vTel,
+  movil: vMovil,           
+  email: vEmail,
+  ciudadPais: vCiudad
+});
+  }
+
+  // 3) Agrupar por empresa
+  const byEmpresa = new Map();
+  rows.forEach(r=>{
+    const key = r.empresa;
+    if(!byEmpresa.has(key)) byEmpresa.set(key, []);
+    byEmpresa.get(key).push(r);
+  });
+
+  return { byEmpresa, all: rows };
+}
+
+function fillEmpresaOptions(){
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+  if(!selEmp || selEmp.tagName!=='SELECT') return;
+
+  // limpiar
+  selEmp.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  selDir.innerHTML = '<option value="" selected disabled>-Selecciona primero una empresa-</option>';
+  selDir.disabled = false;
+
+  // opciones
+  const empresas = Array.from(CONTACTS_DB.byEmpresa.keys()).sort((a,b)=>a.localeCompare(b,'es'));
+  empresas.forEach(e=>{
+    const opt = document.createElement('option');
+    opt.value = e.toUpperCase();   // valor en mayúsculas
+    opt.textContent = e.toUpperCase();
+    opt.dataset.empraw = e;        // original para buscar contactos
+    selEmp.appendChild(opt);
+  });
+
+  const status = document.getElementById('xlsDatosStatus');
+  if (status) status.textContent = `Empresas: ${empresas.length} • Contactos: ${CONTACTS_DB.all.length}`;
+}
+
+function fillDirigidoOptions(){
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if(!selEmp || !selDir) return;
+
+const empRaw = selEmp.selectedOptions[0]?.dataset?.empraw || '';
+selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>';
+selDir.disabled = false;                       // <- SIEMPRE habilitado
+if (dirSearch) { dirSearch.value=''; dirSearch.disabled = false; } // <- SIEMPRE habilitado
+
+  const lista = CONTACTS_DB.byEmpresa.get(empRaw) || [];
+  lista.forEach(c=>{
+    const cargoNorm = _normKey(c.cargo);
+    // detecta: INGENIERO, INGENIERA, INGENIERIA (con/sin tilde), y la abreviatura ING o ING.
+    const isIng = /\b(ing(\.?|\b)|ingenier\w*)/.test(cargoNorm);
+    const etiqueta = (isIng ? 'ING. ' : 'SR(A). ') + `${c.nombre} ${c.apellidos}`.trim();
+
+const opt = document.createElement('option');
+opt.value = etiqueta.toUpperCase();
+opt.textContent = etiqueta.toUpperCase();
+opt.dataset.cid    = String(c.id);                  // por si haces fallback
+// 👇 Embebe los datos reales para que onDirigidoChange los lea directo
+opt.dataset.tel    = (c.telefono   || '').trim();
+opt.dataset.movil  = (c.movil      || '').trim();
+opt.dataset.email  = (c.email      || '').trim();
+opt.dataset.ciudad = (c.ciudadPais || '').trim();
+
+selDir.appendChild(opt);
+  });
+
+  // si solo hay 1 contacto, seleccionarlo y autollenar
+  if (lista.length === 1) {
+    selDir.selectedIndex = 1;
+    onDirigidoChange();
+  }
+  
+}
+
+// ========= Combo editable con filtro para <select> =========
+function normalizeStr(s){
+  return (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+}
+
+function attachSearchableCombo(selectId, inputId, { onCommit, matchMode = 'startsWith' } = {}){
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  if (!sel || !inp) return;
+
+  // opción "custom" persistente
+  let customOpt = sel.querySelector('option[data-custom="1"]') || null;
+
+  const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+
+  function resetFilter(){ Array.from(sel.options).forEach(o=>o.hidden=false); }
+
+  function filterOptions(q){
+    const Q = norm(q);
+    Array.from(sel.options).forEach((opt, idx)=>{
+      const txt = norm(opt.textContent||opt.value||'');
+      if (idx===0 && opt.disabled){ opt.hidden=false; return; }
+      if (!Q){ opt.hidden=false; return; }
+      opt.hidden = (matchMode==='startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
+    });
+  }
+
+  // Crea/selecciona opción del select con el texto actual del input.
+  // Devuelve el texto confirmado (si no hay texto, devuelve '').
+  function commitFreeTextToSelect(){
+    const valTyped = norm(inp.value);
+    if (!valTyped) return '';
+
+    // Si existe una opción EXACTA, seleccionar esa
+    const exact = Array.from(sel.options).find(o => norm(o.textContent||o.value||'') === valTyped);
+    if (exact){
+      sel.value = exact.value;
+      return (exact.textContent||exact.value||'').toUpperCase();
+    }
+
+    // Si no existe, crear/actualizar opción custom
+if (!customOpt || !sel.contains(customOpt)) {
+  customOpt = document.createElement('option');
+  customOpt.dataset.custom = '1';
+  sel.appendChild(customOpt);
+}
+    customOpt.value = valTyped;
+    customOpt.textContent = valTyped;
+    customOpt.hidden = false;
+
+    sel.value = customOpt.value;          // ← SELECCIONA EN EL SELECT
+    return valTyped;
+  }
+
+  // Sincroniza input cuando cambia el select
+  sel.addEventListener('change', ()=>{
+    const opt = sel.selectedOptions[0];
+    if (opt){
+      inp.value = (opt.textContent||opt.value||'').toUpperCase();
+      if (typeof onCommit === 'function') onCommit();
+    }
+  });
+
+  // Filtra mientras escribes
+  inp.addEventListener('input', ()=>{
+    const pos = inp.selectionStart;
+    inp.value = inp.value.toUpperCase();
+    if (typeof pos === 'number') inp.setSelectionRange(pos, pos);
+
+    resetFilter();
+    filterOptions(inp.value);
+
+    // Para "dirigido": si lo escrito NO coincide exactamente, limpia autollenado
+    if (selectId === 'dirigido'){
+      const exact = Array.from(sel.options).find(o => norm(o.textContent||o.value||'') === norm(inp.value));
+      if (!exact){
+        ['email','office','ubicacion','tel'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
+      }
+    }
+  });
+
+  // ENTER → confirmar en el SELECT, conservar texto y luego onCommit
+  inp.addEventListener('keydown', (e)=>{
+    if (e.key === 'Enter'){
+      e.preventDefault(); e.stopPropagation();
+      const confirmed = commitFreeTextToSelect();     // 1) fija select
+      if (confirmed) inp.value = confirmed;           // 2) conserva texto
+      if (typeof onCommit === 'function') onCommit(); // 3) rellena dependientes
+    }
+  });
+
+  // BLUR → mismo flujo que ENTER
+  inp.addEventListener('blur', ()=>{
+    const confirmed = commitFreeTextToSelect();
+    if (confirmed) inp.value = confirmed;
+    if (typeof onCommit === 'function') onCommit();
+  });
+}
+
+function onEmpresaChange(){
+  const selDir = document.getElementById('dirigido');
+  const email = document.getElementById('email');
+  const office = document.getElementById('office');
+  const ubic = document.getElementById('ubicacion');
+  const empSearch = document.getElementById('empresaSearch');
+if (empSearch) {
+  const selEmp = document.getElementById('empresa');
+  const opt = selEmp && selEmp.selectedOptions[0];
+  empSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : '';
+}
+  if (selDir) { selDir.innerHTML = '<option value="" selected disabled>-Seleccionar persona-</option>'; selDir.disabled = false; }
+  if (email) email.value = '';
+  if (office) office.value = '';
+  if (ubic) ubic.value = '';
+
+  fillDirigidoOptions();
+
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if (dirSearch) dirSearch.value = '';
+
+  // quitar marca de error si existía
+  const emp = document.getElementById('empresa');
+  if(emp){ emp.style.borderColor=''; emp.style.boxShadow=''; }
+}
+
+function onDirigidoChange(){
+  const selDir = document.getElementById('dirigido');
+  const email  = document.getElementById('email');
+  const office = document.getElementById('office');
+  const tel    = document.getElementById('tel');
+  const ubic   = document.getElementById('ubicacion');
+  const opt    = selDir && selDir.selectedOptions[0];
+
+  const dirSearch = document.getElementById('dirigidoSearch');
+  if (dirSearch) {
+    dirSearch.value = opt ? (opt.textContent||opt.value||'').toUpperCase() : dirSearch.value.toUpperCase();
+  }
+
+  const clearAuto = () => {
+    if (email)  email.value  = '';
+    if (office) office.value = '';
+    if (ubic)   ubic.value   = '';
+    if (tel)    tel.value    = '';
+  };
+
+  if (!opt) { clearAuto(); return; }
+
+  // 1) Intentar leer de data-*
+  let tFijo  = (opt.dataset.tel    || '').trim();
+  let tMovil = (opt.dataset.movil  || '').trim();
+  let mail   = (opt.dataset.email  || '').trim();
+  let city   = (opt.dataset.ciudad || '').trim();
+
+  // 2) Si no hay datos en data-* pero hay cid, hacer fallback al registro en CONTACTS_DB
+  if (!tFijo && !tMovil && !mail && !city && opt.dataset.cid != null) {
+    const idx = Number(opt.dataset.cid);
+    const c   = CONTACTS_DB.all[idx];
+    if (c) {
+      tFijo  = (c.telefono   || '').trim();
+      tMovil = (c.movil      || '').trim();
+      mail   = (c.email      || '').trim();
+      city   = (c.ciudadPais || '').trim();
+    }
+  }
+
+  // 3) Si sigue sin datos → es opción "custom": limpiar y salir
+  if (!tFijo && !tMovil && !mail && !city) { clearAuto(); return; }
+
+  // 4) E-mail y ubicación
+  if (email) email.value = mail;
+  if (ubic)  ubic.value  = city;
+
+  // 5) Reglas de teléfonos
+  //    - Si hay Teléfono => OFFICE
+  //    - Si hay Móvil    => TEL
+  //    - Si NO hay Teléfono pero SÍ Móvil => ese Móvil => OFFICE (y opcionalmente también TEL)
+  let officeVal = '';
+  let telVal    = '';
+
+  if (tFijo) {
+    officeVal = tFijo;
+    telVal    = tMovil || '';
+  } else if (tMovil) {
+    officeVal = tMovil;  // prioridad: que OFFICE quede lleno
+    telVal    = tMovil;  // si prefieres dejar TEL vacío, borra esta línea
+  }
+
+  if (office) office.value = officeVal;
+  if (tel)    tel.value    = telVal;
+
+  // quitar marca de error si existía
+  if(selDir){ selDir.style.borderColor=''; selDir.style.boxShadow=''; }
+}
+
+function wireContactsInput(){
+  const input = document.getElementById('xlsDatos');
+  if (!input) return;
+
+  input.addEventListener('change', async ()=>{
+    const f = input.files && input.files[0];
+    if (!f) { CONTACTS_DB = {byEmpresa:new Map(), all:[]}; fillEmpresaOptions(); return; }
+    try{
+      const buf = await f.arrayBuffer();
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      fillEmpresaOptions();
+const empSearch = document.getElementById('empresaSearch');
+if (empSearch) empSearch.value = '';
+    }catch(e){
+      console.error(e);
+      alert('No se pudo leer el Excel de contactos: ' + (e.message||e));
+    }
+  });
+
+  // eventos de selects
+  const selEmp = document.getElementById('empresa');
+  const selDir = document.getElementById('dirigido');
+  if (selEmp) selEmp.addEventListener('change', onEmpresaChange);
+  if (selDir) selDir.addEventListener('change', onDirigidoChange);
+  // Combos editables (empresa y dirigido)
+attachSearchableCombo('empresa','empresaSearch',  { onCommit: onEmpresaChange,  matchMode: 'startsWith' });
+attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange, matchMode: 'includes'   });
+}
+
+// ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
+function findLabelFor(id){
+  return document.querySelector(`label[for="${id}"]`);
+}
+
+function hideContactsUploadUI(){
+  const row = document.getElementById('xlsDatosRow');
+  if (row) row.remove(); // lo borra completo del DOM
+}
+
+// ========= NUEVO: AUTODETECCIÓN DE EXCEL DE CONTACTOS EN LA MISMA CARPETA =========
+
+// Utilidad: fecha en zona Bogotá (sin depender del SO del usuario)
+function nowInBogota(){
+  // America/Bogota sin DST: UTC-5
+  const nowUTC = new Date();
+  const bogota = new Date(nowUTC.getTime() - (5*60*60*1000));
+  return bogota;
+}
+function ymd(date){
+  const yyyy = date.getUTCFullYear();
+  const mm = String(date.getUTCMonth()+1).padStart(2,'0');
+  const dd = String(date.getUTCDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// Construye candidatos de nombre de archivo muy comunes en tu flujo
+function buildContactFilenameCandidates(){
+  const baseURL = new URL('.', location.href); // misma carpeta del HTML
+
+  // ⬅️ PRIORIDAD 1: tu archivo EXACTO (el que me dijiste)
+  const EXACT = 'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx';
+
+  // Utilidades de fecha (zona Bogotá)
+  function nowInBogota(){
+    const nowUTC = new Date();
+    return new Date(nowUTC.getTime() - (5*60*60*1000)); // -05:00
+  }
+  function ymd(date){
+    const yyyy = date.getUTCFullYear();
+    const mm = String(date.getUTCMonth()+1).padStart(2,'0');
+    const dd = String(date.getUTCDate()).padStart(2,'0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  const today = nowInBogota();
+  const days = [0,1,2,3]; // hoy y últimos 3 días
+
+  // Para HOY probamos minutos más comunes + 58 (por tu patrón)
+  const minutesToday = [58, 0, 30, 15, 45];
+  // Para días previos mantenemos una búsqueda liviana
+  const minutesPast = [0, 30];
+  const hours = Array.from({length: 24}, (_,i)=> i); // 00..23
+
+  const list = [];
+
+  // 0) EXACTO primero (si está en la carpeta lo encuentra de una)
+  list.push(new URL(EXACT, baseURL).href);
+
+  // 1) Pistas opcionales (si subes uno de estos al folder, acierta 100%)
+  list.push(new URL('contacts-latest.txt', baseURL).href);
+  list.push(new URL('contacts-index.json', baseURL).href);
+
+  // 2) Nombres fijos probables
+  [
+    'informe de Contactos para PORTAL.xlsx',
+    'informe de Contactos para PORTAL-latest.xlsx',
+    'Contactos_PORTAL.xlsx',
+    'Contactos.xlsx'
+  ].forEach(n => list.push(new URL(n, baseURL).href));
+
+  // 3) Con fecha YYYY-MM-DD (sin hora)
+  days.forEach(d=>{
+    const dt = new Date(today.getTime() - d*24*60*60*1000);
+    const stamp = ymd(dt);
+    list.push(new URL(`informe de Contactos para PORTAL-${stamp}.xlsx`, baseURL).href);
+  });
+
+  // 4) Con fecha y hora
+  days.forEach(d=>{
+    const dt = new Date(today.getTime() - d*24*60*60*1000);
+    const stamp = ymd(dt);
+    const mins = d === 0 ? minutesToday : minutesPast; // hoy incluye 58
+
+    hours.forEach(h=>{
+      mins.forEach(m=>{
+        const hh = String(h).padStart(2,'0');
+        const mm = String(m).padStart(2,'0');
+        // segundos comunes + 01 por tu patrón
+        ['00','30','01'].forEach(ss=>{
+          list.push(new URL(`informe de Contactos para PORTAL-${stamp}-${hh}-${mm}-${ss}.xlsx`, baseURL).href);
+        });
+      });
+    });
+  });
+
+  return list;
+}
+
+
+// Hace una petición ligera para ver si el archivo existe y luego lo lee como ArrayBuffer
+async function fetchExcelArrayBuffer(url){
+  // Algunos hosts bloquean HEAD; probamos GET parcial con Range y si falla, GET completa
+  try{
+    const head = await fetch(url, { method:'HEAD' });
+    if (head.ok) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('GET no OK tras HEAD');
+      return await res.arrayBuffer();
+    }
+  }catch(_e){ /* sigue */ }
+
+  try{
+    const partial = await fetch(url, { headers: { 'Range': 'bytes=0-1024' } });
+    if (partial.ok) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('GET completa falló');
+      return await res.arrayBuffer();
+    }
+  }catch(_e){ /* sigue */ }
+
+  // Último intento: GET directa
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('GET directa no OK');
+  return await res.arrayBuffer();
+}
+
+// Intenta usar contacts-latest.txt y contacts-index.json como “índices”
+async function tryIndexHints(url){
+  // contacts-latest.txt
+  if (url.endsWith('contacts-latest.txt')) {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const name = (await res.text()).trim();
+    if (!name) return null;
+    const fileURL = new URL(name, new URL('.', location.href)).href;
+    return await fetchExcelArrayBuffer(fileURL);
+  }
+
+  // contacts-index.json (array de strings)
+  if (url.endsWith('contacts-index.json')) {
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const arr = await res.json();
+    if (!Array.isArray(arr)) return null;
+    // Elegir primero el que más se parezca a tu patrón y tenga “mayor” fecha dentro del nombre
+    const scored = arr
+      .filter(s => typeof s === 'string' && s.toLowerCase().endsWith('.xlsx'))
+      .map(s=>{
+        // score simple por contener “informe de Contactos para PORTAL”
+        const base = s.toLowerCase().includes('informe de contactos para portal') ? 100 : 0;
+        // extrae yyyy-mm-dd si existe
+        const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+        let when = 0;
+        if (m) {
+          when = Date.UTC(+m[1], +m[2]-1, +m[3]);
+        }
+        return { s, score: base + when };
+      })
+      .sort((a,b)=>b.score - a.score);
+    if (!scored.length) return null;
+    const best = scored[0].s;
+    const fileURL = new URL(best, new URL('.', location.href)).href;
+    return await fetchExcelArrayBuffer(fileURL);
+  }
+
+  return null;
+}
+
+// Orquesta la autodetección; si encuentra, parsea y llena selects
+async function autoDetectContactsInSameFolder(){
+  if (CONTACTS_DB.all.length) return; // ya cargado (p.ej. por input)
+  const status = document.getElementById('xlsDatosStatus');
+  if (status) status.textContent = 'Buscando Excel de contactos en la carpeta…';
+
+  const candidates = buildContactFilenameCandidates();
+
+  for (const url of candidates) {
+    try{
+      let buf = null;
+      if (url.endsWith('.txt') || url.endsWith('.json')) {
+        buf = await tryIndexHints(url);
+        if (!buf) { continue; }
+      } else {
+        buf = await fetchExcelArrayBuffer(url);
+      }
+
+      if (buf) {
+        // parsear y llenar
+        CONTACTS_DB = await parseContactsWorkbook(buf);
+        fillEmpresaOptions();
+  // sincroniza buscador empresa con placeholder vacío
+const empSearch = document.getElementById('empresaSearch');
+if (empSearch) empSearch.value = '';
+        hideContactsUploadUI(); // NUEVO: oculta el bloque de carga de contactos
+
+        // Si hay una sola empresa, dispara el cambio (y si hay 1 contacto, también)
+        const selEmp = document.getElementById('empresa');
+        if (selEmp && selEmp.options.length === 2) { // 1 opción + placeholder
+          selEmp.selectedIndex = 1;
+          onEmpresaChange();
+        }
+        return true;
+      }
+    }catch(_e){
+      // continuar con el siguiente candidato
+    }
+  }
+
+  if (status) status.textContent = 'No se encontró Excel de contactos automáticamente. Selecciónalo manualmente.';
+  return false;
+}
+
+// activar al cargar
+window.addEventListener('load', wireContactsInput);
+// NUEVO: intentar autodetección al cargar
+window.addEventListener('load', ()=>{ autoDetectContactsInSameFolder(); });
+
+/* ========= Excel helpers ========= */
+function decodeCell(a){const m=String(a).match(/^([A-Z]+)(\d+)$/i);if(!m)return null;const L=m[1].toUpperCase();let r=parseInt(m[2],10),c=0;for(let i=0;i<L.length;i++)c=c*26+(L.charCodeAt(i)-64);return{r:r-1,c:c-1};}
+function decodeRangeA1(r){const p=String(r||'').split(':'),s=decodeCell(p[0]),e=decodeCell(p[1]);if(!s||!e)return null;return{s:s,e:e};}
+function iterateMerges(wsE,cb){
+  if(wsE && wsE.model && Array.isArray(wsE.model.merges) && wsE.model.merges.length){ wsE.model.merges.forEach(addr=>cb(addr)); return; }
+  if(wsE && wsE._merges && typeof wsE._merges[Symbol.iterator]==='function'){
+    for(const m of wsE._merges){ const entry=Array.isArray(m)?m[0]:m; cb(entry && entry.model && entry.model.range ? entry.model.range : (typeof entry==='string'?entry:null)); } return;
+  }
+  if(wsE && wsE._merges && typeof wsE._merges==='object'){ Object.keys(wsE._merges).forEach(k=>cb(k)); }
+}
+
+/* ========= Excel -> Tabla con estilos (detección AUTO de inicio) ========= */
+async function buildTableFromWorkbook(docx, arrayBuffer){ 
+  const XLSX=await ensureXLSX();
+  const ExcelJS=await ensureExcelJS();
+
+  const wbX=XLSX.read(arrayBuffer,{type:'array',cellStyles:true});
+  const wsX=wbX.Sheets['VENTA']; if(!wsX) throw new Error('La hoja "VENTA" no existe');
+
+  const wbE=new ExcelJS.Workbook(); await wbE.xlsx.load(arrayBuffer);
+  const wsE=wbE.getWorksheet('VENTA'); if(!wsE) throw new Error('La hoja "VENTA" no existe (ExcelJS)');
+
+  const usedR=XLSX.utils.decode_range(wsX['!ref']||'A1');
+  const hasVal=(r,c)=>{const a=XLSX.utils.encode_cell({r,c}), cell=wsX[a]; return !!(cell && (cell.v!==undefined && cell.v!==null && String(cell.v).trim()!==''));};
+  const hasStyle=(r,c)=>{ const cell=wsE.getCell(r+1,c+1); if(!cell) return false;
+    const f=cell.font||{}, b=cell.border||{}, fill=cell.fill, a=cell.alignment||{};
+    return !!( (f&&f.bold) || (fill&&fill.fgColor) || (b&&(b.top||b.right||b.bottom||b.left)) || (a&&a.horizontal) );
+  };
+
+  // 1) Fila inicial: >=3 celdas con valor o estilo
+  let sR=usedR.s.r;
+  for(let r=usedR.s.r;r<=usedR.e.r;r++){
+    let count=0;
+    for(let c=usedR.s.c;c<=usedR.e.c;c++){
+      if(hasVal(r,c) || hasStyle(r,c)) count++;
+      if(count>=3) break;
+    }
+    if(count>=3){ sR=r; break; }
+  }
+  // 2) Columna inicial en esa fila
+  let sC=usedR.s.c;
+  for(let c=usedR.s.c;c<=usedR.e.c;c++){
+    if(hasVal(sR,c) || hasStyle(sR,c)){ sC=c; break; }
+  }
+  // 3) Limites inferiores/derechos con datos o estilos
+  let eR=usedR.e.r, eC=usedR.e.c;
+  while(eR>=sR){ let any=false; for(let c=sC;c<=eC;c++){ if(hasVal(eR,c)||hasStyle(eR,c)){ any=true; break; } } if(any)break; eR--; }
+  while(eC>=sC){ let any=false; for(let r=sR;r<=eR;r++){ if(hasVal(r,eC)||hasStyle(r,eC)){ any=true; break; } } if(any)break; eC--; }
+  if(eR<sR || eC<sC) throw new Error('No se detectó una tabla con contenido/estilo en "VENTA".');
+
+  // ---------- merges ----------
+  function decodeCell2(a){const m=String(a).match(/^([A-Z]+)(\d+)$/i);if(!m)return null;const L=m[1].toUpperCase();let r=parseInt(m[2],10),c=0;for(let i=0;i<L.length;i++)c=c*26+(L.charCodeAt(i)-64);return{r:r-1,c:c-1};}
+  function decodeRangeA1_2(r){const p=String(r||'').split(':'),s=decodeCell2(p[0]),e=decodeCell2(p[1]);if(!s||!e)return null;return{s:s,e:e};}
+  const mergedSkip=new Set(), mergeTL=new Map();
+  iterateMerges(wsE,(rngStr)=>{ if(!rngStr) return; const rg=decodeRangeA1_2(rngStr); if(!rg) return; const s=rg.s,e=rg.e;
+    if(s.r>=sR && s.c>=sC && e.r<=eR && e.c<=eC){
+      mergeTL.set(s.r+','+s.c,{rs:e.r-s.r+1,cs:e.c-s.c+1});
+      for(let r=s.r;r<=e.r;r++)for(let c=s.c;c<=e.c;c++) if(!(r===s.r && c===s.c)) mergedSkip.add(r+','+c);
+    }
+  });
+
+  // ---------- anchos ----------
+  const contentTwip=(8.5-2)*1440; let totalPx=0; const colPx=[];
+  for(let c=sC;c<=eC;c++){ const col=wsE.getColumn(c+1); const px=(col && col.width)?Math.round(col.width*7):80; colPx.push(px); totalPx+=px; }
+  totalPx=totalPx||1; const colTwip=colPx.map(px=>Math.max(200,Math.floor(px/totalPx*contentTwip)));
+
+  // ---------- estilo y texto ----------
+  function formattedText(r,c){
+    const addr=XLSX.utils.encode_cell({r,c}), cell=wsX[addr];
+    if(!cell) return '';
+    if(typeof cell.w==='string' && cell.w!=='') return cell.w;        // usa formato visible Excel
+    const z=cell.z || (cell.s && cell.s.numFmt) || 'General';
+    try{ return XLSX.SSF.format(z, cell.v); }catch(_){}
+    return cell.v==null? '' : String(cell.v);
+  }
+  function styleE(r,c){
+    const cell=wsE.getCell(r+1,c+1), a=cell.alignment||{}, f=cell.font||{}, b=cell.border||{}, fill=cell.fill;
+    return {
+      h:(a&&a.horizontal)||null, v:(a&&a.vertical)||null,
+      bold:!!(f&&f.bold), italic:!!(f&&f.italic), underline:!!(f&&f.underline),
+      color:(f&&f.color && (f.color.argb||f.color.rgb)) ? String(f.color.argb||f.color.rgb).replace(/^0x/i,'').slice(-6) : null,
+      fill:(fill&&fill.fgColor && (fill.fgColor.argb||fill.fgColor.rgb)) ? String(fill.fgColor.argb||fill.fgColor.rgb).replace(/^0x/i,'').slice(-6) : null,
+      borders:{top:!!(b&&b.top),right:!!(b&&b.right),bottom:!!(b&&b.bottom),left:!!(b&&b.left)}
+    };
+  }
+
+// Convierte el contenido de la celda ExcelJS a runs de docx,
+// respetando richText (negrillas parciales) y saltos de línea.
+function runsFromCell(r, c) {
+  const cellE = wsE.getCell(r + 1, c + 1);     // ExcelJS
+  const v = cellE && cellE.value;
+  const st = styleE(r, c);
+
+  function makeRuns(text, spec = {}) { 
+    const parts = String(text || '').split(/\r?\n/);
+    const out = [];
+    parts.forEach((p, i) => {
+      if (i > 0) out.push(new docx.TextRun({ break: 1 }));
+      if (p !== '') {
+        out.push(new docx.TextRun({
+          text: p,
+          font: "Calibri",
+          size: 21,                   // ≈10 pt
+          bold: !!spec.bold,
+          italics: !!spec.italic,
+          underline: spec.underline ? {} : undefined,
+          color: spec.color || st.color || undefined
+        }));
+      }
+    });
+    return out.length ? out : [new docx.TextRun({ text: '' })];
+  }
+
+  // 1) Si la celda es richText, respetar negrillas por segmento
+  if (v && typeof v === 'object' && Array.isArray(v.richText)) {
+    let runs = [];
+    v.richText.forEach(seg => {
+      const f = seg.font || {};
+      const color = f.color && (f.color.argb || f.color.rgb)
+        ? String(f.color.argb || f.color.rgb).replace(/^0x/i, '').slice(-6)
+        : undefined;
+      runs = runs.concat(makeRuns(seg.text || '', {
+        bold: !!f.bold, italic: !!f.italic, underline: !!f.underline, color
+      }));
+    });
+    return runs;
+  }
+
+  // 2) Fallback a texto plano con estilo uniforme de la celda
+  const txt = String(formattedText(r, c) || '');
+  return makeRuns(txt, { bold: !!st.bold, italic: !!st.italic, underline: !!st.underline });
+}
+
+  const mapH=h=>{h=(h||'').toLowerCase();return h==='right'?docx.AlignmentType.RIGHT:h==='center'||h==='centre'?docx.AlignmentType.CENTER:h==='justify'||h==='distributed'?docx.AlignmentType.JUSTIFIED:docx.AlignmentType.LEFT;};
+  const mapV=v=>{v=(v||'').toLowerCase();return v==='bottom'?docx.VerticalAlign.BOTTOM:v==='middle'||v==='center'||v==='distributed'?docx.VerticalAlign.CENTER:docx.VerticalAlign.TOP;};
+
+// ==== Franjas separadoras naranja combinadas ====
+const ORANGE = "FFC000"; // mismo tono
+const thinB = { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" };
+const cellBorder = { top: thinB, right: thinB, bottom: thinB, left: thinB };
+
+// Crea una fila con UNA sola celda que abarca todas las columnas
+function makeSpacerRow(colorHex, colWidths){
+  const total = colWidths.reduce((a, b) => a + b, 0); // suma de anchos en DXA
+  return new docx.TableRow({
+    height: { value: 220, rule: docx.HeightRule.ATLEAST }, // grosor de la franja
+    children: [
+      new docx.TableCell({
+        columnSpan: colWidths.length,               // 👈 combina todas las columnas
+        width: { size: total, type: docx.WidthType.DXA },
+        shading: { fill: colorHex },
+        borders: cellBorder,                        // solo borde exterior
+        children: [ new docx.Paragraph({ text: "" }) ]
+      })
+    ]
+  });
+}
+
+  // ---------- construir tabla DOCX ----------
+  const rows=[];
+  for (let r = sR; r <= eR; r++) {
+    let rowHasText = false;
+    const cells=[];
+    for(let c=sC;c<=eC;c++){
+      if(mergedSkip.has(r+','+c)) continue;
+
+      const txt=String(formattedText(r,c)||'');
+      const st=styleE(r,c);
+      const span=mergeTL.get(r+','+c) || {rs:1,cs:1};
+
+      if (txt.trim() !== '') rowHasText = true;
+
+const paraCell = new docx.Paragraph({
+  spacing: SPACING_SINGLE,
+  alignment: mapH(st.h),
+  children: runsFromCell(r, c)   // ← usa richText real
+});
+
+      const cellOpts={ width:{size:colTwip[c-sC],type:docx.WidthType.DXA}, children:[paraCell], verticalAlign:mapV(st.v) };
+      if(st.fill) cellOpts.shading={type:'clear',color:'auto',fill:st.fill};
+      if(st.borders && (st.borders.top||st.borders.right||st.borders.bottom||st.borders.left)){
+        const BS=docx.BorderStyle.SINGLE;
+        cellOpts.borders={
+          top: st.borders.top?   {style:BS,size:4,color:'000000'} : {style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},
+          right: st.borders.right? {style:BS,size:4,color:'000000'} : {style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},
+          bottom: st.borders.bottom?{style:BS,size:4,color:'000000'} : {style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},
+          left: st.borders.left?  {style:BS,size:4,color:'000000'} : {style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'}
+        };
+      }
+      if(span.cs>1) cellOpts.columnSpan=span.cs;
+      if(span.rs>1) cellOpts.rowSpan=span.rs;
+
+      cells.push(new docx.TableCell(cellOpts));
+    }
+    if (!rowHasText || cells.length === 0) continue;
+    if(cells.length) rows.push(new docx.TableRow({children:cells}));
+  }
+  // Inserta franja naranja al inicio y al final de la tabla
+rows.unshift( makeSpacerRow(ORANGE, colTwip) );
+rows.push(    makeSpacerRow(ORANGE, colTwip) );
+  return new docx.Table({width:{size:100,type:docx.WidthType.PERCENTAGE},rows});
+}
+
+/* ========= Construcción del documento ========= */
+function buildDocCommon(docx, fileName, bgBuf, excelTable){
+  const widthIn=8.5,heightIn=11;
+
+  // Fondo (alineación segura)
+  const bgImage=new docx.ImageRun({
+    data:bgBuf,
+    transformation:{width:INCH_TO_PX(widthIn),height:INCH_TO_PX(heightIn)},
+    floating:{
+      behindDocument:true,allowOverlap:true,
+      horizontalPosition:{relative:docx.HorizontalPositionRelativeFrom.PAGE,align:docx.HorizontalPositionAlign.LEFT},
+      verticalPosition:{relative:docx.VerticalPositionRelativeFrom.PAGE,align:docx.VerticalPositionAlign.TOP}
+    }
+  });
+
+  // Encabezado (MSS 12 / TNR 12)
+  const namePara=new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:fileName,font:'Microsoft Sans Serif',size:24,color:'000000'}) ],alignment:docx.AlignmentType.RIGHT});
+  const pagePara=new docx.Paragraph({spacing:SPACING_SINGLE,children:[
+    new docx.TextRun({text:'Página ',bold:true,font:'Times New Roman',size:24,color:'000000'}),
+    new docx.SimpleField('PAGE'),
+    new docx.TextRun({text:' de ',bold:true,font:'Times New Roman',size:24,color:'000000'}),
+    new docx.SimpleField('NUMPAGES')],alignment:docx.AlignmentType.RIGHT});
+  const header=new docx.Header({children:[ new docx.Paragraph({children:[bgImage]}), namePara, pagePara ]});
+
+  // Valores del formulario
+  // Lee la fecha del <input type="date"> como LOCAL (sin desfases de zona horaria)
+const fechaStr = (() => {
+  const el = document.getElementById('fecha');
+  if (!el || !el.value) return '';
+
+  // 1) Formato nativo del input: YYYY-MM-DD
+  let m = el.value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) {
+    const d = new Date(+m[1], +m[2]-1, +m[3]); // año, mes(0-based), día -> local
+    return new Intl.DateTimeFormat('es-CO', {
+      day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Bogota'
+    }).format(d);
+  }
+
+  // 2) Fallback por si el usuario escribe dd/mm/aaaa
+  m = el.value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (m) {
+    const d = new Date(+m[3], +m[2]-1, +m[1]);
+    return new Intl.DateTimeFormat('es-CO', {
+      day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Bogota'
+    }).format(d);
+  }
+
+  return '';
+})();
+
+const empresaStr  = comboVal('empresa','empresaSearch','');   // usa el texto del input si el select está vacío
+const dirigidoStr = comboVal('dirigido','dirigidoSearch','');
+  const areaStr=capFirst(val('area',''));
+  const officeStr=val('office','');
+  const telStr=val('tel','');
+  const emailStr=val('email','');
+  const ubicacionStr = val('ubicacion','');
+  const asuntoStr    = val('asunto','');
+
+  // Tabla superior: izquierda sin tres bordes; derecha alineación izquierda y centrado vertical
+  const tableIntro=new docx.Table({
+    width:{size:100,type:docx.WidthType.PERCENTAGE},
+    rows:[ new docx.TableRow({children:[
+      new docx.TableCell({
+        borders:{
+          top:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},
+          bottom:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},
+          left:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},
+          right:{style:docx.BorderStyle.SINGLE,size:4,color:'000000'}
+        },
+        children:[
+          para([ run('Señores:', FONTS.MSS12) ]),
+          para([ run(empresaStr||'', FONTS.MSS12, {bold:true}) ]),
+          para([ run('ATTE. '+(dirigidoStr||''), FONTS.MSS12) ]),
+          para([ run(areaStr||'', FONTS.MSS12, {bold:true}) ]),
+        ]
+      }),
+      new docx.TableCell({
+        verticalAlign: docx.VerticalAlign.CENTER,
+        children:[
+          new docx.Paragraph({alignment:docx.AlignmentType.LEFT,spacing:SPACING_SINGLE,children:[
+            run('☎️ Office: ', FONTS.MSS9, {bold:true}),
+            run(officeStr, FONTS.MSS9, {color:'000000'})
+          ]}),
+          new docx.Paragraph({alignment:docx.AlignmentType.LEFT,spacing:SPACING_SINGLE,children:[
+            run('☎️ Tel.: ', FONTS.MSS9, {bold:true}),
+            run(telStr, FONTS.MSS9, {color:'000000'})
+          ]}),
+          new docx.Paragraph({alignment:docx.AlignmentType.LEFT,spacing:SPACING_SINGLE,children:[
+            run('☎️ E-Mail: ', FONTS.MSS9, {bold:true}),
+            run(emailStr, FONTS.MSS9, {color:'000000'})
+          ]})
+        ]
+      })
+    ]}) ]
+  });
+
+  const cuerpo=[
+    para([ run('Bogotá, '+fechaStr, FONTS.MSS12) ]),
+    para([ run('', FONTS.MSS12) ]),
+    tableIntro,
+    para([ run(ubicacionStr, FONTS.MSS12) ]),
+    para([ run('', FONTS.AR10) ]),
+    para([ run('ASUNTO: '+ asuntoStr, FONTS.AR10, {bold:true}) ]),
+    para([ run('', FONTS.AR10) ]),
+    para([ run('Apreciados señores:', FONTS.AR10) ]),
+    para([ run('', FONTS.AR10) ]),
+    para([ run('Por medio de la presente estamos dando respuesta a su amable solicitud de cotización de la siguiente manera:', FONTS.AR10) ])
+  ];
+
+  if(excelTable){ cuerpo.push(para([ run('', FONTS.AR10) ])); cuerpo.push(excelTable); }
+
+  // OBSERVACIONES
+  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'',font:'Arial',size:20}) ]}));
+  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'OBSERVACIONES:',font:'Arial',size:20,bold:true}) ]}));
+  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'-  Una vez emitida la orden de compra NO se admiten devoluciones. Si se insiste en la devolución, se cargará una penalidad del 25% del valor de los equipos devueltos.',font:'Arial',size:20}) ]}));
+  (document.getElementById('obsExtra')?.value||'').split(/\r?\n/).map(s=>s.trim()).filter(Boolean)
+    .forEach(line=>cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'-  '+line,font:'Arial',size:20}) ]})));
+  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'',font:'Arial',size:20}) ]}));
+  cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'',font:'Arial',size:20}) ]}));
+
+  // CONDICIONES COMERCIALES (tabla sin bordes visibles)
+cuerpo.push(new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:'CONDICIONES COMERCIALES:', font:'Arial', size:20,bold:true}) ]}));
+  const contentTwip=(8.5-2)*1440, leftW=Math.floor(contentTwip*0.35), rightW=contentTwip-leftW, rows=[];
+const pairs = [
+  ['GARANTIA:',             choiceVal('garantia','')],
+  ['FORMA DE PAGO:',        choiceVal('formaPago','')],
+  ['SITIO ENTREGA:',        choiceVal('sitioEntrega','')],
+  ['VALIDEZ DE LA OFERTA:', choiceVal('validezOferta','')],
+  ['PRECIOS:',              choiceVal('precios','')]
+];
+
+  for(const [lab,txt] of pairs){
+    rows.push(new docx.TableRow({children:[
+      new docx.TableCell({width:{size:leftW,type:docx.WidthType.DXA},borders:{top:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},right:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},bottom:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},left:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'}},children:[
+        new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:lab,font:'Arial',size:20,bold:true}) ]})
+      ]}),
+      new docx.TableCell({width:{size:rightW,type:docx.WidthType.DXA},borders:{top:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},right:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},bottom:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'},left:{style:docx.BorderStyle.NONE,size:0,color:'FFFFFF'}},children:[
+        new docx.Paragraph({spacing:SPACING_SINGLE,children:[ new docx.TextRun({text:txt,font:'Arial',size:20}) ]})
+      ]})
+    ]}));
+  }
+  cuerpo.push(new docx.Table({width:{size:100,type:docx.WidthType.PERCENTAGE},rows}));
+
+  // Firma
+  const c=getComercial();
+  // Verificar si se seleccionó un comercial válido
+  if (!c) {
+    throw new Error('No se ha seleccionado un comercial válido');
+  }
+  cuerpo.push(para([ run('', FONTS.AR10) ]));
+  cuerpo.push(para([ run('Cordialmente,', FONTS.AR10) ]));
+  cuerpo.push(para([ run(c.nombre, FONTS.AR10, {bold:true}) ]));
+  cuerpo.push(para([ run(c.cargo, FONTS.AR10) ]));
+  cuerpo.push(para([ run(c.email, FONTS.AR10, {underline:{type:docx.UnderlineType.SINGLE},color:'1155CC'}) ]));
+  cuerpo.push(para([ run(c.telefono, FONTS.AR10) ]));
+
+  return new docx.Document({
+    sections:[{
+      properties:{page:{size:{width:INCH_TO_TWIP(8.5),height:INCH_TO_TWIP(11)},
+        margin:{top:CM_TO_TWIP(4),bottom:CM_TO_TWIP(3.5),left:INCH_TO_TWIP(1),right:INCH_TO_TWIP(1)},
+        header:CM_TO_TWIP(1),footer:CM_TO_TWIP(3.2)}},
+      headers:{default:header},
+      children:cuerpo
+    }]
+  });
+}
+
+// Agregar al final del script, después de los event listeners existentes
+const requiredFields = ['fecha', 'comercial', 'empresa', 'dirigido', 'area', 'office','email', 'ubicacion', 'asunto'];
+requiredFields.forEach(fieldId => {
+  const element = document.getElementById(fieldId);
+  if (element) {
+    element.addEventListener('input', function() {
+      if (this.value.trim()) {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+      }
+    });
+  }
+});
+
+// Limpia el rojo cuando el usuario corrige (selects y "otro")
+(function attachClearErrorHandlers(){
+  const selectIds = ['garantia','formaPago','sitioEntrega','validezOferta','precios'];
+  selectIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', () => {
+      // quita el resaltado rojo
+      el.classList.remove('input-error');
+      el.style.borderColor = '';
+      el.style.boxShadow  = '';
+
+      // mostrar/ocultar campo "otro" y limpiar su error
+      const other = document.getElementById(id + '_otro');
+      if (el.value === '__OTRO__') {
+        other && other.classList.remove('hidden');
+      } else if (other) {
+        other.value = '';
+        other.classList.add('hidden');
+        other.classList.remove('input-error');
+        other.style.borderColor = '';
+        other.style.boxShadow  = '';
+      }
+    });
+  });
+
+  const otherIds = ['garantia_otro','formaPago_otro','sitioEntrega_otro','validezOferta_otro','precios_otro'];
+  otherIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      el.classList.remove('input-error');
+      el.style.borderColor = '';
+      el.style.boxShadow  = '';
+    });
+  });
+})();
+
+</script>
+</body>
+</html>
+
