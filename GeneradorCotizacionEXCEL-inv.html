@@ -1136,27 +1136,29 @@ wrapAll(ws);
   for(let i=0;i<items.length;i++){
 const loc = 10 + i; // fila en LOCATIVO (empieza en 10)
 
-// ITEM, CANT, V/UNIT y V/TOTAL siguen referenciando LOCATIVO
+// ITEM, CANT, V/UNIT y V/TOTAL siguen con fórmulas a LOCATIVO
 wv.getCell(rr,4).value = { formula: `LOCATIVO!B${loc}` };
 wv.getCell(rr,5).value = { formula: `LOCATIVO!E${loc}` };
 wv.getCell(rr,7).value = { formula: `LOCATIVO!N${loc}` };
 wv.getCell(rr,8).value = { formula: `LOCATIVO!O${loc}` };
 
-// DESCRIPCIÓN con richText: negrilla en la referencia y la disponibilidad
+// DESCRIPCIÓN con richText: negrilla SOLO en "Ref:" y "Disponibilidad:"
 const it = items[i];
 const rich = [
   { text: (it.descripcion || '') + '\n' },
 ];
+
 if (showRef) {
   rich.push(
-    { text: 'Ref: ' },
-    { text: String(it.referencia || ''), font: { bold: true } },
-    { text: '\n' },
+    { text: 'Ref: ', font: { bold: true } },        // etiqueta en negrilla
+    { text: String(it.referencia || '') },          // valor normal
+    { text: '\n' }
   );
 }
+
 rich.push(
-  { text: 'Disponibilidad: ' },
-  { text: String(it.disponibilidad || ''), font: { bold: true } },
+  { text: 'Disponibilidad: ', font: { bold: true } }, // etiqueta en negrilla
+  { text: String(it.disponibilidad || '') }           // valor normal
 );
 
 const cellDesc = wv.getCell(rr,6);
@@ -1382,6 +1384,7 @@ if (!saved) {
 </body>
 
 </html>
+
 
 
 
