@@ -183,21 +183,40 @@
 <h3>1) Archivos de entrada</h3>
 <div class="grid two">
   <div>
-    <label class="required">Excel del Industry Mall (.xls/.xlsx)</label>
-    <input id="fileMall" type="file" accept=".xls,.xlsx" />
-    <div id="fileMallInfo" style="margin-top:6px;color:#9aa3b2"></div>
-  </div>
-  <div>
     <label class="required">Informe de Inventario (.xls/.xlsx)</label>
     <input id="fileInv" type="file" accept=".xls,.xlsx" />
     <div id="fileInvInfo" style="margin-top:6px;color:#9aa3b2"></div>
   </div>
-</div>
+  <div>
+    <label class="required">Excel del Industry Mall (.xls/.xlsx)</label>
+    <input id="fileMall" type="file" accept=".xls,.xlsx" />
+    <div id="fileMallInfo" style="margin-top:6px;color:#9aa3b2"></div>
+  </div>
 
+<!-- Selector de sección de inventario -->
+<div id="invTipoWrap" class="row" style="margin-top:6px">
+  <label style="margin:0;color:#6b7280">Sección:</label>
+
+  <label class="pill" style="cursor:pointer">
+    <input type="radio" name="invTipo" value="REGULAR" checked style="margin-right:6px">
+    Regular
+  </label>
+
+  <label class="pill" style="cursor:pointer">
+    <input type="radio" name="invTipo" value="OEMS" style="margin-right:6px">
+    OEMs
+  </label>
+
+  <label class="pill" style="cursor:pointer">
+    <input type="radio" name="invTipo" value="MIGRACION" style="margin-right:6px">
+    Migración
+  </label>
+</div>
 <div id="xlsDatosRow" style="margin-top:12px">
   <label class="required">Excel datos de contacto (.xlsx)</label>
   <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
   <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
+</div>
 </div>
 
 <div id="previewWrap" style="display:none;margin-top:14px">
@@ -347,6 +366,7 @@ async function ensureExcelJS(){
 let invMap = new Map();     // refN -> { raw, descripcion, cantidad }
 let cotMap = new Map();     // refN -> { req }
 let cotOrder = [];          // para pintar en orden en la tabla
+let invFileBuffer = null; // buffer del archivo de inventario subido
 
 const normRef = s => String(s||'')
   .replace(/\u00A0/g,' ')
@@ -662,36 +682,19 @@ $('#fileMall').addEventListener('change', async (ev)=>{
   renderInvUI();
 });
 
-// Inventario: llena invMap (hoja DATOS/DATA/INVENTARIO con columnas REFE/DESC/CANT)
 $('#fileInv').addEventListener('change', async (ev)=>{
-  const f=ev.target.files?.[0]; if(!f) return;
-  $('#fileInvInfo').textContent=`${f.name} • ${(f.size/1024/1024).toFixed(2)} MB`;
+  const f = ev.target.files?.[0]; if(!f) return;
+  $('#fileInvInfo').textContent = `${f.name} • ${(f.size/1024/1024).toFixed(2)} MB`;
 
-  const data = await f.arrayBuffer();
-  const wb = XLSX.read(data,{type:'array'});
+  invFileBuffer = await f.arrayBuffer();
+  const wb = XLSX.read(invFileBuffer, { type:'array' });
   const sh = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
   const ws = wb.Sheets[sh];
-  const range = XLSX.utils.decode_range(ws['!ref']);
-  const H = s=>String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
+const tipo = getInvTipo();
+invMap = parseInvMergedPreferred(ws, tipo);
 
-  const { headerRow, colRef, colDesc, colQty, colMarca } = detectInvCols(ws);
-
-  const map=new Map();
-for (let r=headerRow+1; r<=range.e.r; r++){
-  const raw = String(ws[XLSX.utils.encode_cell({r,c:colRef})]?.v ?? '').trim();
-  const refN = normRef(raw); if(!refN) continue;
-
-  const desc  = String(ws[XLSX.utils.encode_cell({r,c:colDesc})]?.v ?? '').trim();
-  const qty   = parseQty(ws[XLSX.utils.encode_cell({r,c:colQty})]?.v ?? 0);
-  const marca = (colMarca!=null)
-    ? String(ws[XLSX.utils.encode_cell({r,c:colMarca})]?.v ?? '').trim()
-    : '';
-
-  map.set(refN, { raw, descripcion:desc, cantidad:qty, marca });
-}
-invMap = map;
-  renderInvUI(); // intenta pintar si ya hay Mall
+  renderInvUI();
 });
 
 // Permitir volver a subir el MISMO archivo y que dispare 'change'
@@ -744,6 +747,25 @@ attachSearchableCombo('clienteSelect','cliente', {  // input+select sincronizado
 const selCli = document.getElementById('clienteSelect');
 if (selCli) selCli.addEventListener('change', syncClienteFromSelect);
 
+document.querySelectorAll('input[name="invTipo"]').forEach(radio=>{
+  radio.addEventListener('change', ()=>{
+    if (!invFileBuffer) return; // aún no se ha cargado inventario
+
+    try{
+      const wb = XLSX.read(invFileBuffer, { type:'array' });
+      const sh = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
+      const ws = wb.Sheets[sh];
+      
+const tipo = getInvTipo();
+invMap = parseInvMergedPreferred(ws, tipo);
+
+      renderInvUI();
+    }catch(e){
+      console.error(e);
+      alert('No se pudo reprocesar el inventario con la sección seleccionada.');
+    }
+  });
+});
   }
 
 function resetForm(){
@@ -1103,6 +1125,114 @@ function detectInvCols(ws){
   // colMarca puede quedar null si no existe
 
   return { headerRow, colRef, colDesc, colQty, colMarca };
+}
+
+function getInvTipo(){
+  const el = document.querySelector('input[name="invTipo"]:checked');
+  return el ? String(el.value || 'REGULAR').toUpperCase() : 'REGULAR';
+}
+
+// Busca el bloque "INVENTARIO REGULAR/OEMS/MIGRACION" y devuelve filas inicio/fin
+function findInvSection(ws, tipo){
+  if (tipo === 'TODO') return null; // "Todo" se maneja aparte
+
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const H = s => String(s||'')
+      .trim()
+      .toUpperCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // sin acentos
+
+  const title = `INVENTARIO ${tipo}`; // p.ej. INVENTARIO REGULAR
+
+  let titleRow = null;
+  for (let r = range.s.r; r <= range.e.r; r++){
+    const v = H(ws[XLSX.utils.encode_cell({ r, c: range.s.c })]?.v);
+    if (v === title){ titleRow = r; break; }
+  }
+  if (titleRow == null) return null;
+
+  const headerRow = titleRow + 1; // la fila de encabezados
+  let endRow = range.e.r;
+  for (let r = headerRow + 1; r <= range.e.r; r++){
+    const v = H(ws[XLSX.utils.encode_cell({ r, c: range.s.c })]?.v);
+    if (v.startsWith('INVENTARIO ')){ endRow = r - 1; break; } // siguiente bloque
+  }
+  return { headerRow, endRow };
+}
+
+// Parsea SOLO la sección elegida y llena el Map de inventario
+function parseInvForSection(ws, tipo){
+  const sect = findInvSection(ws, tipo);
+  const map = new Map();
+  if (!sect) return map;
+
+  // Reutiliza detectInvCols para saber qué columnas son REFE/DESC/CANT/MARCA
+  const { headerRow, endRow } = sect;
+  const { colRef, colDesc, colQty, colMarca } = detectInvCols(ws);
+
+  for (let r = headerRow + 1; r <= endRow; r++){
+    const raw   = String(ws[XLSX.utils.encode_cell({ r, c: colRef })]?.v ?? '').trim();
+    const refN  = normRef(raw); if (!refN) continue;
+
+    const desc  = String(ws[XLSX.utils.encode_cell({ r, c: colDesc })]?.v ?? '').trim();
+    const qty   = parseQty(ws[XLSX.utils.encode_cell({ r, c: colQty })]?.v ?? 0);
+    const marca = (colMarca != null)
+      ? String(ws[XLSX.utils.encode_cell({ r, c: colMarca })]?.v ?? '').trim()
+      : '';
+
+    map.set(refN, { raw, descripcion: desc, cantidad: qty, marca });
+  }
+  return map;
+}
+
+// Recorre TODAS las secciones y resuelve por preferencia:
+// - Si la referencia está en varias, usa la de la sección elegida (preferTipo)
+// - Si está en una sola sección, usa esa (sin importar preferTipo)
+// - Si preferTipo === 'TODO', toma la primera aparición (REGULAR → OEMS → MIGRACION)
+function parseInvMergedPreferred(ws, preferTipo){
+  const prefer = String(preferTipo || 'REGULAR').toUpperCase();
+  const maps = {
+    REGULAR:   parseInvForSection(ws, 'REGULAR'),
+    OEMS:      parseInvForSection(ws, 'OEMS'),
+    MIGRACION: parseInvForSection(ws, 'MIGRACION')
+  };
+  const order = ['REGULAR','OEMS','MIGRACION'];
+  const allRefs = new Set();
+  order.forEach(sec => maps[sec].forEach((_, k) => allRefs.add(k)));
+
+  const out = new Map();
+  const isTodo = (prefer === 'TODO');
+
+  allRefs.forEach(k => {
+    // 1) Si hay preferencia (no "TODO") y esa sección tiene la ref → usarla
+    if (!isTodo && maps[prefer].has(k)) {
+      const v = maps[prefer].get(k);
+      out.set(k, { ...v, seccion: prefer });
+      return;
+    }
+    // 2) No hay preferencia válida o no existe en la preferida:
+    //    - si está en una sola sección → usar esa
+    //    - si está en varias → tomar la primera por orden REGULAR→OEMS→MIGRACION
+    const sources = order.filter(sec => maps[sec].has(k));
+    if (sources.length) {
+      const sec = sources[0];
+      const v = maps[sec].get(k);
+      out.set(k, { ...v, seccion: sec });
+    }
+  });
+
+  return out;
+}
+
+function parseInvAll(ws){
+  const map = new Map();
+  ['REGULAR','OEMS','MIGRACION'].forEach(tipo=>{
+    const partial = parseInvForSection(ws, tipo);
+    partial.forEach((val, key)=>{
+      if (!map.has(key)) map.set(key, val); // primera aparición gana
+    });
+  });
+  return map;
 }
 
 // Forzar ajuste de texto (wrapText) en todas las celdas de una hoja
