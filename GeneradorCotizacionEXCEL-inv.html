@@ -638,7 +638,7 @@ function renderInvUI() {
 function updateOutName(){
   // número sin ceros a la izquierda; si está vacío, muestra 1 como preview
   const raw = String($('#numCot').value || '').trim();
-  const n = (raw.replace(/^0+/, '') || '1');
+  const n = (raw.replace(/^0+/, '') || '#');
 
   // iniciales y sufijo en mayúsculas
   const i = String($('#iniCom').value || '').toUpperCase();
@@ -1340,6 +1340,7 @@ if (!saved) {
 </body>
 
 </html>
+
 
 
 
