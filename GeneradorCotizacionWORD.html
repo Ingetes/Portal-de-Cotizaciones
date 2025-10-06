@@ -716,26 +716,11 @@ if (selDir && selDir.tagName === 'SELECT') {
 /* ========= Descarga con File System Access API ========= */
 async function downloadWithFilePicker(doc, fileName) {
   try {
-    // Crear el blob del documento
     const blob = await docx.Packer.toBlob(doc);
-    const buffer = await blob.arrayBuffer();
-    
-    // Verificar si estamos dentro de un iframe (portal)
-    if (window.parent !== window.self) {
-      // Enviar mensaje al padre para manejar la descarga
-      window.parent.postMessage({
-        __ingetes_download: true,
-        filename: fileName,
-        mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        buffer: buffer
-      }, '*');
-      return;
-    }
-    
-    // Verificar si el navegador soporta la API de File System Access
+
+    // 1) Preferir guardado local si el navegador lo soporta (incluso en iframe)
     if ('showSaveFilePicker' in window) {
       try {
-        // Mostrar el diálogo para guardar archivo
         const handle = await window.showSaveFilePicker({
           suggestedName: fileName,
           types: [{
@@ -745,27 +730,42 @@ async function downloadWithFilePicker(doc, fileName) {
             }
           }]
         });
-        
-        // Crear un stream para escribir el archivo
         const writable = await handle.createWritable();
         await writable.write(blob);
         await writable.close();
-        
-        console.log('Archivo guardado exitosamente');
+        return;
       } catch (err) {
         if (err.name !== 'AbortError') {
-          console.error('Error al guardar el archivo:', err);
-          // Fallback a descarga tradicional si hay error
-          downloadWithFallback(blob, fileName);
+          console.error('Error FilePicker, uso fallback:', err);
+          // si falla, seguimos a fallback
+        } else {
+          return; // canceló el diálogo -> salimos sin más
         }
       }
-    } else {
-      // Fallback para navegadores que no soportan la API
-      downloadWithFallback(blob, fileName);
     }
+
+    // 2) Si estás embebido en el portal, intenta delegar —pero SIN bloquear fallback
+    if (window.parent !== window.self) {
+      try {
+        const arrBuf = await blob.arrayBuffer();
+        window.parent.postMessage({
+          __ingetes_download: true,
+          filename: fileName,
+          mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          buffer: arrBuf
+        }, '*');
+        // No return aquí: si el padre no maneja el mensaje, igual hacemos fallback
+      } catch (_) {
+        // Ignorar y continuar a fallback
+      }
+    }
+
+    // 3) Fallback universal por <a download>
+    downloadWithFallback(blob, fileName);
+
   } catch (error) {
     console.error('Error al generar el documento:', error);
-    alert('Error al generar el documento: ' + error.message);
+    alert('Error al generar el documento: ' + (error.message || error));
   }
 }
 
@@ -1841,6 +1841,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
