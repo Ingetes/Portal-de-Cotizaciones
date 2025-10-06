@@ -1551,6 +1551,7 @@ function runsFromCell(r, c) {
 
 // ==== Franjas separadoras naranja combinadas ====
 const ORANGE = "FFC000"; // mismo tono
+const green  = "FF92D050"; // verdecito del encabezado
 const thinB = { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" };
 const cellBorder = { top: thinB, right: thinB, bottom: thinB, left: thinB };
 
@@ -1611,8 +1612,8 @@ const paraCell = new docx.Paragraph({
     if(cells.length) rows.push(new docx.TableRow({children:cells}));
   }
   // Inserta franja naranja al inicio y al final de la tabla
-rows.unshift( makeSpacerRow(ORANGE, colTwip) );
-rows.push(    makeSpacerRow(ORANGE, colTwip) );
+rows.unshift( makeSpacerRow(green, colTwip) );
+rows.push(    makeSpacerRow(green, colTwip) );
   return new docx.Table({width:{size:100,type:docx.WidthType.PERCENTAGE},rows});
 }
 
@@ -1840,6 +1841,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
