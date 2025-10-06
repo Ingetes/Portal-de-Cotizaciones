@@ -153,6 +153,22 @@
   box-shadow:0 0 0 2px rgba(220,38,38,.20) !important;
 }
 
+.combo-input{
+  width:100%;
+  margin-bottom:8px;
+  padding:10px 12px;
+  background:var(--input-bg);
+  color:var(--text);
+  border:1px solid var(--input-border);
+  border-radius:10px;
+  outline:none;
+}
+.combo-input:focus{
+  border-color:#9aa7b4;
+  box-shadow:0 0 0 3px rgba(2,132,199,.15);
+}
+.hidden{ display:none !important; }
+
 </style>
 
 </head>
@@ -176,6 +192,12 @@
     <input id="fileInv" type="file" accept=".xls,.xlsx" />
     <div id="fileInvInfo" style="margin-top:6px;color:#9aa3b2"></div>
   </div>
+</div>
+
+<div id="xlsDatosRow" style="margin-top:12px">
+  <label class="required">Excel datos de contacto (.xlsx)</label>
+  <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
+  <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
 </div>
 
 <div id="previewWrap" style="display:none;margin-top:14px">
@@ -249,10 +271,17 @@
           </div>
 
           <div class="row">
-            <div style="min-width:450px">
-              <label class="required">Cliente</label>
-              <input id="cliente" placeholder="Nombre del cliente" style="text-transform:uppercase" value="">
-            </div>
+<div style="min-width:450px">
+  <label class="required">Cliente</label>
+  <!-- escribir / filtrar -->
+  <input id="cliente" class="combo-input"
+         placeholder="Escribe para filtrar o ingresar nueva empresa"
+         style="text-transform:uppercase" value="">
+  <!-- seleccionar de la lista -->
+  <select id="clienteSelect" class="select">
+    <option value="" selected disabled>-Seleccionar empresa-</option>
+  </select>
+</div>
           </div>
         </div>
 
@@ -379,7 +408,181 @@ function pickSheetByNameLike(wb, names){
     if (msg) msg.textContent = "";
   }
 }
-  
+
+// ====== Contactos (empresa) ======
+let CONTACTS_DB = { byEmpresa: new Map(), all: [] };
+
+function _normStr(s){ return (s||'').toString().trim(); }
+function _normKey(s){
+  return _normStr(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+async function parseContactsWorkbook(arrayBuffer){
+  await ensureXLSX();
+  const wb = XLSX.read(arrayBuffer, { type:'array', cellStyles:false });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if(!ws) throw new Error('No se encontró hoja de contactos');
+
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  const getCell = (r,c) => {
+    const a = XLSX.utils.encode_cell({r,c});
+    const cell = ws[a];
+    if(!cell) return '';
+    if(typeof cell.w === 'string') return cell.w;
+    return cell.v==null ? '' : String(cell.v);
+  };
+
+  // 1) Buscar encabezados (normalizados)
+  let headerRow = -1, cols = {};
+  for(let r=range.s.r; r<=range.e.r; r++){
+    const names = [];
+    for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
+    const idxEmpresa = names.findIndex(v => v.includes('nombre de la cuenta'));
+    if (idxEmpresa>=0){
+      headerRow = r;
+      cols = { empresa: idxEmpresa };
+      break;
+    }
+  }
+  if(headerRow < 0) throw new Error('No se detectó columna "Nombre de la cuenta"');
+
+  // 2) Recorrer filas con “arrastre” de empresa, saltando subtotales
+  const rows = [];
+  let lastEmpresa = '';
+  for(let r=headerRow+1; r<=range.e.r; r++){
+    const vEmpresa = _normStr(getCell(r, cols.empresa));
+    const line = (vEmpresa||'').toLowerCase();
+    if (line.includes('subtotal')) continue;
+
+    if (vEmpresa) lastEmpresa = vEmpresa;
+    const empresa = lastEmpresa;
+    if (!empresa) continue;
+
+    rows.push({ empresa });
+  }
+
+  // 3) Agrupar por empresa
+  const byEmpresa = new Map();
+  rows.forEach(r=>{
+    if(!byEmpresa.has(r.empresa)) byEmpresa.set(r.empresa, []);
+    byEmpresa.get(r.empresa).push(r);
+  });
+
+  return { byEmpresa, all: rows };
+}
+
+// Llena el select con las empresas
+function fillClienteOptions(){
+  const sel = document.getElementById('clienteSelect');
+  if(!sel) return;
+  sel.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+
+  const empresas = Array.from(CONTACTS_DB.byEmpresa.keys())
+                        .sort((a,b)=>a.localeCompare(b,'es'));
+  empresas.forEach(e=>{
+    const opt = document.createElement('option');
+    opt.value = e.toUpperCase();
+    opt.textContent = e.toUpperCase();
+    sel.appendChild(opt);
+  });
+
+  const st = document.getElementById('xlsDatosStatus');
+  if (st) st.textContent = `Empresas: ${empresas.length}`;
+}
+
+function hideContactsUploadUI(){
+  const row = document.getElementById('xlsDatosRow');
+  if (row) row.style.display = 'none';
+}
+
+// Sincroniza el input #cliente desde el select
+function syncClienteFromSelect(){
+  const sel = document.getElementById('clienteSelect');
+  const inp = document.getElementById('cliente');
+  const opt = sel && sel.selectedOptions[0];
+  if (opt && inp) inp.value = (opt.textContent || opt.value || '').toUpperCase();
+}
+
+// Combo buscable (igual al del Word, simplificado)
+function attachSearchableCombo(selectId, inputId, { onCommit, matchMode='startsWith' } = {}){
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  if (!sel || !inp) return;
+
+  let customOpt = sel.querySelector('option[data-custom="1"]') || null;
+  const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+
+  function resetFilter(){ Array.from(sel.options).forEach(o=>o.hidden=false); }
+  function filterOptions(q){
+    const Q = norm(q);
+    Array.from(sel.options).forEach((opt, idx)=>{
+      const txt = norm(opt.textContent||opt.value||'');
+      if (idx===0 && opt.disabled){ opt.hidden=false; return; }
+      if (!Q){ opt.hidden=false; return; }
+      opt.hidden = (matchMode==='startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
+    });
+  }
+  function commitFreeTextToSelect(){
+    const valTyped = norm(inp.value);
+    if (!valTyped) return '';
+    const exact = Array.from(sel.options).find(o => norm(o.textContent||o.value||'') === valTyped);
+    if (exact){ sel.value = exact.value; return (exact.textContent||exact.value||'').toUpperCase(); }
+    if (!customOpt || !sel.contains(customOpt)) {
+      customOpt = document.createElement('option');
+      customOpt.dataset.custom='1';
+      sel.appendChild(customOpt);
+    }
+    customOpt.value = valTyped;
+    customOpt.textContent = valTyped;
+    customOpt.hidden = false;
+    sel.value = customOpt.value;
+    return valTyped;
+  }
+
+  sel.addEventListener('change', ()=>{ syncClienteFromSelect(); if (onCommit) onCommit(); });
+  inp.addEventListener('input', ()=>{
+    const pos = inp.selectionStart;
+    inp.value = inp.value.toUpperCase();
+    if (typeof pos === 'number') inp.setSelectionRange(pos,pos);
+    resetFilter(); filterOptions(inp.value);
+  });
+  inp.addEventListener('keydown', (e)=>{
+    if (e.key==='Enter'){ e.preventDefault(); const v=commitFreeTextToSelect(); if (v) inp.value=v; if (onCommit) onCommit(); }
+  });
+  inp.addEventListener('blur', ()=>{ const v=commitFreeTextToSelect(); if (v) inp.value=v; if (onCommit) onCommit(); });
+}
+
+function wireContactsInput(){
+  const up = document.getElementById('xlsDatos');
+  if (!up) return;
+
+  up.addEventListener('change', async ()=>{
+    const f = up.files && up.files[0];
+    if (!f){
+      CONTACTS_DB = {byEmpresa:new Map(), all:[]};
+      fillClienteOptions();
+      return;
+    }
+    try{
+      const buf = await f.arrayBuffer();
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      fillClienteOptions();
+
+      // 👇 Oculta el bloque de subida cuando ya hay empresas
+      if (CONTACTS_DB.byEmpresa && CONTACTS_DB.byEmpresa.size) {
+        hideContactsUploadUI();
+      }
+    }catch(e){
+      console.error(e);
+      alert('No se pudo leer el Excel de contactos: ' + (e.message||e));
+    }
+  });
+
+  // permitir re-subir el mismo archivo
+  up.addEventListener('click', e => { e.currentTarget.value=''; });
+}
+
   function bindEvents(){
 // Mall: lee, muestra preview y construye cotMap usando detectMallCols()
 $('#fileMall').addEventListener('change', async (ev)=>{
@@ -487,6 +690,15 @@ requiredIds.forEach(id=>{
   });
 });
 
+// === Contactos (empresa)
+wireContactsInput();                                // escucha #xlsDatos
+attachSearchableCombo('clienteSelect','cliente', {  // input+select sincronizados
+  onCommit: syncClienteFromSelect,
+  matchMode: 'startsWith'
+});
+const selCli = document.getElementById('clienteSelect');
+if (selCli) selCli.addEventListener('change', syncClienteFromSelect);
+
   }
 
 function resetForm(){
@@ -524,6 +736,19 @@ function resetForm(){
   document.getElementById('botonGlobal').value = 'NORMAL';
   document.getElementById('mostrarRef').value  = 'NO';
   document.getElementById('cliente').value     = '';
+  // Reinicia el desplegable de empresas
+  const selCli = document.getElementById('clienteSelect');
+  if (selCli) {
+    // vuelve al placeholder
+    selCli.selectedIndex = 0;
+
+    // muestra todas las opciones (quita filtros de escritura)
+    Array.from(selCli.options).forEach(o => o.hidden = false);
+
+    // elimina la opción “personalizada” si se creó al escribir y confirmar
+    const custom = selCli.querySelector('option[data-custom="1"]');
+    if (custom) custom.remove();
+  }
   document.getElementById('fechaElab').value   = '';
   document.getElementById('numCot').value      = '';
   document.getElementById('iniCom').value      = '';
@@ -1388,13 +1613,3 @@ if (!saved) {
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
