@@ -259,7 +259,7 @@
           <div class="row">
             <div style="min-width:220px">
               <label class="required">Número de cotización</label>
-              <input id="numCot" type="number" placeholder="####" value="">
+              <input id="numCot" type="number" min="1" step="1" placeholder="###" value="">
             </div>
             <div style="min-width:220px">
               <label class="required">Iniciales comercial</label>
@@ -635,18 +635,26 @@ function renderInvUI() {
   }
 
   // ===== Nombre de salida =====
-  function updateOutName(){
-    const n=String($('#numCot').value||'').padStart(4,'0') || '0000';
-    const i=String($('#iniCom').value||'').toUpperCase();
-    const yIn=$('#anio').value;
-    const y=(yIn?String(yIn):String(new
-Date().getFullYear()).slice(-2)).slice(-2).toUpperCase();
-    const s=String($('#sufijo').value||'').toUpperCase();
-    $('#iniCom').value=i; $('#sufijo').value=s;
-    $('#outName').value=(`Q${n}-${i}-${y}${s}`).toUpperCase();
-    $('#outName').value = (`Q${n}-${i || 'AAA'}-${y}${s}`).toUpperCase();
+function updateOutName(){
+  // número sin ceros a la izquierda; si está vacío, muestra 1 como preview
+  const raw = String($('#numCot').value || '').trim();
+  const n = (raw.replace(/^0+/, '') || '1');
 
-  }
+  // iniciales y sufijo en mayúsculas
+  const i = String($('#iniCom').value || '').toUpperCase();
+  const s = String($('#sufijo').value || '').toUpperCase();
+  $('#iniCom').value = i;
+  $('#sufijo').value = s;
+
+  // año: si el campo está vacío usa el año actual (2 dígitos)
+  const yIn = $('#anio').value;
+  const y = (yIn ? String(yIn) : String(new Date().getFullYear()).slice(-2))
+              .slice(-2)
+              .toUpperCase();
+
+  // nombre final (si no hay iniciales aún, usa AAA como placeholder)
+  $('#outName').value = (`Q${n}-${i || 'AAA'}-${y}${s}`).toUpperCase();
+}
 
 /* ========= Descarga con File System Access API ========= */
 async function downloadExcelWithFilePicker(blob, fileName) {
@@ -1332,6 +1340,7 @@ if (!saved) {
 </body>
 
 </html>
+
 
 
 
