@@ -1134,16 +1134,34 @@ wrapAll(ws);
   // Datos de venta referenciando lo de LOCATIVO (mismos vínculos de siempre)
   let rr=5;
   for(let i=0;i<items.length;i++){
-    const loc = 10 + i; // fila en LOCATIVO (empieza en 10)
-    const descFormula = showRef
-      ? `LOCATIVO!F${loc}&CHAR(10)&"Ref: "&LOCATIVO!D${loc}&CHAR(10)&"Disponibilidad: "&LOCATIVO!G${loc}`
-      : `LOCATIVO!F${loc}&CHAR(10)&"Disponibilidad: "&LOCATIVO!G${loc}`;
+const loc = 10 + i; // fila en LOCATIVO (empieza en 10)
 
-    wv.getCell(rr,4).value={ formula:`LOCATIVO!B${loc}` };
-    wv.getCell(rr,5).value={ formula:`LOCATIVO!E${loc}` };
-    wv.getCell(rr,6).value={ formula: descFormula };
-    wv.getCell(rr,7).value={ formula:`LOCATIVO!N${loc}` };
-    wv.getCell(rr,8).value={ formula:`LOCATIVO!O${loc}` };
+// ITEM, CANT, V/UNIT y V/TOTAL siguen referenciando LOCATIVO
+wv.getCell(rr,4).value = { formula: `LOCATIVO!B${loc}` };
+wv.getCell(rr,5).value = { formula: `LOCATIVO!E${loc}` };
+wv.getCell(rr,7).value = { formula: `LOCATIVO!N${loc}` };
+wv.getCell(rr,8).value = { formula: `LOCATIVO!O${loc}` };
+
+// DESCRIPCIÓN con richText: negrilla en la referencia y la disponibilidad
+const it = items[i];
+const rich = [
+  { text: (it.descripcion || '') + '\n' },
+];
+if (showRef) {
+  rich.push(
+    { text: 'Ref: ' },
+    { text: String(it.referencia || ''), font: { bold: true } },
+    { text: '\n' },
+  );
+}
+rich.push(
+  { text: 'Disponibilidad: ' },
+  { text: String(it.disponibilidad || ''), font: { bold: true } },
+);
+
+const cellDesc = wv.getCell(rr,6);
+cellDesc.value = { richText: rich };
+cellDesc.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
 
     wv.getCell(rr,6).alignment = { vertical:'top', horizontal:'left', wrapText:true };
     wv.getCell(rr,7).numFmt = '"$" #,##0';
@@ -1364,6 +1382,7 @@ if (!saved) {
 </body>
 
 </html>
+
 
 
 
