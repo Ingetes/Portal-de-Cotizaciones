@@ -1542,7 +1542,7 @@ wrapAll(ws);
 
   const thinB={style:'thin',color:{argb:'FF000000'}}, boxThin={top:thinB,left:thinB,bottom:thinB,right:thinB};
   wv.mergeCells(3,4,3,8);
-  for(let c=4;c<=8;c++){ const cell=wv.getCell(3,c); cell.value=''; cell.fill=orange; cell.border=boxThin; }
+  for(let c=4;c<=8;c++){ const cell=wv.getCell(3,c); cell.value=''; cell.fill=green; cell.border=boxThin; }
   const HDR=['ITEM','CANT','DESCRIPCIÓN','V/UNIT','V/TOTAL'];
   for(let i=0;i<HDR.length;i++){ const cell=wv.getCell(4,4+i); cell.value=HDR[i]; cell.fill=green; cell.font={bold:true}; cell.alignment={vertical:'middle',horizontal:'center',wrapText:true}; cell.border=boxThin; }
 
@@ -1799,3 +1799,4 @@ if (!saved) {
 </body>
 
 </html>
+
