@@ -1199,29 +1199,40 @@ if(missing.length){
   const botonGlobal  = $('#botonGlobal')?.value || 'NORMAL';
   const showRef      = ($('#mostrarRef').value||'NO') === 'SI';
 
-  // Mapear filas del Mall a ítems
-  const items = parsedRows.map((r, idx)=>{
-    const cant  = toNum(r[m.cantidad])||1;
-    const p     = toNum(r[m.precio]);
-    const d     = toNum(r[m.descuento]);
-    const costo = p*(1 - d/100);
-    const vUnit = costo*(factor||1) + (envio || 0);
+// Mapear filas del Mall a ítems
+const items = parsedRows.map((r, idx)=>{
+  const cant  = toNum(r[m.cantidad])||1;
+  const p     = toNum(r[m.precio]);
+  const d     = toNum(r[m.descuento]);
+  const costo = p*(1 - d/100);
+  const vUnit = costo*(factor||1) + (envio || 0);
 
-    return {
-      item: idx+1,
-      referencia: String(r[m.referencia]||'').trim(),
-      cant,
-      descripcion: String(r[m.descripcion]||'').trim(),
-      disponibilidad: disponibilidad(r[m.fecha]),
-      precioLista: p,
-      boton: botonGlobal,
-      dcto: d,
-      factorUtil: factor,
-      vUnitVenta: vUnit,
-      vTotal: vUnit*cant,
-      envio: envio || 0
-    };
-  }).filter(x=>x.referencia);
+  // --- DISPONIBILIDAD: si el inventario dice INGETES (o hay stock) => 3-5 días; si no, la del Mall
+  const refTxt   = String(r[m.referencia]||'').trim();
+  const refNorm  = normRef(refTxt);
+  const invRow   = invMap.get(refNorm);
+  const stockInv = Number(invRow?.cantidad || 0);
+  const marcaInv = String(invRow?.marca || '').toUpperCase();
+  const enIngetes = stockInv > 0 || marcaInv.includes('INGETES');
+
+  const dispMall = disponibilidad(r[m.fecha]); // lo que ya tenías
+  const disp     = enIngetes ? '3-5 días. Salvo venta previa' : (dispMall || '');
+
+  return {
+    item: idx+1,
+    referencia: refTxt,
+    cant,
+    descripcion: String(r[m.descripcion]||'').trim(),
+    disponibilidad: disp,            // <- ahora usa la lógica nueva
+    precioLista: p,
+    boton: botonGlobal,
+    dcto: d,
+    factorUtil: factor,
+    vUnitVenta: vUnit,
+    vTotal: vUnit*cant,
+    envio: envio || 0
+  };
+}).filter(x=>x.referencia);
 
   const meta = {
     cliente: ($('#cliente').value||'').toUpperCase(),
@@ -1658,6 +1669,3 @@ if (!saved) {
 </body>
 
 </html>
-
-
-
