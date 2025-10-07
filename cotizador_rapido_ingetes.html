@@ -99,9 +99,9 @@
   <label for="ref">Referencia (MLFB)</label>
   <div class="ref-grid">
     <input id="ref" type="text" placeholder="Ej. 6ES7131-6BH01-0BA0" />
-    <a id="mallLink" class="btn ghost" target="_blank" rel="noopener noreferrer">
-  🔎 Industry Mall ↗
-</a>
+    <a id="mallLink" href="#" rel="noopener" class="btn-soft">
+      🔎 Industry Mall ↗
+    </a>
     <button id="fetchMall" class="btn primary">✨ Traer descripción</button>
   </div>
 </div>
@@ -411,18 +411,18 @@ function clearInputsForNext(){
   $("fetchMall").addEventListener("click", fetchMallDescription);
 document.getElementById("mallLink").addEventListener("click", (e) => {
   e.preventDefault();
+  e.stopPropagation();
+
   const ref = document.getElementById("ref").value.trim();
   if (!ref) return;
 
   const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
 
-  // Abrimos la ventana de inmediato (gesto del usuario) para evitar bloqueos
-  const w = window.open("about:blank", "_blank", "noopener");
-  if (w) {
-    w.location.href = url;              // redirige la pestaña recién abierta
-  } else {
-    // Fallback: si el navegador bloqueó popups, al menos navega en esta pestaña
-    window.location.href = url;
+  // Abre directamente la URL en nueva pestaña
+  const w = window.open(url, "_blank", "noopener");
+  if (!w) {
+    // Si el navegador bloquea popups, NO navegamos la pestaña actual.
+    alert("Tu navegador bloqueó la pestaña del Industry Mall. Permite pop-ups para este sitio.");
   }
 });
 
@@ -455,6 +455,7 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
