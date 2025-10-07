@@ -1742,21 +1742,23 @@ async function loadIngenierosRemote(){
   }
 }
 
+// usa EXACTAMENTE el mismo valor que pusiste en Vercel
+const API_ING_URL = "https://portal-api-nine.vercel.app/api/ingenieros";
+const ADMIN_KEY   = "admin"; // <- tu variable en Vercel
+
 async function saveIngenierosRemote(){
   try{
-    const clean = INGS.map(s=>(s||'').trim()).filter(Boolean);
-    const headers = { 'Content-Type':'application/json' };
-    if (ADMIN_KEY) headers['X-Admin-Key'] = ADMIN_KEY;
-
+    const clean = INGS.map(s => (s||'').trim()).filter(Boolean);
     const r = await fetch(API_ING_URL, {
-      method:'PUT',
-      headers,
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Key': ADMIN_KEY     // ✅ OBLIGATORIO
+      },
       body: JSON.stringify({ ingenieros: clean })
     });
     if (!r.ok) throw new Error(await r.text());
     ingMsg.textContent = "✅ Guardado. (Actualizado para todos)";
-    INGS = clean;
-    renderSelect();
   }catch(e){
     ingMsg.textContent = "❌ Error al guardar: " + (e?.message || e);
   }
