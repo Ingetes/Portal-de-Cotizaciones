@@ -245,66 +245,103 @@ function pickSheetByNameLike(wb, names){
   return wb.SheetNames[0];
 }
 
+// === Helpers para sumar por secciones ===
+
+// Normaliza encabezados (MAYÚSCULAS y sin tildes)
+const _H = s => String(s||'').trim().toUpperCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+// Detecta columnas en una fila de encabezado concreta
+function detectInvColsAtRow(ws, headerRow){
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  let colRef=null, colMarca=null, colDesc=null, colQty=null;
+  for (let c = range.s.c; c <= range.e.c; c++){
+    const t = _H(ws[XLSX.utils.encode_cell({r:headerRow, c})]?.v);
+    if (t === 'REFERENCIA'  && colRef  === null) colRef  = c;
+    if (t === 'MARCA'       && colMarca=== null) colMarca= c;
+    if (t === 'DESCRIPCION' && colDesc === null) colDesc = c;
+    if (t === 'CANTIDAD'    && colQty  === null) colQty  = c;
+  }
+  if (colRef  === null) colRef  = 0;
+  if (colMarca=== null) colMarca= 1;
+  if (colDesc === null) colDesc = 2;
+  if (colQty  === null) colQty  = 3;
+  return { colRef, colMarca, colDesc, colQty };
+}
+
+// Encuentra el bloque "INVENTARIO REGULAR/OEMS/MIGRACION" (insensible a acentos)
+function findInvSection(ws, tipo){
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const title = `INVENTARIO ${_H(tipo)}`; // p.ej. INVENTARIO REGULAR
+  let titleRow = null;
+
+  for (let r = range.s.r; r <= range.e.r; r++){
+    const v = _H(ws[XLSX.utils.encode_cell({ r, c: range.s.c })]?.v);
+    if (v === title){ titleRow = r; break; }
+  }
+  if (titleRow == null) return null;
+
+  const headerRow = titleRow + 1;
+  let endRow = range.e.r;
+  for (let r = headerRow + 1; r <= range.e.r; r++){
+    const v = _H(ws[XLSX.utils.encode_cell({ r, c: range.s.c })]?.v);
+    if (v.startsWith('INVENTARIO ')){ endRow = r - 1; break; } // siguiente bloque
+  }
+  return { headerRow, endRow };
+}
+
+// Parsea SOLO una sección (Regular / OEMs / Migración)
+function parseInvForSection(ws, tipo){
+  const sect = findInvSection(ws, tipo);
+  const map = new Map();
+  if (!sect) return map;
+
+  const { headerRow, endRow } = sect;
+  const { colRef, colMarca, colDesc, colQty } = detectInvColsAtRow(ws, headerRow);
+
+  for (let r = headerRow + 1; r <= endRow; r++){
+    const raw  = String(ws[XLSX.utils.encode_cell({ r, c: colRef })]?.v ?? '').trim();
+    const refN = normRef(raw);
+    if (!refN) continue;
+
+    const desc  = String(ws[XLSX.utils.encode_cell({ r, c: colDesc })]?.v ?? '').trim();
+    const qty   = parseQty(ws[XLSX.utils.encode_cell({ r, c: colQty })]?.v ?? 0);
+    const marca = String(ws[XLSX.utils.encode_cell({ r, c: colMarca })]?.v ?? '').trim();
+
+    map.set(refN, { raw, descripcion: desc, cantidad: qty, marca });
+  }
+  return map;
+}
+
+// Suma cantidades de REGULAR + OEMS + MIGRACION (primera desc/marca que aparezca)
+function parseInvSumAll(ws){
+  const out = new Map();
+  ['REGULAR','OEMS','MIGRACION'].forEach(tipo=>{
+    const part = parseInvForSection(ws, tipo);
+    part.forEach((v, k)=>{
+      const prev = out.get(k);
+      out.set(k, {
+        raw:         prev?.raw || v.raw,
+        descripcion: prev?.descripcion || v.descripcion,
+        cantidad:    (prev?.cantidad || 0) + (Number(v.cantidad)||0),
+        marca:       prev?.marca || v.marca
+      });
+    });
+  });
+  return out;
+}
+
 function loadInventario(wb){
   const sheetName = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
   const ws = wb.Sheets[sheetName];
   if(!ws || !ws['!ref']) throw new Error('Hoja sin datos');
-  const range = XLSX.utils.decode_range(ws['!ref']);
 
-  // Detectar columnas por encabezado
-  let colRef=null, colMarca=null, colDesc=null, colQty=null, headerRow=range.s.r;
-  const normH = s => String(s||'').trim().toUpperCase()
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // === NUEVO: sumar REGULAR + OEMS + MIGRACION
+  invMap  = parseInvSumAll(ws);
+  invRefs = new Set(invMap.keys());
 
-  const maxR = Math.min(range.s.r+10, range.e.r);
-  const maxC = Math.min(range.s.c+20, range.e.c);
-  for (let r=range.s.r; r<=maxR; r++){
-    for (let c=range.s.c; c<=maxC; c++){
-      const t = normH(ws[XLSX.utils.encode_cell({r,c})]?.v);
-      if (!t) continue;
-      if (t==='REFERENCIA'  && colRef  ===null){ colRef  = c; headerRow = r; }
-      if (t==='MARCA'       && colMarca===null){ colMarca= c; headerRow = r; }
-      if (t==='DESCRIPCION' && colDesc ===null){ colDesc = c; headerRow = r; }
-      if (t==='CANTIDAD'    && colQty  ===null){ colQty  = c; headerRow = r; }
-    }
-  }
-  // Fallbacks si no encuentra encabezado
-  if (colRef  === null) colRef  = 0; // A
-  if (colMarca=== null) colMarca= 1; // B
-  if (colDesc === null) colDesc = 2; // C
-  if (colQty  === null) colQty  = 3; // D
-
-  const set = new Set();
-  const map = new Map();
-
-  // Leer filas y poblar el mapa
-  for (let r=headerRow+1; r<=range.e.r; r++){
-    const cR = ws[XLSX.utils.encode_cell({r, c: colRef})];
-    if (!cR) continue;
-
-    const raw  = String(cR.v ?? '').trim();
-    const refN = normRef(raw);
-    if (!refN) continue;
-
-    const cM = ws[XLSX.utils.encode_cell({r, c: colMarca})];
-    const cD = ws[XLSX.utils.encode_cell({r, c: colDesc})];
-    const cQ = ws[XLSX.utils.encode_cell({r, c: colQty})];
-
-    const marca       = cM ? String(cM.v ?? '').trim() : '';
-    const descripcion = cD ? String(cD.v ?? '').trim() : '';
-    const cantidad    = parseQty(cQ ? cQ.v : 0);
-
-    set.add(refN);
-    map.set(refN, { raw, marca, descripcion, cantidad, sheet: sheetName, row: r+1 });
-  }
-
-  invRefs = set;
-  invMap  = map;
-
-  // Mostrar columnas detectadas
-  const colL = n => XLSX.utils.encode_col(n);
   $('#invInfo').textContent =
-    `Hoja "${sheetName}" • ${invRefs.size} referencias cargadas.`;
+    `Hoja "${sheetName}" • ${invRefs.size} referencias (suma REGULAR + OEMS + MIGRACION).`;
 }
 
 function loadCotizacion(wb){
