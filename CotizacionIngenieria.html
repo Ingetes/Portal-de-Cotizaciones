@@ -214,7 +214,12 @@ header .brand{
 <tr>
   <td colspan="5">
     Imprevistos (
-    <input id="impPct" type="number" min="0" step="0.01" value="10" style="width:60px;text-align:right"> %)
+    <input id="impPct"
+       type="number"
+       min="5" max="25" step="0.01"
+       value="10"
+       style="width:60px;text-align:right"
+       title="Mín 5%, Máx 25%"> %)
   </td>
   <td class="right"><span id="imprevView">$ 0</span></td>
 </tr>
@@ -531,6 +536,14 @@ async function loadPricingFromURL(){
     fallbackWrap.style.display='grid';
   }
 }
+
+const impEl = document.getElementById('impPct');
+impEl?.addEventListener('input', () => {
+  const clamped = clampImprevistos(impEl.value);
+  if (String(clamped) !== String(impEl.value)) impEl.value = clamped;
+  recalcTotals();
+});
+
 document.getElementById('filePicker')?.addEventListener('change', async (ev)=>{
   const f = ev.target.files?.[0]; if(!f) return;
   const arr = await f.arrayBuffer();
@@ -812,6 +825,15 @@ function recalcRow(i){
   const el  = document.getElementById('sub_'+i); if(el) el.textContent = fmtMoney(sub);
   recalcTotals();
 }
+
+function clampImprevistos(v){
+  const n = parseFloat(v);
+  if (isNaN(n)) return 10;      // valor por defecto
+  if (n < 5)   return 5;
+  if (n > 25)  return 25;
+  return n;
+}
+
 function recalcTotals(){
   let subtotal=0;
   DESCS.forEach((desc,i)=>{
@@ -827,14 +849,13 @@ function recalcTotals(){
   if (pillV) pillV.textContent = fmtMoney(viatTotal);
 
 const pctEl  = document.getElementById('impPct');
-const impPct = parseFloat(pctEl?.value || '10');
+const impPct = clampImprevistos(pctEl?.value);
 const imprev = subtotal * (isNaN(impPct) ? 0 : impPct) / 100;
 const total  = subtotal + imprev;
 
 const pillLbl = document.getElementById('pillImprevLabel');
 if (pillLbl && !isNaN(impPct)) pillLbl.textContent = `Imprevistos (${impPct}%):`;
 
-  document.getElementById('impPct')?.addEventListener('input', recalcTotals);
   document.getElementById('subtotalView').textContent=fmtMoney(subtotal);
   document.getElementById('imprevView').textContent=fmtMoney(imprev);
   document.getElementById('totalView').textContent=fmtMoney(total);
@@ -1042,7 +1063,8 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
     const nombreVal  = (document.getElementById('nombreDoc') || {}).value || '';
     const alcanceVal = (document.getElementById('alcance')  || {}).value || '';
     const ingVal     = (document.getElementById('ingeniero')|| {}).value || '';
-    const impPct     = Number(((document.getElementById('impPct') || {}).value) || 10);
+    const impPctRaw = Number(((document.getElementById('impPct') || {}).value) || 10);
+    const impPct    = clampImprevistos(impPctRaw);
     const clienteVal = (document.getElementById('cliente') || {}).value || '';
 
     /* =====================================================
