@@ -185,6 +185,7 @@
           <button id="addBtn" class="btn-soft">➕ Agregar referencia</button> <!-- NUEVO -->
           <button id="copyBtn" class="btn-soft">📋 Copiar</button>
           <button id="resetBtn" class="btn-soft">🔄 Reiniciar</button>
+          <span id="copyMsg" class="text-sm ml-auto"></span>
         </div>
       </div>
     </div>
@@ -336,19 +337,36 @@ return block.includes("Completa referencia") ? "" : block;
 
 async function copyBlock() {
   const txt = $("preview").textContent.trim();
+  const msg = document.getElementById("copyMsg"); // puede ser null si lo quitan
   if (!txt || txt.includes("Completa referencia")) return;
-  $("copyMsg").textContent = "";
+
+  // Limpia mensaje previo (si existe)
+  if (msg) { msg.textContent = ""; msg.className = "text-sm ml-auto"; }
+
+  // Intento moderno (HTTPS + permiso de clipboard)
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(txt);
-      $("copyMsg").textContent = "✅ Copiado al portapapeles";
-      $("copyMsg").className = "text-sm ml-auto text-emerald-600";
-    } else {
-      throw new Error("clipboard not available");
+      if (msg) { msg.textContent = "✅ Copiado al portapapeles"; msg.classList.add("text-emerald-600"); }
+      return;
     }
-  } catch {
-    $("copyMsg").textContent = "⚠️ Copia manual: selecciona el texto y presiona Ctrl/Cmd+C";
-    $("copyMsg").className = "text-sm ml-auto text-amber-600";
+    throw new Error("Clipboard API no disponible");
+  } catch (_) {
+    // Fallback legacy: textarea temporal + execCommand('copy')
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "-9999px";
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+      if (msg) { msg.textContent = "✅ Copiado"; msg.classList.add("text-emerald-600"); }
+    } catch {
+      if (msg) { msg.textContent = "⚠️ Copia manual: selecciona el texto y presiona Ctrl/Cmd+C"; msg.classList.add("text-amber-600"); }
+    }
   }
 }
 
@@ -461,6 +479,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
