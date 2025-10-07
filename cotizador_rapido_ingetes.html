@@ -363,12 +363,21 @@ function roundUpTo(v, step = 100) {
 
   // Eventos
   $("fetchMall").addEventListener("click", fetchMallDescription);
-$("mallLink").addEventListener("click", (e) => {
-  const ref = $("ref").value.trim();
-  if (!ref) { e.preventDefault(); return; }
-  const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
+document.getElementById("mallLink").addEventListener("click", (e) => {
   e.preventDefault();
-  window.open(url, "_blank", "noopener");
+  const ref = document.getElementById("ref").value.trim();
+  if (!ref) return;
+
+  const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
+
+  // Abrimos la ventana de inmediato (gesto del usuario) para evitar bloqueos
+  const w = window.open("about:blank", "_blank", "noopener");
+  if (w) {
+    w.location.href = url;              // redirige la pestaña recién abierta
+  } else {
+    // Fallback: si el navegador bloqueó popups, al menos navega en esta pestaña
+    window.location.href = url;
+  }
 });
 
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
@@ -384,16 +393,5 @@ $("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
 
 
