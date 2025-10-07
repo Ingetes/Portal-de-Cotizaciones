@@ -214,12 +214,13 @@ header .brand{
 <tr>
   <td colspan="5">
     Imprevistos (
-    <input id="impPct"
+<input id="impPct"
        type="number"
        min="5" max="25" step="0.01"
        value="10"
        style="width:60px;text-align:right"
-       title="Mín 5%, Máx 25%"> %)
+       oninput="limitImprevistos(this)"> %)
+    <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
   </td>
   <td class="right"><span id="imprevView">$ 0</span></td>
 </tr>
@@ -842,6 +843,32 @@ function clampImprevistos(v){
   return n;
 }
 
+function limitImprevistos(input){
+  let v = parseFloat(input.value);
+  if (isNaN(v)) return; // permite borrar momentáneamente sin rebotar
+
+  let msg = "";
+  if (v > 25){
+    v = 25;
+    input.value = v;
+    msg = "Máximo permitido: 25%";
+  } else if (v < 5){
+    v = 5;
+    input.value = v;
+    msg = "Mínimo permitido: 5%";
+  }
+
+  // Estilo rojo discreto cuando se corrige
+  const hasError = !!msg;
+  input.style.borderColor = hasError ? "#dc2626" : "";
+  input.style.boxShadow  = hasError ? "0 0 0 2px rgba(220,38,38,.20)" : "";
+  const el = document.getElementById("impMsg");
+  if (el) el.textContent = msg;
+
+  // Recalcular totales de inmediato
+  recalcTotals();
+}
+
 function recalcTotals(){
   let subtotal=0;
   DESCS.forEach((desc,i)=>{
@@ -857,9 +884,8 @@ function recalcTotals(){
   if (pillV) pillV.textContent = fmtMoney(viatTotal);
 
 const pctEl  = document.getElementById('impPct');
-// mientras escribes: permite vacío o parcial; usa 0 temporalmente
 let impPct = parseFloat(pctEl?.value);
-if (!Number.isFinite(impPct)) impPct = 0;
+if (!Number.isFinite(impPct)) impPct = 0; // temporal si está vacío mientras escribes
 const imprev = subtotal * (isNaN(impPct) ? 0 : impPct) / 100;
 const total  = subtotal + imprev;
 
