@@ -780,8 +780,8 @@ function fillClienteOptions(){
 }
 
 function hideContactsUploadUI(){
-  const row = document.getElementById('xlsDatosRow');
-  if (row) row.style.display = 'none';
+  const wrap = document.getElementById('contactsWrap');
+  if (wrap) wrap.style.display = 'none';
 }
 
 // intenta cargar automáticamente un Excel de contactos de la MISMA carpeta
@@ -1669,15 +1669,6 @@ attachSearchableCombo('clienteSelect','cliente', {     // input+select sincroniz
   onCommit: ()=>{}, matchMode: 'startsWith'
 });
 tryAutoLoadContactsFromFolder();                       // intenta leer CONTACTOS.xlsx automáticamente
-
-/* ====== INGENIEROS: carga remota, edición y guardado ====== */
-/* Cambia esta URL si tu deploy de Vercel es otro dominio */
-const API_ING_URL = "https://portal-api-nine.vercel.app/api/ingenieros";
-
-/* Si protegiste la API con una llave opcional, envíala así:
-   const ADMIN_KEY = "admin";  // o deja "" si no usas llave
-*/
-const ADMIN_KEY = ""; // opcional
 
 let INGS = [];
 const selIng   = document.getElementById('ingenieroSelect');
