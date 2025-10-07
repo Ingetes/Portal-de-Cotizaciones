@@ -175,25 +175,23 @@
             <div id="totalBefore" class="text-base mt-1 font-medium">—</div>
           </div>
         </div>
-
         <div class="text-sm font-medium mt-2">Previsualización (formato final)</div>
         <pre id="preview" class="text-sm whitespace-pre-wrap leading-6 border rounded-xl p-3 bg-white">(Completa referencia, descripción y valores para ver el bloque final)</pre>
-
         <div class="flex flex-wrap gap-2 items-center">
+          <button id="addBtn" class="btn-soft">➕ Agregar referencia</button> <!-- NUEVO -->
           <button id="copyBtn" class="btn-soft">📋 Copiar</button>
-          <button id="downloadBtn" class="btn-soft">⬇️ Descargar .txt</button>
           <button id="resetBtn" class="btn-soft">🔄 Reiniciar</button>
-          <div id="copyMsg" class="text-sm ml-auto"></div>
         </div>
       </div>
     </div>
   </div>
-
 <script>
+  
   // ⬅️ Ajusta esto si tu dominio es otro
   const API_BASE = 'https://portal-api-nine.vercel.app'; // tu backend en Vercel
 
   // Helpers
+  let LOCK_PREVIEW = false; // si true, compute() no sobreescribe #preview
   let lastRefUsedForDesc = ""; // referencia para la que llenamos la descripción
   const $ = (id) => document.getElementById(id);
   const moneyCOP = (v) => (v == null || isNaN(v))
@@ -307,43 +305,47 @@ function roundUpTo(v, step = 100) {
     const block = (ref && desc && totalBeforeVAT != null)
       ? `${ref}\n${desc}\nCosto: ${moneyCOP(totalBeforeVAT)} + IVA\nDisponibilidad: ${availability}${notesPart}`
       : "(Completa referencia, descripción y valores para ver el bloque final)";
-    $("preview").textContent = block;
-
-    return block.includes("Completa referencia") ? "" : block;
+if (!LOCK_PREVIEW) {
+  $("preview").textContent = block;
+}
+return block.includes("Completa referencia") ? "" : block;
   }
 
-  async function copyBlock() {
-    const txt = compute();
-    if (!txt) return;
-    $("copyMsg").textContent = "";
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(txt);
-        $("copyMsg").textContent = "✅ Copiado al portapapeles";
-        $("copyMsg").className = "text-sm ml-auto text-emerald-600";
-      } else {
-        throw new Error("clipboard not available");
-      }
-    } catch {
-      $("copyMsg").textContent = "⚠️ Copia manual: selecciona el texto y presiona Ctrl/Cmd+C";
-      $("copyMsg").className = "text-sm ml-auto text-amber-600";
+async function copyBlock() {
+  const txt = $("preview").textContent.trim();
+  if (!txt || txt.includes("Completa referencia")) return;
+  $("copyMsg").textContent = "";
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(txt);
+      $("copyMsg").textContent = "✅ Copiado al portapapeles";
+      $("copyMsg").className = "text-sm ml-auto text-emerald-600";
+    } else {
+      throw new Error("clipboard not available");
     }
+  } catch {
+    $("copyMsg").textContent = "⚠️ Copia manual: selecciona el texto y presiona Ctrl/Cmd+C";
+    $("copyMsg").className = "text-sm ml-auto text-amber-600";
   }
+}
 
-  function downloadTxt() {
-    const txt = compute();
-    if (!txt) return;
-    const ref = $("ref").value.trim().replace(/[^A-Za-z0-9_-]+/g, "-") || "cotizacion";
-    const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `cotizacion-${ref}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
+function downloadTxt() {
+  const txt = $("preview").textContent.trim();
+  if (!txt || txt.includes("Completa referencia")) return;
+
+  // usa la 1ª línea del preview como parte del nombre si existe
+  const first = txt.split(/\r?\n/)[0] || "cotizacion";
+  const safe = first.replace(/[^A-Za-z0-9_-]+/g, "-").slice(0, 60);
+  const blob = new Blob([txt], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `cotizacion-${safe}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
   function resetAll() {
     $("ref").value = "";
@@ -359,7 +361,36 @@ function roundUpTo(v, step = 100) {
     $("copyMsg").textContent = "";
     $("copyMsg").className = "text-sm ml-auto";
     compute();
+    LOCK_PREVIEW = false;        // vuelve a permitir que compute() actualice el preview
+    $("preview").textContent = "";  // limpia el acumulado
+
   }
+
+function clearInputsForNext(){
+  $("ref").value = "";
+  $("desc").value = "";
+  $("price").value = "";
+  // conservamos modo de precio y TRM para tu flujo
+  // $("priceMode").value = $("priceMode").value;
+  // $("trm").value = $("trm").value;
+  $("discount").value = "0";
+  $("util").value = "1.00";
+  $("shipping").value = "0";
+  $("lead").value = "";
+  $("notes").value = "";
+  $("copyMsg").textContent = "";
+  $("copyMsg").className = "text-sm ml-auto";
+
+  // resetea los resúmenes numéricos sin llamar compute()
+  $("baseCop").textContent = "—";
+  $("saleAfter").textContent = "—";
+  $("shipVal").textContent = "—";
+  $("totalBefore").textContent = "—";
+  $("mallLink").href = "#";
+
+  // no llames compute() aquí para no sobrescribir el preview acumulado
+  $("ref").focus();
+}
 
   // Eventos
   $("fetchMall").addEventListener("click", fetchMallDescription);
@@ -387,11 +418,27 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
   $("copyBtn").addEventListener("click", copyBlock);
   $("downloadBtn").addEventListener("click", downloadTxt);
   $("resetBtn").addEventListener("click", resetAll);
+  $("addBtn").addEventListener("click", () => {
+  // obtenemos el bloque actual (no modifica el preview si está bloqueado)
+  const txt = compute();
+  if (!txt) return; // faltan datos
+
+  // suma al preview
+  const prev = $("preview").textContent.trim();
+  $("preview").textContent = prev ? (prev + "\n\n" + txt) : txt;
+
+  // bloquea el preview para que compute() ya no lo reemplace mientras llenas la siguiente
+  LOCK_PREVIEW = true;
+
+  // limpia inputs para digitar la siguiente referencia
+  clearInputsForNext();
+});
 
   // Init
   compute();
 </script>
 </body>
 </html>
+
 
 
