@@ -538,9 +538,17 @@ async function loadPricingFromURL(){
 }
 
 const impEl = document.getElementById('impPct');
+
+// 1) En vivo: recalcula sin forzar el valor (permite borrar y tipear)
 impEl?.addEventListener('input', () => {
-  const clamped = clampImprevistos(impEl.value);
-  if (String(clamped) !== String(impEl.value)) impEl.value = clamped;
+  recalcTotals();
+});
+
+// 2) Al salir del campo: corrige al rango 5–25 y recalcula
+impEl?.addEventListener('blur', () => {
+  // si quedó vacío, usa el default (10) o el que prefieras
+  if (impEl.value.trim() === '') impEl.value = 10;
+  impEl.value = clampImprevistos(impEl.value); // 5–25%
   recalcTotals();
 });
 
@@ -849,7 +857,9 @@ function recalcTotals(){
   if (pillV) pillV.textContent = fmtMoney(viatTotal);
 
 const pctEl  = document.getElementById('impPct');
-const impPct = clampImprevistos(pctEl?.value);
+// mientras escribes: permite vacío o parcial; usa 0 temporalmente
+let impPct = parseFloat(pctEl?.value);
+if (!Number.isFinite(impPct)) impPct = 0;
 const imprev = subtotal * (isNaN(impPct) ? 0 : impPct) / 100;
 const total  = subtotal + imprev;
 
