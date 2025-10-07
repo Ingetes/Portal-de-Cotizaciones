@@ -99,7 +99,7 @@
   <label for="ref">Referencia (MLFB)</label>
   <div class="ref-grid">
     <input id="ref" type="text" placeholder="Ej. 6ES7131-6BH01-0BA0" />
-    <a id="mallLink" href="#" rel="noopener" class="btn-soft">
+    <a id="mallLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-soft">
       🔎 Industry Mall ↗
     </a>
     <button id="fetchMall" class="btn primary">✨ Traer descripción</button>
@@ -291,10 +291,12 @@ function roundUpTo(v, step = 100) {
 
   // Cálculos y previsualización
   function compute() {
-    const ref = $("ref").value.trim();
-    $("mallLink").href = ref
-      ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
-      : "#";
+const ref = $("ref").value.trim();
+const url = ref
+  ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
+  : "#";
+
+$("mallLink").href = url;          // <- solo actualiza el href
 
     const desc = cleanDesc($("desc").value);
     const priceMode = $("priceMode").value;
@@ -409,18 +411,6 @@ function clearInputsForNext(){
 
   // Eventos
   $("fetchMall").addEventListener("click", fetchMallDescription);
-document.getElementById("mallLink").addEventListener("click", (e) => {
-  e.preventDefault();
-  e.stopPropagation();
-
-  const ref = document.getElementById("ref").value.trim();
-  if (!ref) return;
-
-  const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
-
-  // Abre directamente la URL en nueva pestaña
-  const w = window.open(url, "_blank", "noopener");
-});
 
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
@@ -451,6 +441,7 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
