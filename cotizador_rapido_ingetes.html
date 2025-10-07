@@ -420,10 +420,6 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 
   // Abre directamente la URL en nueva pestaña
   const w = window.open(url, "_blank", "noopener");
-  if (!w) {
-    // Si el navegador bloquea popups, NO navegamos la pestaña actual.
-    alert("Tu navegador bloqueó la pestaña del Industry Mall. Permite pop-ups para este sitio.");
-  }
 });
 
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
@@ -455,6 +451,7 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
