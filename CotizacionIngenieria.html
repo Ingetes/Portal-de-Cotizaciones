@@ -747,20 +747,23 @@ function hideContactsUploadUI(){
 // intenta cargar automáticamente un Excel de contactos de la MISMA carpeta
 async function tryAutoLoadContactsFromFolder(){
   const CANDIDATES = [
+    'informedeContactos.xlsx',          // ✅ tu nombre
     'CONTACTOS.xlsx','Contactos.xlsx','contactos.xlsx',
     'CLIENTES.xlsx','clientes.xlsx'
   ];
   for (const rel of CANDIDATES){
     try{
-      const url = new URL(rel, location.href).href + `?v=${Date.now()}`;
+      const url = new URL(rel, location.href).href + `?v=${Date.now()}`; // cache buster
       const resp = await fetch(url, { cache:'no-store' });
       if (!resp.ok) continue;
       const buf = await resp.arrayBuffer();
       if (buf.byteLength < 1024) continue;
+
       CONTACTS_DB = await parseContactsWorkbook(buf);
       if (CONTACTS_DB?.byEmpresa?.size){
         fillClienteOptions();
-        hideContactsUploadUI();
+        const wrap = document.getElementById('contactsWrap');
+        if (wrap) wrap.style.display = 'none';      // ✅ oculta el bloque al cargar bien
         return true;
       }
     }catch(_){}
