@@ -192,31 +192,11 @@
     <input id="fileMall" type="file" accept=".xls,.xlsx" />
     <div id="fileMallInfo" style="margin-top:6px;color:#9aa3b2"></div>
   </div>
-
-<!-- Selector de sección de inventario -->
-<div id="invTipoWrap" class="row" style="margin-top:6px">
-  <label style="margin:0;color:#6b7280">Sección:</label>
-
-  <label class="pill" style="cursor:pointer">
-    <input type="radio" name="invTipo" value="REGULAR" checked style="margin-right:6px">
-    Regular
-  </label>
-
-  <label class="pill" style="cursor:pointer">
-    <input type="radio" name="invTipo" value="OEMS" style="margin-right:6px">
-    OEMs
-  </label>
-
-  <label class="pill" style="cursor:pointer">
-    <input type="radio" name="invTipo" value="MIGRACION" style="margin-right:6px">
-    Migración
-  </label>
 </div>
 <div id="xlsDatosRow" style="margin-top:12px">
   <label class="required">Excel datos de contacto (.xlsx)</label>
   <input id="xlsDatos" type="file" accept=".xlsx,.xls"/>
   <small id="xlsDatosStatus" style="margin-left:6px;color:#6b7280"></small>
-</div>
 </div>
 
 <div id="previewWrap" style="display:none;margin-top:14px">
@@ -691,9 +671,7 @@ $('#fileInv').addEventListener('change', async (ev)=>{
   const sh = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
   const ws = wb.Sheets[sh];
 
-const tipo = getInvTipo();
-invMap = parseInvMergedPreferred(ws, tipo);
-
+invMap = parseInvSumAll(ws);
   renderInvUI();
 });
 
@@ -746,26 +724,6 @@ attachSearchableCombo('clienteSelect','cliente', {  // input+select sincronizado
 });
 const selCli = document.getElementById('clienteSelect');
 if (selCli) selCli.addEventListener('change', syncClienteFromSelect);
-
-document.querySelectorAll('input[name="invTipo"]').forEach(radio=>{
-  radio.addEventListener('change', ()=>{
-    if (!invFileBuffer) return; // aún no se ha cargado inventario
-
-    try{
-      const wb = XLSX.read(invFileBuffer, { type:'array' });
-      const sh = pickSheetByNameLike(wb, ['DATOS','DATA','INVENTARIO']);
-      const ws = wb.Sheets[sh];
-      
-const tipo = getInvTipo();
-invMap = parseInvMergedPreferred(ws, tipo);
-
-      renderInvUI();
-    }catch(e){
-      console.error(e);
-      alert('No se pudo reprocesar el inventario con la sección seleccionada.');
-    }
-  });
-});
   }
 
 function resetForm(){
@@ -1127,11 +1085,6 @@ function detectInvCols(ws){
   return { headerRow, colRef, colDesc, colQty, colMarca };
 }
 
-function getInvTipo(){
-  const el = document.querySelector('input[name="invTipo"]:checked');
-  return el ? String(el.value || 'REGULAR').toUpperCase() : 'REGULAR';
-}
-
 // Busca el bloque "INVENTARIO REGULAR/OEMS/MIGRACION" y devuelve filas inicio/fin
 function findInvSection(ws, tipo){
   if (tipo === 'TODO') return null; // "Todo" se maneja aparte
@@ -1185,54 +1138,22 @@ function parseInvForSection(ws, tipo){
   return map;
 }
 
-// Recorre TODAS las secciones y resuelve por preferencia:
-// - Si la referencia está en varias, usa la de la sección elegida (preferTipo)
-// - Si está en una sola sección, usa esa (sin importar preferTipo)
-// - Si preferTipo === 'TODO', toma la primera aparición (REGULAR → OEMS → MIGRACION)
-function parseInvMergedPreferred(ws, preferTipo){
-  const prefer = String(preferTipo || 'REGULAR').toUpperCase();
-  const maps = {
-    REGULAR:   parseInvForSection(ws, 'REGULAR'),
-    OEMS:      parseInvForSection(ws, 'OEMS'),
-    MIGRACION: parseInvForSection(ws, 'MIGRACION')
-  };
-  const order = ['REGULAR','OEMS','MIGRACION'];
-  const allRefs = new Set();
-  order.forEach(sec => maps[sec].forEach((_, k) => allRefs.add(k)));
-
+// Suma cantidades de REGULAR + OEMS + MIGRACION
+function parseInvSumAll(ws){
   const out = new Map();
-  const isTodo = (prefer === 'TODO');
-
-  allRefs.forEach(k => {
-    // 1) Si hay preferencia (no "TODO") y esa sección tiene la ref → usarla
-    if (!isTodo && maps[prefer].has(k)) {
-      const v = maps[prefer].get(k);
-      out.set(k, { ...v, seccion: prefer });
-      return;
-    }
-    // 2) No hay preferencia válida o no existe en la preferida:
-    //    - si está en una sola sección → usar esa
-    //    - si está en varias → tomar la primera por orden REGULAR→OEMS→MIGRACION
-    const sources = order.filter(sec => maps[sec].has(k));
-    if (sources.length) {
-      const sec = sources[0];
-      const v = maps[sec].get(k);
-      out.set(k, { ...v, seccion: sec });
-    }
-  });
-
-  return out;
-}
-
-function parseInvAll(ws){
-  const map = new Map();
   ['REGULAR','OEMS','MIGRACION'].forEach(tipo=>{
-    const partial = parseInvForSection(ws, tipo);
-    partial.forEach((val, key)=>{
-      if (!map.has(key)) map.set(key, val); // primera aparición gana
+    const part = parseInvForSection(ws, tipo);
+    part.forEach((v, k)=>{
+      const prev = out.get(k);
+      out.set(k, {
+        raw: prev?.raw || v.raw,
+        descripcion: prev?.descripcion || v.descripcion,
+        cantidad: (prev?.cantidad || 0) + (Number(v.cantidad)||0),
+        marca: prev?.marca || v.marca
+      });
     });
   });
-  return map;
+  return out;
 }
 
 // Forzar ajuste de texto (wrapText) en todas las celdas de una hoja
@@ -1799,4 +1720,5 @@ if (!saved) {
 </body>
 
 </html>
+
 
