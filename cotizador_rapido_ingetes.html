@@ -405,9 +405,6 @@ function clearInputsForNext(){
   $("shipVal").textContent = "—";
   $("totalBefore").textContent = "—";
   $("mallLink").href = "#";
-
-  // no llames compute() aquí para no sobrescribir el preview acumulado
-  $("ref").focus();
 }
 
   // Eventos
@@ -437,28 +434,27 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
   $("resetBtn").addEventListener("click", resetAll);
   $("addBtn").addEventListener("click", () => {
   const txt = compute();
-  if (!txt) return; // faltan datos
+  if (!txt) return;
 
   const prev = $("preview").textContent.trim();
 
-  // Primer clic: el preview ya muestra txt. No dupliques.
   if (!LOCK_PREVIEW && prev === txt) {
     LOCK_PREVIEW = true;
-    clearInputsForNext();
-    scrollToSlide();          // 👈 sube al slide
+    scrollToSlide();      // 👈 sube primero
+    clearInputsForNext(); // limpia SIN hacer focus
     return;
   }
 
-  // Clics siguientes: agrega y limpia
   $("preview").textContent = prev ? `${prev}\n\n${txt}` : txt;
   LOCK_PREVIEW = true;
-  clearInputsForNext();
-  scrollToSlide();            // 👈 sube al slide
+  scrollToSlide();        // 👈 sube primero
+  clearInputsForNext();   // limpia SIN hacer focus
 });
 
   compute();
 </script>
 </body>
 </html>
+
 
 
