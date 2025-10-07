@@ -418,18 +418,19 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
   $("copyBtn").addEventListener("click", copyBlock);
   $("resetBtn").addEventListener("click", resetAll);
   $("addBtn").addEventListener("click", () => {
-  // obtenemos el bloque actual (no modifica el preview si está bloqueado)
   const txt = compute();
-  if (!txt) return; // faltan datos
+  if (!txt) { alert("Completa referencia, descripción y valores."); return; }
 
-  // suma al preview
   const prev = $("preview").textContent.trim();
-  $("preview").textContent = prev ? (prev + "\n\n" + txt) : txt;
+  // si el preview ya muestra el mismo bloque, no lo dupliques
+  if (!LOCK_PREVIEW && prev === txt) {
+    LOCK_PREVIEW = true;
+    clearInputsForNext();
+    return;
+  }
 
-  // bloquea el preview para que compute() ya no lo reemplace mientras llenas la siguiente
+  $("preview").textContent = prev ? `${prev}\n\n${txt}` : txt;
   LOCK_PREVIEW = true;
-
-  // limpia inputs para digitar la siguiente referencia
   clearInputsForNext();
 });
 
@@ -438,6 +439,7 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
