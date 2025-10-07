@@ -418,27 +418,33 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
   $("copyBtn").addEventListener("click", copyBlock);
   $("resetBtn").addEventListener("click", resetAll);
   $("addBtn").addEventListener("click", () => {
+  // Genera el bloque actual a partir de los inputs
   const txt = compute();
-  if (!txt) { alert("Completa referencia, descripción y valores."); return; }
+  if (!txt) return; // faltan datos (placeholder)
 
   const prev = $("preview").textContent.trim();
-  // si el preview ya muestra el mismo bloque, no lo dupliques
+
+  // 👉 Primer clic: el preview YA muestra txt (compute lo puso).
+  // No dupliques: solo bloquea para que compute() no lo reescriba y limpia inputs.
   if (!LOCK_PREVIEW && prev === txt) {
-    LOCK_PREVIEW = true;
-    clearInputsForNext();
+    LOCK_PREVIEW = true;     // desde ahora compute() no tocará el preview
+    clearInputsForNext();    // vacía inputs para digitar la siguiente referencia
     return;
   }
 
+  // Clics siguientes: agrega la nueva referencia debajo del acumulado
   $("preview").textContent = prev ? `${prev}\n\n${txt}` : txt;
-  LOCK_PREVIEW = true;
+  LOCK_PREVIEW = true;       // mantener bloqueado mientras llenas la próxima
   clearInputsForNext();
 });
+
 
   // Init
   compute();
 </script>
 </body>
 </html>
+
 
 
 
