@@ -209,6 +209,17 @@
     return s;
   }
 
+  function scrollToSlide() {
+  // si tienes un contenedor del slide con id, úsalo:
+  const el = document.getElementById('slide') || document.getElementById('top');
+  if (el && el.scrollIntoView) {
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+    // fallback: al tope de la página dentro del iframe/página actual
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
   function normalizeAvailability(input) {
     const raw = (input || "").trim();
     if (!raw) return "(sin confirmar)";
@@ -418,35 +429,27 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
   $("copyBtn").addEventListener("click", copyBlock);
   $("resetBtn").addEventListener("click", resetAll);
   $("addBtn").addEventListener("click", () => {
-  // Genera el bloque actual a partir de los inputs
   const txt = compute();
-  if (!txt) return; // faltan datos (placeholder)
+  if (!txt) return; // faltan datos
 
   const prev = $("preview").textContent.trim();
 
-  // 👉 Primer clic: el preview YA muestra txt (compute lo puso).
-  // No dupliques: solo bloquea para que compute() no lo reescriba y limpia inputs.
+  // Primer clic: el preview ya muestra txt. No dupliques.
   if (!LOCK_PREVIEW && prev === txt) {
-    LOCK_PREVIEW = true;     // desde ahora compute() no tocará el preview
-    clearInputsForNext();    // vacía inputs para digitar la siguiente referencia
+    LOCK_PREVIEW = true;
+    clearInputsForNext();
+    scrollToSlide();          // 👈 sube al slide
     return;
   }
 
-  // Clics siguientes: agrega la nueva referencia debajo del acumulado
+  // Clics siguientes: agrega y limpia
   $("preview").textContent = prev ? `${prev}\n\n${txt}` : txt;
-  LOCK_PREVIEW = true;       // mantener bloqueado mientras llenas la próxima
+  LOCK_PREVIEW = true;
   clearInputsForNext();
+  scrollToSlide();            // 👈 sube al slide
 });
 
-
-  // Init
   compute();
 </script>
 </body>
 </html>
-
-
-
-
-
-
