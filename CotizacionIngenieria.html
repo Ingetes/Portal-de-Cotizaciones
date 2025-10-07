@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Cotizador de ingeniería </title>
+<title>Cotizador de ingenierí­a </title>
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
@@ -16,7 +16,7 @@
   --line:#e5e7eb;        /* bordes suaves */
   --accent:#111827;      /* botón oscuro */
   --radius:16px;
-  --border:#e5e7eb;      /* líneas y bordes suaves */
+  --border:#e5e7eb;      /* lí­neas y bordes suaves */
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -47,7 +47,7 @@ main{max-width:1340px;margin:0 auto;padding:24px 16px}
   margin-bottom:18px;
 }
 
-/* Títulos de sección */
+/* Tí­tulos de sección */
 h2{font-size:18px;margin:22px 0 10px 0;color:var(--text);font-weight:700}
 
 /* Formularios */
@@ -93,7 +93,7 @@ table tfoot tr td{
     cursor:pointer;font-weight:600;
 }
 
-/* Borde rojo para campos obligatorios vacíos */
+/* Borde rojo para campos obligatorios vací­os */
 input.error, select.error, textarea.error{
   border-color:#ef4444 !important;
   box-shadow:0 0 0 3px rgba(239,68,68,.15) !important;
@@ -107,18 +107,49 @@ th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;font-size
 th{font-weight:800;background:#f1f5f9}
 td.right{text-align:right}
 
-/* KPIs “pill” */
+/* KPIs â€œpillâ€ */
 .kpi{
   display:flex;
   gap:16px;
   flex-wrap:wrap;
-  justify-content:center;   /* ← centrado a la mitad (sección 3) */
+  justify-content:center;   /* â† centrado a la mitad (sección 3) */
   margin-top:10px;
 }
 
 .pill{background:#eef2ff;border:1px solid #c7d2fe;border-radius:999px;padding:6px 12px;font-weight:800}
 .muted{color:var(--muted)}
 .warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:8px 12px;margin-top:12px}
+.mini{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px;
+}
+.mini h3{
+  margin:0 0 6px 0;
+  font-size:16px;
+}
+.file-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.file-row small{ color:var(--muted) }
+
+/* utilidades de grilla */
+.col-span-2{ grid-column:1 / -1; }
+
+/* pastilla de estado */
+.status-pill{
+  background:#eef2ff;
+  border:1px solid #c7d2fe;
+  color:#1e3a8a;
+  padding:8px 12px;
+  border-radius:10px;
+  display:inline-block;
+  font-size:13px;
+}
 
 /* Botón principal oscuro */
 button{
@@ -128,14 +159,23 @@ button{
 .actions{
   display:flex;
   gap:10px;
-  justify-content:flex-start; /* ← botones a la derecha */
+  justify-content:flex-start; /* â† botones a la derecha */
   margin-top:12px;
 }
 
 /* Inputs de precio compactos */
 .price-input{width:120px;text-align:right}
 .note{display:block;color:#64748b;font-size:12px;margin-bottom:6px}
-#loadStatus{margin:12px 0;font-size:13px;color:var(--muted)}
+#loadStatus{
+  margin:0 0 14px 0;
+  font-size:13px;
+  color:#3730a3;
+  background:#eef2ff;
+  border:1px solid #c7d2fe;
+  padding:8px 12px;
+  border-radius:10px;
+  display:inline-block;
+}
 label .req{ color:#dc2626; font-weight:700; }
 
 header .brand{
@@ -144,13 +184,39 @@ header .brand{
   margin-top: 4px;
 }
 
+/* Combo buscable (igual al del generador Excel) */
+.combo-input{
+  width:100%;
+  margin-bottom:8px;
+  padding:10px 12px;
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+  outline:none;
+}
+.combo-input:focus{
+  border-color:#9aa7b4;
+  box-shadow:0 0 0 3px rgba(2,132,199,.15);
+}
+.select{
+  width:100%;
+  padding:10px 12px;
+  background:#fff;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:10px;
+}
+.hidden{display:none!important}
+
+
 </style>
 
 </head>
 <body>
 
 <header>
-  <h1>Cotizador de ingeniería</h1>
+  <h1>Cotizador de ingenierí­a</h1>
   <div class="brand">INGETES SAS</div>
 </header>
 
@@ -167,17 +233,26 @@ header .brand{
         <option>Servicio</option><option>Proyecto</option>
       </select>
     </div>
-    <div>
-      <label for="cliente" id="clienteLabel">Nombre del cliente <span class="req">*</span></label>
-      <input id="cliente" type="text" placeholder="Escriba aquí"/>
-    </div>
+<div>
+  <label for="cliente" id="clienteLabel">Nombre del cliente <span class="req">*</span></label>
+
+  <!-- escribir / filtrar -->
+  <input id="cliente" class="combo-input"
+         placeholder="Escribe para filtrar o ingresar nueva empresa"
+         style="text-transform:uppercase" />
+
+  <!-- seleccionar de la lista -->
+  <select id="clienteSelect" class="select">
+    <option value="" selected disabled>-Seleccionar empresa-</option>
+  </select>
+</div>
     <div>
       <label for="nombreDoc" id="nombreDocLabel">Nombre del servicio o proyecto <span class="req">*</span></label>
-      <input id="nombreDoc" type="text" placeholder="Escriba aquí"/>
+      <input id="nombreDoc" type="text" placeholder="Escriba aquí­"/>
     </div>
     <div>
       <label for="ingeniero" id="ingenieroLabel">Ingeniero que ejecuta el servicio o proyecto <span class="req">*</span></label>
-      <input id="ingeniero" type="text" placeholder="Escriba aquí"/>
+      <input id="ingeniero" type="text" placeholder="Escriba aquí­"/>
     </div>
   </div>
   <div class="grid" style="margin-top:12px">
@@ -186,12 +261,40 @@ header .brand{
       <textarea id="alcance" placeholder="Describe el alcance del servicio o del proyecto..."></textarea>
     </div>
   </div>
-
-<div id="loadStatus" class="muted">Cargando lista de precios desde <b>ListaPreciosIngenieria.xlsx</b>…</div>
-  <div id="fallbackWrap" style="display:none;gap:8px" class="grid two">
-    <div class="warn">No se pudo leer <b>ListaPreciosIngenieria.xlsx</b> automáticamente. Cárgalo manualmente aquí:</div>
-    <div><input type="file" id="filePicker" accept=".xlsx,.xls"/></div>
+<div class="grid two">
+  <!-- pastilla de estado: ocupa las 2 columnas -->
+  <div class="col-span-2">
+    <div id="loadStatus" class="status-pill">
+      Cargando lista de precios desde <b>ListaPreciosIngenieria.xlsx</b>...
+    </div>
   </div>
+
+  <!-- Columna 1: Lista de precios (solo si falla el autoload) -->
+  <div id="fallbackWrap" class="mini" style="display:none">
+    <h3>Lista de precios de ingeniería</h3>
+    <div class="warn">
+      No se pudo leer <b>ListaPreciosIngenieria.xlsx</b> automáticamente.<br>
+      Cárgalo manualmente aquí:
+    </div>
+    <div class="file-row">
+      <input type="file" id="filePicker" accept=".xlsx,.xls">
+    </div>
+  </div>
+
+  <!-- Columna 2: Excel de contactos -->
+  <div id="contactsWrap" class="mini">
+    <h3>Excel de contactos</h3>
+    <div class="warn">
+      No se encontró automáticamente el Excel de contactos.<br>
+      Cárgalo aquí (CONTACTOS.xlsx / CLIENTES.xlsx):
+    </div>
+    <div class="file-row">
+      <input id="xlsDatos" type="file" accept=".xls,.xlsx">
+      <small id="xlsDatosStatus" class="muted"></small>
+    </div>
+  </div>
+</div>
+
 </div>
 
 <!-- Tabla principal -->
@@ -204,7 +307,7 @@ header .brand{
         <th>Opción</th>
         <th>Condición</th>
         <th class="right" style="width:180px">Precio</th>
-        <th class="right" style="width:120px">Días</th>
+        <th class="right" style="width:120px">Dí­as</th>
         <th class="right" style="width:140px">Subtotal</th>
       </tr>
     </thead>
@@ -270,15 +373,15 @@ const DESCS = [
   "Programación","Visualización","Configuración","Especializados","Planos",
   "Pruebas FAT","Pruebas SAT (PLC/CCM/HMI)","Puesta en marcha", "Puesta en marcha nocturno", 
   "Capacitación de operación","Elaboración e impr. manual","Dossier técnico",
-  "Días de fin de semana","Viáticos"
+  "Dí­as de fin de semana","Viáticos"
 ];
 
 const EDITABLE_PRICE = new Set(["Planos","Elaboración e impr. manual","Dossier técnico", "Puesta en marcha" ]);
 
-// Filas que usan precio MÁXIMO entre categorías (misma condición)
+// Filas que usan precio MíXIMO entre categorí­as (misma condición)
 const DEPENDIENTES = new Set([
   "Pruebas FAT","Pruebas SAT (PLC/CCM/HMI)","Puesta en marcha",
-  "Puesta en marcha nocturno", "Capacitación de operación","Días de fin de semana"
+  "Puesta en marcha nocturno", "Capacitación de operación","Dí­as de fin de semana"
 ]);
 
 const CATEGORIAS = ["Programación","Visualización","Configuración","Especializados"];
@@ -287,10 +390,10 @@ const OPTIONS_MAP = {
   "Programación": ["-Seleccionar opción-","Micro automatización (S7-1200, LOGO)","Automatización","Servos"],
   "Visualización": ["-Seleccionar opción-","Basic Panels, LOGO Panels","Paneles Comfort","(SCADA, WinCC TIA.)"],
   "Configuración": ["-Seleccionar opción-","Comunicaciones","V20","G120","Sistemas de pesaje"],
-  "Especializados": ["-Seleccionar opción-","Analítica de gases","(Instrumentación, caudal)","(Instrumentación, presión, temperatura, nivel, por equipo)"]
+  "Especializados": ["-Seleccionar opción-","Analí­tica de gases","(Instrumentación, caudal)","(Instrumentación, presión, temperatura, nivel, por equipo)"]
 };
 const COND_2  = ["-Seleccionar opción-","Diurno lun- vier campo Bogotá","Diurno lun-vier campo fuera Bogotá"];
-const COND_3  = ["-Seleccionar opción-","Diurno lun- viernes, OFC","Medio día, diurno lun- vier"];
+const COND_3  = ["-Seleccionar opción-","Diurno lun- viernes, OFC","Medio dí­a, diurno lun- vier"];
 const COND_4  = ["-Seleccionar opción-","Diurno lun- vier campo Bogotá","Diurno lun-vier campo fuera Bogotá","Nocturno lun-vier/hora"];
 const COND_5  = ["-Seleccionar opción-","Diurno lun- vier campo Bogotá","Diurno lun-vier campo fuera Bogotá"];
 const COND_WK = ["-Seleccionar opción-","Fin de semana diurno bog","Fin de semana diurno fuera bog","Fin de semana nocturno/ hora"];
@@ -304,7 +407,7 @@ const COND_MAP = {
   "Pruebas SAT (PLC/CCM/HMI)":COND_2, 
   "Puesta en marcha": COND_2,
   "Capacitación de operación": COND_4,
-  "Días de fin de semana": COND_WK
+  "Dí­as de fin de semana": COND_WK
 };
 
 /* ====== Etiquetas Servicio/Proyecto ====== */
@@ -343,24 +446,24 @@ function refrescarEtiquetas() {
     nombreLabel.innerHTML = 'Nombre del proyecto <span class="req">*</span>';
     ingenieroLabel.innerHTML = 'Ingeniero que ejecuta el proyecto <span class="req">*</span>';
     alcanceLabel.innerHTML = 'Alcance del proyecto <span class="req">*</span>';
-    clienteInp.placeholder = 'Escriba aquí';
-    nombreInp.placeholder = 'Escriba aquí';
-    ingenieroInp.placeholder = 'Escriba aquí';
+    clienteInp.placeholder = 'Escriba aquí­';
+    nombreInp.placeholder = 'Escriba aquí­';
+    ingenieroInp.placeholder = 'Escriba aquí­';
     alcanceInp.placeholder = 'Describe el alcance del proyecto...';
   } else if (t === 'Servicio') {
     nombreLabel.innerHTML = 'Nombre del servicio <span class="req">*</span>';
     ingenieroLabel.innerHTML = 'Ingeniero que ejecuta el servicio <span class="req">*</span>';
     alcanceLabel.innerHTML = 'Alcance del servicio <span class="req">*</span>';
-    clienteInp.placeholder = 'Escriba aquí';
-    nombreInp.placeholder = 'Escriba aquí';
-    ingenieroInp.placeholder = 'Escriba aquí';
+    clienteInp.placeholder = 'Escriba aquí­';
+    nombreInp.placeholder = 'Escriba aquí­';
+    ingenieroInp.placeholder = 'Escriba aquí­';
     alcanceInp.placeholder = 'Describe el alcance del servicio...';
   } else {
     nombreLabel.innerHTML = 'Nombre del servicio o proyecto <span class="req">*</span>';
     ingenieroLabel.innerHTML = 'Ingeniero que ejecuta el servicio o proyecto <span class="req">*</span>';
     alcanceLabel.innerHTML = 'Alcance del servicio o proyecto <span class="req">*</span>';
-    clienteInp.placeholder = 'Escriba aquí';
-    nombreInp.placeholder = 'Escriba aquí';
+    clienteInp.placeholder = 'Escriba aquí­';
+    nombreInp.placeholder = 'Escriba aquí­';
     alcanceInp.placeholder = 'Describe el alcance del servicio o del proyecto...';
   }
 }
@@ -375,7 +478,7 @@ function norm(s){
   return (s??'').toString()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/\s+/g,' ').trim()
-    .replace(/[“”"']/g,'').replace(/\s*-\s*/g,'-');
+    .replace(/[â€œâ€"']/g,'').replace(/\s*-\s*/g,'-');
 }
 function canonCond(s){
   let t = norm(s);
@@ -394,19 +497,19 @@ const DESC_CANON = [
   {keys:['pruebas sat'], target:'Pruebas SAT (PLC/CCM/HMI)'},
   {keys:['puesta en marcha'], target:'Puesta en marcha'},
   {keys:['capacitacion de operacion','capacitación de operación'], target:'Capacitación de operación'},
-  {keys:['dias de fin de semana','días de fin de semana'], target:'Días de fin de semana'},
+  {keys:['dias de fin de semana','dí­as de fin de semana'], target:'Dí­as de fin de semana'},
   {keys:['viaticos','viáticos'], target:'Viáticos'},
   // Elaboración e impr. manual (acepta "imp." o variaciones)
   { keys: [
       'elaboracion e impr', 'elaboración e impr',
-      'elaboracion e imp',  'elaboración e imp',   // <- clave: “imp.” sin r
+      'elaboracion e imp',  'elaboración e imp',   // <- clave: â€œimp.â€ sin r
       'elaboracion manual', 'elaboración manual',
       'imp. manual', 'impr. manual'
     ],
     target: 'Elaboración e impr. manual'
   },
 
-  // Dossier técnico (acepta “dossier” a secas y variantes)
+  // Dossier técnico (acepta â€œdossierâ€ a secas y variantes)
   { keys: [
       'dossier tecnico','dossier técnico','dossier',
       'libro ingenieria y back up','libro ingenieria','backup'
@@ -417,7 +520,7 @@ const DESC_CANON = [
 ];
 function canonDesc(s){
   const n = norm(s);
-  let n2 = n.replace(/\bimp\.?\b/g,'impr')   // "imp." → "impr"
+  let n2 = n.replace(/\bimp\.?\b/g,'impr')   // "imp." â†’ "impr"
             .replace(/\bmanuales?\b/g,'manual');
   for (const {keys,target} of DESC_CANON) {
     for (const k of keys) {
@@ -428,17 +531,17 @@ function canonDesc(s){
 }
 function setPrice(desc,opt,cond,price){
   const d = canonDesc(desc);
-  const key = norm(d)+'|'+(norm(opt)||'—')+'|'+canonCond(cond);
+  const key = norm(d)+'|'+(norm(opt)||'-')+'|'+canonCond(cond);
   PRICE_LOOKUP.set(key, Number(price)||0);
   if(!cond){
-    PRICE_LOOKUP.set(norm(d)+'|'+(norm(opt)||'—')+'|', Number(price)||0);
+    PRICE_LOOKUP.set(norm(d)+'|'+(norm(opt)||'-')+'|', Number(price)||0);
   }
 }
 function findPrice(desc,opt,cond){
   const d = canonDesc(desc);
-  const variants = [canonCond(cond), '', '—'];
+  const variants = [canonCond(cond), '', '-'];
   for(const v of variants){
-    const key = norm(d)+'|'+(norm(opt)||'—')+'|'+v;
+    const key = norm(d)+'|'+(norm(opt)||'-')+'|'+v;
     if(PRICE_LOOKUP.has(key)) return PRICE_LOOKUP.get(key);
   }
   return null;
@@ -470,7 +573,7 @@ function parseHeaderRows(rows){
   const iOpt  = findIdx(['opcion','opción','categoria','opciones','grupo']);
   const iCond = findIdx(['condicion','condición','jornada','modalidad','cond']);
   const iPrice= findIdx(['precio','valor','tarifa','costo','importe']);
-  if(iDesc<0 || iPrice<0) throw new Error('No se localizaron columnas mínimas de Descripción/Precio');
+  if(iDesc<0 || iPrice<0) throw new Error('No se localizaron columnas mí­nimas de Descripción/Precio');
   PRICE_LOOKUP = new Map();
   for(let r=1;r<rows.length;r++){
     const desc0 = rows[r]?.[iDesc]; if(!desc0) continue;
@@ -500,11 +603,11 @@ function parseHierarchicalRows(rows){
     if(hasA && !hasB && !hasC){ curDesc = canonDesc(a); curOpt = null; continue; }
     if(hasA && hasB && hasC){
       const maybeDesc = canonDesc(a);
-      const simpleSet = new Set(["Pruebas FAT","Pruebas SAT (PLC/CCM/HMI)","Puesta en marcha","Capacitación de operación","Elaboración e impr. manual","Dossier técnico","Días de fin de semana","Planos","Viáticos","Otros"]);
-      if(simpleSet.has(maybeDesc)){ curDesc = maybeDesc; curOpt = '—'; setPrice(curDesc,curOpt,b,c); continue; }
+      const simpleSet = new Set(["Pruebas FAT","Pruebas SAT (PLC/CCM/HMI)","Puesta en marcha","Capacitación de operación","Elaboración e impr. manual","Dossier técnico","Dí­as de fin de semana","Planos","Viáticos","Otros"]);
+      if(simpleSet.has(maybeDesc)){ curDesc = maybeDesc; curOpt = '-'; setPrice(curDesc,curOpt,b,c); continue; }
       else { curOpt = a; setPrice(curDesc,curOpt,b,c); continue; }
     }
-    if(!hasA && hasB && hasC){ setPrice(curDesc, curOpt || '—', b, c); continue; }
+    if(!hasA && hasB && hasC){ setPrice(curDesc, curOpt || '-', b, c); continue; }
   }
   //deriveViaticosFixed();
 }
@@ -516,7 +619,7 @@ function deriveViaticosFixed(){
 /* Carga Excel */
 async function loadPricingFromURL(){
   const url = 'ListaPreciosIngenieria.xlsx?v=' + Date.now();   // cache-buster
-  loadStatus.textContent = 'Cargando lista de precios desde ListaPreciosIngenieria.xlsx…';
+  loadStatus.textContent = 'Cargando lista de precios desde ListaPreciosIngenieria.xlsx...';
   try{
     const resp = await fetch(url, { cache: 'no-store' });
     if(!resp.ok) throw new Error('HTTP '+resp.status);
@@ -545,11 +648,11 @@ impEl?.addEventListener('input', () => {
   recalcTotals();
 });
 
-// 2) Al salir del campo: corrige al rango 5–25 y recalcula
+// 2) Al salir del campo: corrige al rango 5â€“25 y recalcula
 impEl?.addEventListener('blur', () => {
-  // si quedó vacío, usa el default (10) o el que prefieras
+  // si quedó vací­o, usa el default (10) o el que prefieras
   if (impEl.value.trim() === '') impEl.value = 10;
-  impEl.value = clampImprevistos(impEl.value); // 5–25%
+  impEl.value = clampImprevistos(impEl.value); // 5â€“25%
   recalcTotals();
 });
 
@@ -569,6 +672,190 @@ document.getElementById('filePicker')?.addEventListener('change', async (ev)=>{
   fallbackWrap.style.display='none';
   applyAllDefaultPrices(); updateViaticosPriceView(); updateDependentRows(); toggleHorasBadgesAll(); recalcTotals();
 });
+
+// ====== CONTACTOS (carga, combo buscable y autoload) ======
+let CONTACTS_DB = { byEmpresa: new Map(), all: [] };
+
+function _normStr(s){ return (s||'').toString().trim(); }
+function _normKey(s){
+  return _normStr(s).toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+}
+
+// Lee el Excel de contactos (primera hoja) y obtiene la columna "Nombre de la cuenta"
+async function parseContactsWorkbook(arrayBuffer){
+  const wb = XLSX.read(arrayBuffer, { type:'array', cellStyles:false });
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if(!ws) throw new Error('No se encontró hoja de contactos');
+
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  const getCell = (r,c) => {
+    const a = XLSX.utils.encode_cell({r,c});
+    const cell = ws[a];
+    if(!cell) return '';
+    if(typeof cell.w === 'string') return cell.w;
+    return cell.v==null ? '' : String(cell.v);
+  };
+
+  // localizar encabezado
+  let headerRow = -1, colEmpresa = -1;
+  for(let r=range.s.r; r<=range.e.r; r++){
+    const names = [];
+    for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
+    const idx = names.findIndex(v => v.includes('nombre de la cuenta') || v.includes('empresa'));
+    if (idx>=0){ headerRow = r; colEmpresa = idx; break; }
+  }
+  if(headerRow < 0) throw new Error('No se detectó columna "Nombre de la cuenta" / "Empresa"');
+
+  // recorrer filas (arrastre de empresa, saltando subtotales)
+  const rows=[], byEmpresa = new Map();
+  let lastEmpresa = '';
+  for(let r=headerRow+1; r<=range.e.r; r++){
+    const v = _normStr(getCell(r, colEmpresa));
+    const line = (v||'').toLowerCase();
+    if (line.includes('subtotal')) continue;
+    if (v) lastEmpresa = v;
+    if (!lastEmpresa) continue;
+    const emp = lastEmpresa.toUpperCase();
+    rows.push({ empresa: emp });
+    if(!byEmpresa.has(emp)) byEmpresa.set(emp, []);
+    byEmpresa.get(emp).push({});
+  }
+  return { byEmpresa, all: rows };
+}
+
+function fillClienteOptions(){
+  const sel = document.getElementById('clienteSelect');
+  if(!sel) return;
+  sel.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+  const empresas = Array.from(CONTACTS_DB.byEmpresa.keys())
+                        .sort((a,b)=>a.localeCompare(b,'es'));
+  empresas.forEach(e=>{
+    const opt = document.createElement('option');
+    opt.value = e; opt.textContent = e;
+    sel.appendChild(opt);
+  });
+  const st = document.getElementById('xlsDatosStatus');
+  if (st) st.textContent = `Empresas: ${empresas.length}`;
+}
+
+function hideContactsUploadUI(){
+  const row = document.getElementById('xlsDatosRow');
+  if (row) row.style.display = 'none';
+}
+
+// intenta cargar automáticamente un Excel de contactos de la MISMA carpeta
+async function tryAutoLoadContactsFromFolder(){
+  const CANDIDATES = [
+    'CONTACTOS.xlsx','Contactos.xlsx','contactos.xlsx',
+    'CLIENTES.xlsx','clientes.xlsx'
+  ];
+  for (const rel of CANDIDATES){
+    try{
+      const url = new URL(rel, location.href).href + `?v=${Date.now()}`;
+      const resp = await fetch(url, { cache:'no-store' });
+      if (!resp.ok) continue;
+      const buf = await resp.arrayBuffer();
+      if (buf.byteLength < 1024) continue;
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      if (CONTACTS_DB?.byEmpresa?.size){
+        fillClienteOptions();
+        hideContactsUploadUI();
+        return true;
+      }
+    }catch(_){}
+  }
+  return false;
+}
+
+function syncClienteFromSelect(){
+  const sel = document.getElementById('clienteSelect');
+  const inp = document.getElementById('cliente');
+  const opt = sel && sel.selectedOptions[0];
+  if (opt && inp) inp.value = (opt.textContent || opt.value || '').toUpperCase();
+}
+
+// Input que filtra el select y permite texto libre (como en el Excel)
+function attachSearchableCombo(selectId, inputId, { onCommit, matchMode='startsWith' } = {}){
+  const sel = document.getElementById(selectId);
+  const inp = document.getElementById(inputId);
+  if (!sel || !inp) return;
+
+  let customOpt = sel.querySelector('option[data-custom="1"]') || null;
+  const norm = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+
+  function resetFilter(){ Array.from(sel.options).forEach(o=>o.hidden=false); }
+  function filterOptions(q){
+    const Q = norm(q);
+    Array.from(sel.options).forEach((opt, idx)=>{
+      const txt = norm(opt.textContent||opt.value||'');
+      if (idx===0 && opt.disabled){ opt.hidden=false; return; }
+      if (!Q){ opt.hidden=false; return; }
+      opt.hidden = (matchMode==='startsWith') ? !txt.startsWith(Q) : !txt.includes(Q);
+    });
+  }
+  function commitFreeTextToSelect(){
+    const valTyped = norm(inp.value);
+    if (!valTyped) return '';
+    const exact = Array.from(sel.options).find(o => norm(o.textContent||o.value||'') === valTyped);
+    if (exact){ sel.value = exact.value; return (exact.textContent||exact.value||'').toUpperCase(); }
+    if (!customOpt || !sel.contains(customOpt)) {
+      customOpt = document.createElement('option');
+      customOpt.dataset.custom='1';
+      sel.appendChild(customOpt);
+    }
+    customOpt.value = valTyped;
+    customOpt.textContent = valTyped;
+    customOpt.hidden = false;
+    sel.value = customOpt.value;
+    return valTyped;
+  }
+
+  sel.addEventListener('change', ()=>{ syncClienteFromSelect(); if (onCommit) onCommit(); });
+  inp.addEventListener('input', ()=>{
+    const pos = inp.selectionStart;
+    inp.value = inp.value.toUpperCase();
+    if (typeof pos === 'number') inp.setSelectionRange(pos,pos);
+    resetFilter(); filterOptions(inp.value);
+  });
+  inp.addEventListener('keydown', (e)=>{
+    if (e.key==='Enter'){ e.preventDefault(); const v=commitFreeTextToSelect(); if (v) inp.value=v; if (onCommit) onCommit(); }
+  });
+  inp.addEventListener('blur', ()=>{ const v=commitFreeTextToSelect(); if (v) inp.value=v; if (onCommit) onCommit(); });
+}
+
+function wireContactsInput(){
+  const up = document.getElementById('xlsDatos'); 
+  if (!up) return;
+
+  up.addEventListener('change', async ()=>{
+    const f = up.files?.[0]; 
+    if (!f) {
+      CONTACTS_DB = {byEmpresa:new Map(), all:[]};
+      fillClienteOptions(); 
+      return;
+    }
+
+    try {
+      const buf = await f.arrayBuffer();
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      fillClienteOptions();
+
+      // ✅ si hay empresas cargadas, ocultar el bloque completo de contactos
+      if (CONTACTS_DB.byEmpresa?.size) {
+        const contactsWrap = document.getElementById('contactsWrap');
+        if (contactsWrap) contactsWrap.style.display = 'none';
+      }
+
+    } catch (e) {
+      console.error(e);
+      alert('No se pudo leer el Excel de contactos: ' + (e.message || e));
+    }
+  });
+
+  // permitir volver a subir el mismo archivo
+  up.addEventListener('click', e => { e.currentTarget.value=''; });
+}
 
 /* =================== RENDER UI =================== */
 const tbody = document.querySelector('#tabla tbody');
@@ -592,7 +879,7 @@ function renderTable(){
       sel.addEventListener('change',()=>{ applyDefaultPrice(i, desc); updateDependentRows(); recalcRow(i); });
       tdOpt.appendChild(sel);
     }else{
-      tdOpt.innerHTML='<span class="muted">—</span>';
+      tdOpt.innerHTML='<span class="muted">-</span>';
     }
     tr.appendChild(tdOpt);
 
@@ -605,7 +892,7 @@ function renderTable(){
       selc.addEventListener('change',()=>{ applyDefaultPrice(i, desc); updateDependentRows(); toggleHorasBadgeForRow(i); recalcRow(i); });
       tdCond.appendChild(selc);
     }else{
-      tdCond.innerHTML='<span class="muted">—</span>';
+      tdCond.innerHTML='<span class="muted">-</span>';
     }
     tr.appendChild(tdCond);
 
@@ -648,7 +935,7 @@ function renderTable(){
     }
     tr.appendChild(tdPrecio);
 
-    // Días (+ badge Horas dinámico)
+    // Dí­as (+ badge Horas dinámico)
     const tdDias=document.createElement('td'); tdDias.className='right';
     const note=document.createElement('small'); note.className='note hours-badge'; note.textContent='Horas'; note.style.display='none';
     if (desc === 'Puesta en marcha nocturno') {
@@ -666,7 +953,7 @@ function renderTable(){
   });
 }
 
-/* ====== UTILIDADES PARA ÍNDICES Y SELECCIONES ====== */
+/* ====== UTILIDADES PARA íNDICES Y SELECCIONES ====== */
 const ROW_INDEX = DESCS.reduce((acc, d, idx)=> (acc[d]=idx, acc), {});
 function getRow(i){ return tbody.children[i]; }
 function getSelectedOption(desc){
@@ -703,7 +990,7 @@ function findHeaderRow(rows){
   return -1;
 }
 
-/* ====== PRECIO DEPENDIENTE: MÁXIMO entre categorías ====== */
+/* ====== PRECIO DEPENDIENTE: MíXIMO entre categorí­as ====== */
 function computeDependentPrice(desc){
   const cond = getSelectedCondition(desc);
   const condCanon = cond || '';
@@ -753,7 +1040,7 @@ function updateViaticosPriceView(){
 
   if (idx >= 0) {
     precioMap.set(idx, sum);          // guarda precio unitario
-    recalcRow(idx);                   // recalcula su subtotal = (sum * días)
+    recalcRow(idx);                   // recalcula su subtotal = (sum * dí­as)
   }
 }
 
@@ -784,7 +1071,7 @@ if (desc === 'Puesta en marcha' && !condVal) {
   const priceView  = row.querySelector('td:nth-child(4) .price-view');
   const priceInput = row.querySelector('td:nth-child(4) input.price-input');
 
-  if (priceInput) priceInput.value = '';     // deja el input vacío
+  if (priceInput) priceInput.value = '';     // deja el input vací­o
   else if (priceView) priceView.textContent = '$ 0';
 
   recalcRow(rowIndex);
@@ -812,7 +1099,7 @@ if (desc === 'Puesta en marcha' && !condVal) {
   const priceInput = row.querySelector('td:nth-child(4) input.price-input');
 
   if (priceInput) {
-    priceInput.value = Math.round(price || 0);   // <— PRECARGA EN EL INPUT
+    priceInput.value = Math.round(price || 0);   // <- PRECARGA EN EL INPUT
   } else if (priceView) {
     priceView.textContent = fmtMoney(price);
   }
@@ -855,7 +1142,7 @@ function limitImprevistos(input){
   } else if (v < 5){
     v = 5;
     input.value = v;
-    msg = "Mínimo permitido: 5%";
+    msg = "Mí­nimo permitido: 5%";
   }
 
   // Estilo rojo discreto cuando se corrige
@@ -885,7 +1172,7 @@ function recalcTotals(){
 
 const pctEl  = document.getElementById('impPct');
 let impPct = parseFloat(pctEl?.value);
-if (!Number.isFinite(impPct)) impPct = 0; // temporal si está vacío mientras escribes
+if (!Number.isFinite(impPct)) impPct = 0; // temporal si está vací­o mientras escribes
 const imprev = subtotal * (isNaN(impPct) ? 0 : impPct) / 100;
 const total  = subtotal + imprev;
 
@@ -900,7 +1187,7 @@ if (pillLbl && !isNaN(impPct)) pillLbl.textContent = `Imprevistos (${impPct}%):`
   document.getElementById('pillTotal').textContent=fmtMoney(total);
 }
 
-/* ====== Validación mínimos ====== */
+/* ====== Validación mí­nimos ====== */
 function validar(){
   const req = [
     { el: document.getElementById('tipoDoc'),   name: 'Tipo' },
@@ -918,7 +1205,7 @@ function validar(){
   if (!req[1].el.value.trim())                  { faltantes.push(req[1].name); req[1].el.classList.add('error'); }
   if (!req[2].el.value.trim())                  { faltantes.push(req[2].name); req[2].el.classList.add('error'); }
   if (!req[3].el.value.trim())                  { faltantes.push(req[3].name); req[3].el.classList.add('error'); }
-  if (!req[4].el.value.trim()) { faltantes.push(req[4].name); req[4].el.classList.add('error'); } // ← NUEVO
+  if (!req[4].el.value.trim()) { faltantes.push(req[4].name); req[4].el.classList.add('error'); } // â† NUEVO
 
   const warnBox = document.getElementById('validacion');
 
@@ -1015,6 +1302,14 @@ function resetCotizacion(ev){
   if (typeof precioMap !== 'undefined') precioMap.clear();
 
   // 3) Limpiar filas de la tabla (selects, inputs, subtotales, viáticos)
+const selCli = document.getElementById('clienteSelect');
+if (selCli) {
+  selCli.selectedIndex = 0;
+  Array.from(selCli.options).forEach(o => o.hidden = false);
+  const custom = selCli.querySelector('option[data-custom="1"]');
+  if (custom) custom.remove();
+}
+
   const tbody = document.querySelector('#tabla tbody');
   if (tbody){
     [...tbody.children].forEach((tr) => {
@@ -1060,7 +1355,7 @@ document.getElementById('btnReset')?.addEventListener('click', resetCotizacion);
 // REEMPLAZA COMPLETO este bloque por el siguiente
 document.getElementById('btnDescargar').addEventListener('click', async () => {
   try {
-    // --- Validación mínima del formulario (si la tienes) ---
+    // --- Validación mí­nima del formulario (si la tienes) ---
     if (typeof validar === 'function' && !validar()) return;
     if (typeof ExcelJS === 'undefined' || !ExcelJS.Workbook) {
       alert('No se pudo cargar ExcelJS.'); return;
@@ -1117,7 +1412,7 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
       ['NOMBRE DEL ' + (tipoVal || 'SERVICIO/PROYECTO').toUpperCase(),  nombreVal],
       ['ALCANCE', alcanceVal],
       ['INGENIERO QUE EJECUTA EL ' + (tipoVal || 'SERVICIO/PROYECTO').toUpperCase(), ingVal],
-      ['DESCRIPCIÓN','OPCIÓN','CONDICIÓN','PRECIO','DÍAS','SUBTOTAL']
+      ['DESCRIPCIí“N','OPCIí“N','CONDICIí“N','PRECIO','DíAS','SUBTOTAL']
     ];
 
     const tbody = document.querySelector('#tabla tbody');
@@ -1149,7 +1444,7 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
     // Mostrar moneda en la columna PRECIO (D)
     ws.getColumn(4).numFmt = '"$" #,##0';
 
-    // Filas 1–4: título en A, valor en B:F combinado
+    // Filas 1â€“4: tí­tulo en A, valor en B:F combinado
     for (let r=1; r<=5; r++){
       ws.getCell(r,1).font = { bold:true };
       safeMerge(ws, r,2, r,6);
@@ -1326,6 +1621,12 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
 /* ====== Init ====== */
 renderTable();
 loadPricingFromURL();
+wireContactsInput();                                   // escucha el file input de contactos
+attachSearchableCombo('clienteSelect','cliente', {     // input+select sincronizados
+  onCommit: ()=>{}, matchMode: 'startsWith'
+});
+tryAutoLoadContactsFromFolder();                       // intenta leer CONTACTOS.xlsx automáticamente
+
 </script>
 </body>
 </html>
