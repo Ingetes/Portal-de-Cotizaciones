@@ -209,15 +209,25 @@ header .brand{
 }
 .hidden{display:none!important}
 
+.hidden{display:none!important}
+.ing-item{display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--line)}
+.ing-item input{flex:1}
+.ing-del{background:#fee2e2;color:#7f1d1d;border:1px solid #fecaca;padding:6px 10px;border-radius:8px}
 
 </style>
 
 </head>
 <body>
 
-<header>
-  <h1>Cotizador de ingenierí­a</h1>
+<header style="position:relative">
+  <h1 style="margin-right:48px;">Cotizador de ingeniería</h1>
   <div class="brand">INGETES SAS</div>
+
+  <!-- ⚙️ Botón ajustes (esquina derecha) -->
+  <button id="btnIngSettings" title="Gestionar ingenieros"
+          style="position:absolute; right:16px; top:18px; background:#f3f4f6; color:#111827; border:1px solid #e5e7eb; border-radius:10px; padding:8px 10px; cursor:pointer; font-weight:700">
+    ⚙️
+  </button>
 </header>
 
 <main>
@@ -250,10 +260,19 @@ header .brand{
       <label for="nombreDoc" id="nombreDocLabel">Nombre del servicio o proyecto <span class="req">*</span></label>
       <input id="nombreDoc" type="text" placeholder="Escriba aquí­"/>
     </div>
-    <div>
-      <label for="ingeniero" id="ingenieroLabel">Ingeniero que ejecuta el servicio o proyecto <span class="req">*</span></label>
-      <input id="ingeniero" type="text" placeholder="Escriba aquí­"/>
-    </div>
+<div>
+  <label for="ingeniero" id="ingenieroLabel">Ingeniero que ejecuta el servicio o proyecto <span class="req">*</span></label>
+
+  <div style="display:flex; gap:8px; align-items:center;">
+    <select id="ingenieroSelect" class="select" style="flex:1">
+      <option value="" selected disabled>-Seleccionar ingeniero-</option>
+    </select>
+    <button id="btnGestionIng" type="button" class="btn reset">Gestionar</button>
+  </div>
+
+  <!-- El input se mantiene para validación/export; se sincroniza con el select -->
+  <input id="ingeniero" type="text" placeholder="Escriba aquí" style="margin-top:8px"/>
+</div>
   </div>
   <div class="grid" style="margin-top:12px">
     <div>
@@ -353,6 +372,27 @@ header .brand{
   <button id="btnDescargar" class="btn primary" type="button">Descargar</button>
   <button id="btnReset" class="btn primary" type="button">Reiniciar</button>
 </div>
+</div>
+
+<!-- Modal: gestionar ingenieros -->
+<div id="ingModal" class="hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;z-index:1000;">
+  <div style="background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;max-width:520px;width:92%;">
+    <h3 style="margin:0 0 10px 0;">Gestionar ingenieros</h3>
+
+    <div id="ingList" style="max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px;margin-bottom:10px;"></div>
+
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <input id="ingNew" type="text" class="combo-input" placeholder="Nuevo ingeniero…"/>
+      <button id="ingAdd" type="button">Añadir</button>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="ingCancel" type="button" class="btn reset">Cerrar</button>
+      <button id="ingSave"   type="button">Guardar</button>
+    </div>
+
+    <small id="ingMsg" class="muted" style="display:block;margin-top:8px;"></small>
+  </div>
 </div>
 
 </main>
@@ -1629,6 +1669,109 @@ attachSearchableCombo('clienteSelect','cliente', {     // input+select sincroniz
   onCommit: ()=>{}, matchMode: 'startsWith'
 });
 tryAutoLoadContactsFromFolder();                       // intenta leer CONTACTOS.xlsx automáticamente
+
+/* ====== INGENIEROS: carga remota, edición y guardado ====== */
+/* Cambia esta URL si tu deploy de Vercel es otro dominio */
+const API_ING_URL = "https://portal-api-nine.vercel.app/api/ingenieros";
+
+/* Si protegiste la API con una llave opcional, envíala así:
+   const ADMIN_KEY = "admin";  // o deja "" si no usas llave
+*/
+const ADMIN_KEY = ""; // opcional
+
+let INGS = [];
+const selIng   = document.getElementById('ingenieroSelect');
+const inpIng   = document.getElementById('ingeniero');
+const btnGest  = document.getElementById('btnGestionIng');
+const btnGear  = document.getElementById('btnIngSettings');
+
+const modal    = document.getElementById('ingModal');
+const listBox  = document.getElementById('ingList');
+const ingNew   = document.getElementById('ingNew');
+const ingAdd   = document.getElementById('ingAdd');
+const ingSave  = document.getElementById('ingSave');
+const ingCancel= document.getElementById('ingCancel');
+const ingMsg   = document.getElementById('ingMsg');
+
+function renderSelect(){
+  if (!selIng) return;
+  const current = selIng.value;
+  selIng.innerHTML = '<option value="" disabled selected>-Seleccionar ingeniero-</option>';
+  INGS.forEach(n=>{
+    const o=document.createElement('option'); o.value=n; o.textContent=n; selIng.appendChild(o);
+  });
+  // intenta conservar selección previa
+  if (INGS.includes(current)) selIng.value = current;
+}
+
+function renderList(){
+  listBox.innerHTML = "";
+  INGS.forEach((n, idx)=>{
+    const row = document.createElement('div');
+    row.className = 'ing-item';
+    row.innerHTML = `
+      <input type="text" value="${(n||'').replace(/"/g,'&quot;')}" data-idx="${idx}">
+      <button type="button" class="ing-del" data-idx="${idx}">Eliminar</button>
+    `;
+    listBox.appendChild(row);
+  });
+
+  listBox.querySelectorAll('input[type="text"]').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const i = Number(e.currentTarget.dataset.idx);
+      INGS[i] = e.currentTarget.value.trim();
+    });
+  });
+  listBox.querySelectorAll('.ing-del').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      const i = Number(e.currentTarget.dataset.idx);
+      INGS.splice(i,1);
+      renderList();
+    });
+  });
+}
+
+async function loadIngenierosRemote(){
+  try{
+    const r = await fetch(API_ING_URL, { cache:'no-store' });
+    const j = await r.json();
+    INGS = Array.isArray(j.ingenieros) ? j.ingenieros : [];
+    renderSelect();
+  }catch(e){
+    console.warn('No se pudieron cargar ingenieros', e);
+  }
+}
+
+async function saveIngenierosRemote(){
+  try{
+    const clean = INGS.map(s=>(s||'').trim()).filter(Boolean);
+    const headers = { 'Content-Type':'application/json' };
+    if (ADMIN_KEY) headers['X-Admin-Key'] = ADMIN_KEY;
+
+    const r = await fetch(API_ING_URL, {
+      method:'PUT',
+      headers,
+      body: JSON.stringify({ ingenieros: clean })
+    });
+    if (!r.ok) throw new Error(await r.text());
+    ingMsg.textContent = "✅ Guardado. (Actualizado para todos)";
+    INGS = clean;
+    renderSelect();
+  }catch(e){
+    ingMsg.textContent = "❌ Error al guardar: " + (e?.message || e);
+  }
+}
+
+/* Interacciones */
+selIng?.addEventListener('change', ()=>{ inpIng.value = selIng.value; });
+btnGest?.addEventListener('click', ()=>{ renderList(); ingNew.value=""; ingMsg.textContent=""; modal.classList.remove('hidden'); });
+btnGear?.addEventListener('click', ()=>{ btnGest?.click(); }); // el ⚙️ abre el mismo modal
+ingAdd?.addEventListener('click', ()=>{ const v=(ingNew.value||"").trim(); if(!v) return; INGS.push(v); ingNew.value=""; renderList(); });
+ingSave?.addEventListener('click', async ()=>{ ingMsg.textContent="Guardando…"; await saveIngenierosRemote(); });
+ingCancel?.addEventListener('click', ()=>{ modal.classList.add('hidden'); });
+
+/* Cargar al inicio */
+loadIngenierosRemote();
 
 </script>
 </body>
