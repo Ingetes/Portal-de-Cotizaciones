@@ -86,7 +86,7 @@
 </head>
 <body class="bg-[var(--bg)]">
 
-<header style="background:#ffffff; border-bottom:1px solid var(--border); padding:24px 16px;">
+<header id="slide" style="background:#ffffff; border-bottom:1px solid var(--border); padding:24px 16px;">
   <h1 class="text-2xl font-extrabold">Cotizador rápido</h1>
   <div>INGETES SAS</div>
 </header>
@@ -209,13 +209,14 @@
     return s;
   }
 
-  function scrollToSlide() {
-  // si tienes un contenedor del slide con id, úsalo:
-  const el = document.getElementById('slide') || document.getElementById('top');
+function scrollToSlide() {
+  const el = document.getElementById('slide') || document.getElementById('ref');
   if (el && el.scrollIntoView) {
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // enfoca el input para que el usuario empiece a escribir de una
+    const ref = document.getElementById('ref');
+    if (ref) setTimeout(() => { try { ref.focus({ preventScroll: true }); } catch(_) {} }, 250);
   } else {
-    // fallback: al tope de la página dentro del iframe/página actual
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
@@ -453,3 +454,4 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
