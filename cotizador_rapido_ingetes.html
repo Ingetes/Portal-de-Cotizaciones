@@ -336,36 +336,46 @@ return block.includes("Completa referencia") ? "" : block;
   }
 
 async function copyBlock() {
-  const txt = $("preview").textContent.trim();
-  const msg = document.getElementById("copyMsg"); // puede ser null si lo quitan
+  const prev = $("preview");
+  if (!prev) return;
+  const txt = (prev.textContent || "").trim();
   if (!txt || txt.includes("Completa referencia")) return;
 
-  // Limpia mensaje previo (si existe)
-  if (msg) { msg.textContent = ""; msg.className = "text-sm ml-auto"; }
+  const msg = $("copyMsg"); // puede ser null
+  const setMsg = (t, cls) => {
+    if (!msg) return;
+    msg.textContent = t;
+    msg.className = "text-sm ml-auto " + (cls || "");
+  };
+  setMsg("", "");
 
-  // Intento moderno (HTTPS + permiso de clipboard)
+  // 1) Intento moderno (HTTPS / localhost)
   try {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(txt);
-      if (msg) { msg.textContent = "✅ Copiado al portapapeles"; msg.classList.add("text-emerald-600"); }
+      setMsg("✅ Copiado al portapapeles", "text-emerald-600");
       return;
     }
     throw new Error("Clipboard API no disponible");
-  } catch (_) {
-    // Fallback legacy: textarea temporal + execCommand('copy')
+  } catch {
+    // 2) Fallback legacy: textarea oculto + execCommand('copy')
     try {
       const ta = document.createElement("textarea");
       ta.value = txt;
       ta.setAttribute("readonly", "");
       ta.style.position = "fixed";
-      ta.style.top = "-9999px";
+      ta.style.top = "-1000px";
       document.body.appendChild(ta);
       ta.select();
-      document.execCommand("copy");
+      const ok = document.execCommand("copy");
       document.body.removeChild(ta);
-      if (msg) { msg.textContent = "✅ Copiado"; msg.classList.add("text-emerald-600"); }
+      if (ok) {
+        setMsg("✅ Copiado", "text-emerald-600");
+      } else {
+        setMsg("⚠️ Copia manual: selecciona y Ctrl/Cmd+C", "text-amber-600");
+      }
     } catch {
-      if (msg) { msg.textContent = "⚠️ Copia manual: selecciona el texto y presiona Ctrl/Cmd+C"; msg.classList.add("text-amber-600"); }
+      setMsg("⚠️ Copia manual: selecciona y Ctrl/Cmd+C", "text-amber-600");
     }
   }
 }
@@ -479,6 +489,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
