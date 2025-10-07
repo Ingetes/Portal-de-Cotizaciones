@@ -87,6 +87,7 @@
 <body class="bg-[var(--bg)]">
 
 <header id="slide" style="background:#ffffff; border-bottom:1px solid var(--border); padding:24px 16px;">
+
   <h1 class="text-2xl font-extrabold">Cotizador rápido</h1>
   <div>INGETES SAS</div>
 </header>
@@ -210,15 +211,20 @@
   }
 
 function scrollToSlide() {
-  const el = document.getElementById('slide') || document.getElementById('ref');
-  if (el && el.scrollIntoView) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // enfoca el input para que el usuario empiece a escribir de una
-    const ref = document.getElementById('ref');
-    if (ref) setTimeout(() => { try { ref.focus({ preventScroll: true }); } catch(_) {} }, 250);
+  // intenta llevar el header al tope
+  const target = document.getElementById('slide') || document.getElementById('ref');
+  if (target && target.scrollIntoView) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } else {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    // fallback duro
+    const root = document.scrollingElement || document.documentElement || document.body;
+    root.scrollTop = 0;
   }
+  // pone el cursor en la referencia (sin volver a scrollear)
+  setTimeout(() => {
+    const ref = document.getElementById('ref');
+    if (ref) { try { ref.focus({ preventScroll: true }); } catch(_) { ref.focus(); } }
+  }, 250);
 }
 
   function normalizeAvailability(input) {
@@ -454,4 +460,5 @@ document.getElementById("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
