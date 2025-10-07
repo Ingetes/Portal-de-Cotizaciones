@@ -267,6 +267,12 @@
     }
   }
 
+  // Redondea hacia arriba al múltiplo indicado (100 por defecto)
+function roundUpTo(v, step = 100) {
+  if (v == null || isNaN(v)) return null;
+  return Math.ceil(v / step) * step;
+}
+
   // Cálculos y previsualización
   function compute() {
     const ref = $("ref").value.trim();
@@ -287,7 +293,9 @@
     const baseCOP = priceMode === "USD" ? (price * trm) : price;
     const afterDisc = baseCOP ? baseCOP * (1 - discount / 100) : null;
     const saleAfter = afterDisc != null ? afterDisc * (util || 1) : null;
-    const totalBeforeVAT = saleAfter != null ? Math.max(0, Math.round(saleAfter + (shipping || 0))) : null;
+    const totalBeforeVAT = saleAfter != null
+    ? Math.max(0, roundUpTo(saleAfter + (shipping || 0), 100))
+    : null;
 
     $("baseCop").textContent = moneyCOP(baseCOP || null);
     $("saleAfter").textContent = moneyCOP(saleAfter != null ? saleAfter : null);
@@ -358,18 +366,11 @@
 $("mallLink").addEventListener("click", (e) => {
   const ref = $("ref").value.trim();
   if (!ref) { e.preventDefault(); return; }
-
   const url = `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`;
-
-  if (window.top !== window.self) {
-    // Estamos embebidos → que el PADRE haga la navegación
-    e.preventDefault();
-    window.top.postMessage({ __openMallTop: true, url }, "*");
-  } else {
-    // Standalone → deja que el <a target="_blank"> funcione normal
-    e.currentTarget.href = url;
-  }
+  e.preventDefault();
+  window.open(url, "_blank", "noopener");
 });
+
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
     $(id).addEventListener("change", compute);
@@ -383,6 +384,7 @@ $("mallLink").addEventListener("click", (e) => {
 </script>
 </body>
 </html>
+
 
 
 
