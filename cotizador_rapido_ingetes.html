@@ -98,7 +98,10 @@
 <div class="field">
   <label for="ref">Referencia (MLFB)</label>
   <div class="ref-grid">
-    <input id="ref" type="text" placeholder="Ej. 6ES7131-6BH01-0BA0" />
+<input id="ref" type="text"
+       placeholder="Ej. 6ES7131-6BH01-0BA0"
+       style="text-transform:uppercase"
+       autocapitalize="characters" />
     <a id="mallLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-soft">
       🔎 Industry Mall ↗
     </a>
@@ -242,7 +245,7 @@ function scrollToSlide() {
 
   // === AUTOFILL: pedir descripción a tu API ===
   async function fetchMallDescription() {
-    const ref = $("ref").value.trim();
+    const ref = $("ref").value.trim().toUpperCase();
     if (!ref) {
       alert("Escribe una referencia (MLFB) primero.");
       return;
@@ -291,7 +294,7 @@ function roundUpTo(v, step = 100) {
 
   // Cálculos y previsualización
   function compute() {
-const ref = $("ref").value.trim();
+const ref = $("ref").value.trim().toUpperCase();
 const url = ref
   ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
   : "#";
@@ -412,6 +415,23 @@ function clearInputsForNext(){
   // Eventos
   $("fetchMall").addEventListener("click", fetchMallDescription);
 
+  // Fuerza mayúsculas en #ref (typing y pegar) sin perder la posición del cursor
+(function forceRefUpper() {
+  const el = $("ref");
+  if (!el) return;
+  const toUpper = (e) => {
+    const i = e.target;
+    const s = i.selectionStart, t = i.selectionEnd;
+    const up = i.value.toUpperCase();
+    if (i.value !== up) {
+      i.value = up;
+      if (s != null && t != null) i.setSelectionRange(s, t);
+    }
+  };
+  el.addEventListener("input", toUpper);
+  el.addEventListener("change", toUpper);
+})();
+  
   ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
     $(id).addEventListener("change", compute);
@@ -441,6 +461,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
