@@ -243,15 +243,16 @@
               <small id="descMsg" style="color:#dc2626;font-size:12px;"></small>
             </div>
             <div style="min-width:220px">
-              <label class="required">Botón (aplica a todos los ítems)</label>
-              <select id="botonGlobal" class="select">
-                <option value="SPO-OEM">SPO-OEM</option>
-                <option value="NORMAL" selected>NORMAL</option>
-                <option value="SPO-SOP">SPO-SOP</option>
-                <option value="SQ">SQ</option>
-                <option value="SPO-TAB">SPO-TAB</option>
-                <option value="SPO-MIG">SPO-MIG</option>
-              </select>
+<label class="required">Botón (aplica a todos los ítems)</label>
+<select id="botonGlobal" class="select">
+  <option value="" selected disabled>-Seleccionar-</option>
+  <option value="SPO-OEM">SPO-OEM</option>
+  <option value="NORMAL">NORMAL</option>
+  <option value="SPO-SOP">SPO-SOP</option>
+  <option value="SQ">SQ</option>
+  <option value="SPO-TAB">SPO-TAB</option>
+  <option value="SPO-MIG">SPO-MIG</option>
+</select>
             </div>
           </div>
 
@@ -758,7 +759,8 @@ function resetForm(){
   document.getElementById('factor').value      = '1.25';
   document.getElementById('envio').value       = '';
   document.getElementById('descuento').value   = '';
-  document.getElementById('botonGlobal').value = 'NORMAL';
+const selBot = document.getElementById('botonGlobal');
+if (selBot) selBot.selectedIndex = 0;   // vuelve a “-Seleccionar-”
   document.getElementById('mostrarRef').value  = 'NO';
   document.getElementById('cliente').value     = '';
   // Reinicia el desplegable de empresas
@@ -1247,7 +1249,7 @@ if(missing.length){
   const factor = parseFloat($('#factor').value||'0');
   if(!(factor >= 1.2)){ alert('El factor de utilidad debe ser ≥ 1,20'); $('#factor').focus(); return; }
   const envio        = parseFloat($('#envio').value||'0');
-  const botonGlobal  = $('#botonGlobal')?.value || 'NORMAL';
+  const botonGlobal  = $('#botonGlobal')?.value || '';
   const showRef      = ($('#mostrarRef').value||'NO') === 'SI';
 
 // Mapear filas del Mall a ítems
@@ -1729,6 +1731,7 @@ wsLoc['J'+r] = { t:'s', v: estado };
 </body>
 
 </html>
+
 
 
 
