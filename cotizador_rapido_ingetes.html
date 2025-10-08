@@ -144,6 +144,10 @@
             <label class="text-sm text-gray-700">Envío (COP)</label>
             <input id="shipping" type="number" value="0" class="w-full border rounded-lg px-3 py-2">
           </div>
+          <div>
+            <label class="text-sm text-gray-700">Cantidad</label>
+            <input id="qty" type="number" min="1" value="1" class="w-full border rounded-lg px-3 py-2">
+          </div>
         </div>
 
         <div>
@@ -296,6 +300,7 @@ function roundUpTo(v, step = 100) {
   // Cálculos y previsualización
   function compute() {
 const ref = $("ref").value.trim().toUpperCase();
+const qty = Math.max(1, parseInt(($("qty").value || 1), 10));
 const url = ref
   ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
   : "#";
@@ -315,9 +320,9 @@ $("mallLink").href = url;          // <- solo actualiza el href
     const baseCOP = priceMode === "USD" ? (price * trm) : price;
     const afterDisc = baseCOP ? baseCOP * (1 - discount / 100) : null;
     const saleAfter = afterDisc != null ? afterDisc * (util || 1) : null;
-    const totalBeforeVAT = saleAfter != null
-    ? Math.max(0, roundUpTo(saleAfter + (shipping || 0), 100))
-    : null;
+const totalBeforeVAT = saleAfter != null
+  ? Math.max(0, roundUpTo((saleAfter * qty) + (shipping || 0), 100))
+  : null;
 
     $("baseCop").textContent = moneyCOP(baseCOP || null);
     $("saleAfter").textContent = moneyCOP(saleAfter != null ? saleAfter : null);
@@ -326,9 +331,14 @@ $("mallLink").href = url;          // <- solo actualiza el href
 
     const availability = normalizeAvailability(lead);
     const notesPart = notes ? `\n\nNOTAS: ${notes}` : "";
-    const block = (ref && desc && totalBeforeVAT != null)
-      ? `${ref}\n${desc}\nCosto: ${moneyCOP(totalBeforeVAT)} + IVA\nDisponibilidad: ${availability}${notesPart}`
-      : "(Completa referencia, descripción y valores para ver el bloque final)";
+const block = (ref && desc && totalBeforeVAT != null)
+  ? `${ref}
+${desc}
+Cantidad: ${qty}
+Precio unitario: ${moneyCOP(saleAfter)}
+Costo: ${moneyCOP(totalBeforeVAT)} + IVA
+Disponibilidad: ${availability}${notesPart}`
+  : "(Completa referencia, descripción y valores para ver el bloque final)";
 if (!LOCK_PREVIEW) {
   $("preview").textContent = block;
 }
@@ -414,6 +424,7 @@ function downloadTxt() {
     compute();
     LOCK_PREVIEW = false;        // vuelve a permitir que compute() actualice el preview
     $("preview").textContent = "";  // limpia el acumulado
+    $("qty").value = "1";
 
   }
 
@@ -431,6 +442,7 @@ function clearInputsForNext(){
   $("notes").value = "";
   $("copyMsg").textContent = "";
   $("copyMsg").className = "text-sm ml-auto";
+  $("qty").value = "1";
 
   // resetea los resúmenes numéricos sin llamar compute()
   $("baseCop").textContent = "—";
@@ -460,7 +472,7 @@ function clearInputsForNext(){
   el.addEventListener("change", toUpper);
 })();
   
-  ["ref","desc","priceMode","price","trm","discount","util","shipping","lead","notes"].forEach(id => {
+  ["ref","desc","priceMode","price","trm","discount","util","shipping","qty","lead","notes"].forEach(id => {
     $(id).addEventListener("input", compute);
     $(id).addEventListener("change", compute);
   });
@@ -489,12 +501,3 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
