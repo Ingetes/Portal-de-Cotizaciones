@@ -1325,12 +1325,13 @@ const items = parsedRows.map((r, idx)=>{
     c(7).value=it.boton;
     c(8).value=it.dcto/100;
 
-    // >>> NUEVO: EXISTENCIA desde el inventario <<<
-    // Coincidimos por referencia normalizada; si hay stock > 0 ponemos 'INGETES', si no, cadena vacía.
-    const inv = invMap.get(normRef(it.referencia));
+// >>> ESTADO igual al del aplicativo <<<
+const inv = invMap.get(normRef(it.referencia));
 const stock = Number(inv?.cantidad || 0);
-const marca = (stock > 0) ? 'INGETES' : (inv?.marca ? String(inv.marca).toUpperCase() : '');
-c(9).value = marca;
+let estado = 'NO EN INVENTARIO';
+if (stock > 0 && stock < it.cant) estado = 'EN INVENTARIO (NO ALCANZA)';
+if (stock >= it.cant && it.cant > 0) estado = 'EN INVENTARIO';
+c(9).value = estado;
 
     // Costo, Factor, Unitario y Total (igual que antes)
     c(10).value={formula:`CEILING(H${r}*(1 - J${r}),100)`};
@@ -1649,7 +1650,15 @@ if (!saved) {
     wsLoc['!cols']=[{wch:3},{wch:6},{wch:9},{wch:20},{wch:8},{wch:46},{wch:22},{wch:14},{wch:10},{wch:10},{wch:12},{wch:14},{wch:14},{wch:16},{wch:16}];
     const startData=10;
     items.forEach((it,i)=>{ 
-  const r=startData+i; 
+  const r=startData+i;
+  // Estado (misma lógica del aplicativo) en columna J
+const inv = invMap.get(normRef(it.referencia));
+const stock = Number(inv?.cantidad || 0);
+let estado = 'NO EN INVENTARIO';
+if (stock > 0 && stock < it.cant) estado = 'EN INVENTARIO (NO ALCANZA)';
+if (stock >= it.cant && it.cant > 0) estado = 'EN INVENTARIO';
+wsLoc['J'+r] = { t:'s', v: estado };
+
   
   // MODIFICAR ESTAS LÍNEAS - Sumar el envío directamente en la fórmula
   if (it.envio > 0) {
@@ -1720,5 +1729,6 @@ if (!saved) {
 </body>
 
 </html>
+
 
 
