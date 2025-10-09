@@ -1483,25 +1483,15 @@ wv.getCell(rr,8).value = { formula: `LOCATIVO!O${loc}` };
 
 // DESCRIPCIÓN con richText: negrilla SOLO en "Ref:" y "Disponibilidad:"
 const it = items[i];
-const rich = [
-  { text: (it.descripcion || '') + '\n' },
-];
+// DESCRIPCIÓN por fórmula, referenciando LOCATIVO (auto-actualiza)
+// loc = 10 + i  → misma fila en LOCATIVO
+const descFormula = showRef
+  ? `LOCATIVO!F${loc}&CHAR(10)&"Ref: "&LOCATIVO!D${loc}&CHAR(10)&"Disponibilidad: "&LOCATIVO!G${loc}`
+  : `LOCATIVO!F${loc}&CHAR(10)&"Disponibilidad: "&LOCATIVO!G${loc}`;
 
-if (showRef) {
-  rich.push(
-    { text: 'Ref: ', font: { bold: true } },        // etiqueta en negrilla
-    { text: String(it.referencia || '') },          // valor normal
-    { text: '\n' }
-  );
-}
-
-rich.push(
-  { text: 'Disponibilidad: ', font: { bold: true } }, // etiqueta en negrilla
-  { text: String(it.disponibilidad || '') }           // valor normal
-);
-
-const cellDesc = wv.getCell(rr,6);
-cellDesc.value = { richText: rich };
+const cellDesc = wv.getCell(rr, 6);
+cellDesc.value = { formula: descFormula };
+cellDesc.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
 cellDesc.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
 
     wv.getCell(rr,6).alignment = { vertical:'top', horizontal:'left', wrapText:true };
@@ -1731,6 +1721,7 @@ wsLoc['J'+r] = { t:'s', v: estado };
 </body>
 
 </html>
+
 
 
 
