@@ -342,7 +342,7 @@ if (ref && desc && roundedTotal != null) {
     // Solo costo total
     block = `${ref}
 ${desc}
-Costo: ${moneyCOP(roundedTotal)} + IVA
+Costo total: ${moneyCOP(roundedTotal)} + IVA
 Disponibilidad: ${availability}${notesPart}`;
   } else {
     // Cantidad + unitario redondeado + total redondeado
@@ -350,7 +350,7 @@ Disponibilidad: ${availability}${notesPart}`;
 ${desc}
 Cantidad: ${qty}
 Precio unitario: ${moneyCOP(roundedUnit)}
-Costo: ${moneyCOP(roundedTotal)} + IVA
+Costo total: ${moneyCOP(roundedTotal)} + IVA
 Disponibilidad: ${availability}${notesPart}`;
   }
 }
@@ -517,6 +517,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
