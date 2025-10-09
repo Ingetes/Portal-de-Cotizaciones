@@ -316,28 +316,45 @@ $("mallLink").href = url;          // <- solo actualiza el href
     const lead = $("lead").value;
     const notes = $("notes").value.trim();
 
-    const baseCOP = priceMode === "USD" ? (price * trm) : price;
-    const afterDisc = baseCOP ? baseCOP * (1 - discount / 100) : null;
-    const saleAfter = afterDisc != null ? afterDisc * (util || 1) : null;
-const totalBeforeVAT = saleAfter != null
-  ? Math.max(0, roundUpTo((saleAfter * qty) + (shipping || 0), 100))
+const baseCOP   = priceMode === "USD" ? (price * trm) : price;
+const afterDisc = baseCOP ? baseCOP * (1 - discount / 100) : null;
+const saleAfter = afterDisc != null ? afterDisc * (util || 1) : null;
+
+// 👉 redondeos
+const roundedUnit  = (saleAfter != null) ? roundUpTo(saleAfter, 100) : null;
+// En el total, sumamos envío UNA sola vez y redondeamos el resultado
+const roundedTotal = (roundedUnit != null)
+  ? Math.max(0, roundUpTo((roundedUnit * qty) + (shipping || 0), 100))
   : null;
 
-    $("baseCop").textContent = moneyCOP(baseCOP || null);
-    $("saleAfter").textContent = moneyCOP(saleAfter != null ? saleAfter : null);
-    $("shipVal").textContent = moneyCOP(shipping || null);
-    $("totalBefore").textContent = moneyCOP(totalBeforeVAT != null ? totalBeforeVAT : null);
+// tarjetas (muestran valores ya redondeados)
+$("baseCop").textContent   = moneyCOP(baseCOP || null);
+$("saleAfter").textContent = moneyCOP(roundedUnit != null ? roundedUnit : null);
+$("shipVal").textContent   = moneyCOP(shipping || null);
+$("totalBefore").textContent = moneyCOP(roundedTotal != null ? roundedTotal : null);
 
-    const availability = normalizeAvailability(lead);
-    const notesPart = notes ? `\n\nNOTAS: ${notes}` : "";
-const block = (ref && desc && totalBeforeVAT != null)
-  ? `${ref}
+const availability = normalizeAvailability(lead);
+const notesPart = notes ? `\n\nNOTAS: ${notes}` : "";
+
+let block = "(Completa referencia, descripción y valores para ver el bloque final)";
+if (ref && desc && roundedTotal != null) {
+  if (qty === 1) {
+    // Solo costo total
+    block = `${ref}
+${desc}
+Costo: ${moneyCOP(roundedTotal)} + IVA
+Disponibilidad: ${availability}${notesPart}`;
+  } else {
+    // Cantidad + unitario redondeado + total redondeado
+    block = `${ref}
 ${desc}
 Cantidad: ${qty}
-Precio unitario: ${moneyCOP(saleAfter)}
-Costo: ${moneyCOP(totalBeforeVAT)} + IVA
-Disponibilidad: ${availability}${notesPart}`
-  : "(Completa referencia, descripción y valores para ver el bloque final)";
+Precio unitario: ${moneyCOP(roundedUnit)}
+Costo: ${moneyCOP(roundedTotal)} + IVA
+Disponibilidad: ${availability}${notesPart}`;
+  }
+}
+
 if (!LOCK_PREVIEW) {
   $("preview").textContent = block;
 }
@@ -500,6 +517,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
