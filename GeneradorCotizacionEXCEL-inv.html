@@ -898,12 +898,13 @@ function renderInvUI() {
     const d2=new Date(s); if(!isNaN(d2)) return new Date(d2.getFullYear(), d2.getMonth(), d2.getDate());
     return null;
   }
+    
   function disponibilidad(val){
     const d=toDate(val); if(!d) return '';
     const t=new Date(); t.setHours(0,0,0,0);
     const diff=Math.floor((d - t)/86400000);
     if(diff <= 6) return '3-5 días. Salvo venta previa';
-    if(diff >= 8 && diff <= 45) return '30-45 días. Salvo venta previa';
+    if(diff >= 7 && diff <= 50) return '30-45 días. Salvo venta previa';
     if(diff >= 46 && diff <= 60) return '6-8 semanas';
     if(diff >= 61 && diff <= 80) return '8-10 semanas';
     if(diff >= 81 && diff <= 100) return '10-12 semanas';
@@ -1721,6 +1722,7 @@ wsLoc['J'+r] = { t:'s', v: estado };
 </body>
 
 </html>
+
 
 
 
