@@ -289,7 +289,7 @@
           <div class="row">
             <div style="min-width:220px">
               <label class="required">Número de cotización</label>
-              <input id="numCot" type="number" min="1" step="1" placeholder="###" value="">
+              <input id="numCot" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="###" value="">
             </div>
             <div style="min-width:220px">
               <label class="required">Iniciales comercial</label>
@@ -644,14 +644,21 @@ $('#fileMall').addEventListener('change', async (ev)=>{
   headers = Object.keys(json[0]||{}).map(String);
   buildPreview(json);
 
-  const { colRef, colQty } = detectMallCols(ws);
+  const { colRef, colQty, colOpts } = detectMallCols(ws);
   const range = XLSX.utils.decode_range(ws['!ref']);
 
   const map=new Map(), order=[];
   for (let r=range.s.r+1; r<=range.e.r; r++){
     const cR = ws[XLSX.utils.encode_cell({r, c: colRef})];
-    if(!cR) continue;
-    const refN = normRef(cR.v);
+// Si hay columna de opciones, concatenar
+let refRaw = String(cR?.v || '').trim();
+if (colOpts != null) {
+  const cOpt = ws[XLSX.utils.encode_cell({r, c: colOpts})];
+  if (cOpt && cOpt.v) {
+    refRaw = refRaw + String(cOpt.v).trim();
+  }
+}
+const refN = normRef(refRaw);
     if(!refN) continue;
     const cQ = ws[XLSX.utils.encode_cell({r, c: colQty})];
     const req = parseQty(cQ?.v || 0);
@@ -721,7 +728,7 @@ requiredIds.forEach(id=>{
 wireContactsInput();                                // escucha #xlsDatos
 attachSearchableCombo('clienteSelect','cliente', {  // input+select sincronizados
   onCommit: syncClienteFromSelect,
-  matchMode: 'startsWith'
+  matchMode: 'includes' // 🔍 ahora busca en cualquier parte del nombre
 });
 const selCli = document.getElementById('clienteSelect');
 if (selCli) selCli.addEventListener('change', syncClienteFromSelect);
@@ -913,9 +920,9 @@ function renderInvUI() {
 
   // ===== Nombre de salida =====
 function updateOutName(){
-  // número sin ceros a la izquierda; si está vacío, muestra 1 como preview
+  // número con ceros a la izquierda preservados
   const raw = String($('#numCot').value || '').trim();
-  const n = (raw.replace(/^0+/, '') || '#');
+  const n = raw || '#';
 
   // iniciales y sufijo en mayúsculas
   const i = String($('#iniCom').value || '').toUpperCase();
@@ -923,13 +930,11 @@ function updateOutName(){
   $('#iniCom').value = i;
   $('#sufijo').value = s;
 
-  // año: si el campo está vacío usa el año actual (2 dígitos)
-  const yIn = $('#anio').value;
-  const y = (yIn ? String(yIn) : String(new Date().getFullYear()).slice(-2))
-              .slice(-2)
-              .toUpperCase();
+  // año: si vacío, usar ##
+  const yIn = $('#anio').value.trim();
+  const y = yIn ? yIn.padStart(2, '0') : '##';
 
-  // nombre final (si no hay iniciales aún, usa AAA como placeholder)
+  // nombre final
   $('#outName').value = (`Q${n}-${i || 'AAA'}-${y}${s}`).toUpperCase();
 }
 
@@ -1027,6 +1032,7 @@ function detectMallCols(ws){
   ];
 
   let headerRow = range.s.r, colRef=null, colQty=null, colDesc=null;
+  let colOpts = null;
 
   // 1) Buscar coincidencias fuertes o parciales (ej: "ID DE MATERI")
   const hitRef = t => {
@@ -1038,24 +1044,30 @@ function detectMallCols(ws){
   };
   const hitQty = t => qtyStrong.some(k => t.includes(k));
 
-  for (let r = range.s.r; r <= maxR; r++){
-    for (let c = range.s.c; c <= maxC; c++){
-      const t = H(ws[XLSX.utils.encode_cell({r,c})]?.v);
-      if (!t) continue;
-      if (colRef === null && hitRef(t)) { colRef = c; headerRow = r; }
-      if (colQty === null && hitQty(t)) { colQty = c; headerRow = r; }
-      if (colDesc === null && (t.includes('DESCRIPCION') || t.includes('DESCRIPTION'))) {
-        colDesc = c; headerRow = r;
-      }
+for (let r = range.s.r; r <= maxR; r++){
+  for (let c = range.s.c; c <= maxC; c++){
+    const t = H(ws[XLSX.utils.encode_cell({r,c})]?.v);
+    if (!t) continue;
+
+    if (colOpts === null && t.includes('OPCION')) {
+      colOpts = c;
+      headerRow = r;
     }
-    if (colRef !== null && colQty !== null) break;
+    if (colRef === null && hitRef(t)) { colRef = c; headerRow = r; }
+    if (colQty === null && hitQty(t)) { colQty = c; headerRow = r; }
+    if (colDesc === null && (t.includes('DESCRIPCION') || t.includes('DESCRIPTION'))) {
+      colDesc = c; headerRow = r;
+    }
   }
+  if (colRef !== null && colQty !== null) break;
+}
 
   // 2) Fallback: tomar primera/segunda columna si no se encontró nada
   if (colRef === null) colRef = range.s.c;
   if (colQty === null) colQty = Math.min(range.s.c + 1, range.e.c);
 
-  return { headerRow, colRef, colQty, colDesc };
+  return { headerRow, colRef, colQty, colDesc, colOpts };
+
 }
 
 // --- Detecta columnas del INVENTARIO (Referencia/Descripción/Cantidad) ---
@@ -1335,6 +1347,16 @@ let estado = 'NO EN INVENTARIO';
 if (stock > 0 && stock < it.cant) estado = 'EN INVENTARIO (NO ALCANZA)';
 if (stock >= it.cant && it.cant > 0) estado = 'EN INVENTARIO';
 c(9).value = estado;
+
+// === Colores según estado de inventario ===
+const cellEstado = c(9);
+if (estado === 'NO EN INVENTARIO') {
+  cellEstado.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFFF00' } }; // Amarillo
+} else if (estado.includes('NO ALCANZA')) {
+  cellEstado.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFC000' } }; // Naranja
+} else if (estado === 'EN INVENTARIO') {
+  cellEstado.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF92D050' } }; // Verde
+}
 
     // Costo, Factor, Unitario y Total (igual que antes)
     c(10).value={formula:`CEILING(H${r}*(1 - J${r}),100)`};
@@ -1722,11 +1744,3 @@ wsLoc['J'+r] = { t:'s', v: estado };
 </body>
 
 </html>
-
-
-
-
-
-
-
-
