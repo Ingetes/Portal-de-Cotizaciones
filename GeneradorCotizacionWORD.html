@@ -1191,8 +1191,8 @@ if (empSearch) empSearch.value = '';
   if (selEmp) selEmp.addEventListener('change', onEmpresaChange);
   if (selDir) selDir.addEventListener('change', onDirigidoChange);
   // Combos editables (empresa y dirigido)
-attachSearchableCombo('empresa','empresaSearch',  { onCommit: onEmpresaChange,  matchMode: 'startsWith' });
-attachSearchableCombo('dirigido','dirigidoSearch',{ onCommit: onDirigidoChange, matchMode: 'includes'   });
+attachSearchableCombo('empresa','empresaSearch', { onCommit: onEmpresaChange, matchMode: 'includes' });
+attachSearchableCombo('dirigido','dirigidoSearch', { onCommit: onDirigidoChange, matchMode: 'includes' });
 }
 
 // ========= NUEVO: ocultar UI de carga de contactos cuando ya hay autodetección o carga exitosa =========
@@ -1841,6 +1841,7 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
+
 
 
 
