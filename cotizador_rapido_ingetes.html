@@ -320,19 +320,31 @@ const baseCOP   = priceMode === "USD" ? (price * trm) : price;
 const afterDisc = baseCOP ? baseCOP * (1 - discount / 100) : null;
 const saleAfter = afterDisc != null ? afterDisc * (util || 1) : null;
 
-// 👉 redondeos
-const roundedUnit  = (saleAfter != null) ? roundUpTo(saleAfter, 100) : null;
-// En el total, sumamos envío UNA sola vez y redondeamos el resultado
-const roundedTotal = (roundedUnit != null)
-  ? Math.max(0, roundUpTo((roundedUnit * qty) + (shipping || 0), 100))
+// 👉 redondeos del precio neto (sin envío)
+const roundedUnit = (saleAfter != null) ? roundUpTo(saleAfter, 100) : null;
+
+// 👉 reparto del envío entre las unidades
+//    - si qty=2 y shipping=20.000 => 10.000 por unidad
+//    - cada parte se redondea a 100 para mantener coherencia
+const sPerUnitRaw      = (qty > 0) ? (shipping || 0) / qty : 0;
+const sPerUnitRounded  = roundUpTo(sPerUnitRaw, 100);
+
+// 👉 precio unitario FINAL (incluye su porción de envío)
+const roundedUnitWithShip = (roundedUnit != null)
+  ? (roundedUnit + sPerUnitRounded)
+  : null;
+
+// 👉 total antes de IVA = unitario final * cantidad
+const roundedTotal = (roundedUnitWithShip != null)
+  ? (roundedUnitWithShip * qty)
   : null;
 
 // tarjetas (muestran valores ya redondeados)
-$("baseCop").textContent   = moneyCOP(baseCOP || null);
-$("saleAfter").textContent = moneyCOP(roundedUnit != null ? roundedUnit : null);
-$("shipVal").textContent   = moneyCOP(shipping || null);
+$("baseCop").textContent     = moneyCOP(baseCOP || null);
+$("saleAfter").textContent   = moneyCOP(roundedUnitWithShip != null ? roundedUnitWithShip : null);
+$("shipVal").textContent     = moneyCOP(shipping || null);
 $("totalBefore").textContent = moneyCOP(roundedTotal != null ? roundedTotal : null);
-
+    
 const availability = normalizeAvailability(lead);
 const notesPart = notes ? `\n\nNOTAS: ${notes}` : "";
 
@@ -517,6 +529,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
