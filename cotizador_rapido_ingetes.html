@@ -357,13 +357,14 @@ ${desc}
 Costo total: ${moneyCOP(roundedTotal)} + IVA
 Disponibilidad: ${availability}${notesPart}`;
   } else {
-    // Cantidad + unitario redondeado + total redondeado
-    block = `${ref}
+  // Cantidad + unitario redondeado (CON envío prorrateado) + total
+  block = `${ref}
 ${desc}
 Cantidad: ${qty}
-Precio unitario: ${moneyCOP(roundedUnit)}
+Precio unitario: ${moneyCOP(roundedUnitWithShip)}
 Costo total: ${moneyCOP(roundedTotal)} + IVA
 Disponibilidad: ${availability}${notesPart}`;
+
   }
 }
 
@@ -529,6 +530,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
