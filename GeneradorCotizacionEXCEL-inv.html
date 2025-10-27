@@ -1440,6 +1440,35 @@ cDet.alignment = { horizontal:'left', vertical:'top', wrapText:true };
 // Altura de la fila para que se vean ambos renglones
 ws.getRow(frDesc).height = 45.8;
 
+// === Bloque de ENVÍO a la derecha (desde columna H)
+const colH = startCol + 6; // H
+const colI = startCol + 7; // I
+const colJ = startCol + 8; // J
+const colK = startCol + 9; // K
+
+// Etiquetas
+ws.getCell(frDesc, colH).value     = 'ENVÍO POR ÍTEM:';
+ws.getCell(frDesc, colH).border    = box;
+ws.getCell(frDesc, colH).alignment = { horizontal:'left', vertical:'middle' };
+
+ws.getCell(frDesc, colJ).value     = 'TOTAL ENVÍO:';
+ws.getCell(frDesc, colJ).border    = box;
+ws.getCell(frDesc, colJ).alignment = { horizontal:'left', vertical:'middle' };
+
+// Valor unitario de envío (lo que digitas en el formulario)
+ws.getCell(frDesc, colI).value  = (parseFloat($('#envio').value || '0') || 0);
+ws.getCell(frDesc, colI).numFmt = '"$" #,##0';
+ws.getCell(frDesc, colI).border = box;
+ws.getCell(frDesc, colI).alignment = { horizontal:'right', vertical:'middle' };
+
+// Total envío = envío por ítem * SUMA de cantidades (columna E)
+const firstItemRow = dataStart;     // ya existe arriba
+const lastItemRow  = r - 1;         // última fila de ítems
+ws.getCell(frDesc, colK).value  = { formula: `I${frDesc}*SUM(E${firstItemRow}:E${lastItemRow})` };
+ws.getCell(frDesc, colK).numFmt = '"$" #,##0';
+ws.getCell(frDesc, colK).border = box;
+ws.getCell(frDesc, colK).alignment = { horizontal:'right', vertical:'middle' };
+
     // === Ajuste de impresión y wrap en LOCATIVO ===
     const lastRowLoc = Math.max(frDesc, ws.lastRow.number);
 
@@ -1674,7 +1703,6 @@ if (stock > 0 && stock < it.cant) estado = 'EN INVENTARIO (NO ALCANZA)';
 if (stock >= it.cant && it.cant > 0) estado = 'EN INVENTARIO';
 wsLoc['J'+r] = { t:'s', v: estado };
 
-  
   // MODIFICAR ESTAS LÍNEAS - Sumar el envío directamente en la fórmula
   if (it.envio > 0) {
     wsLoc['N'+r]={t:'n',f:`CEILING((L${r}*M${r})+${it.envio},100)`};
@@ -1685,6 +1713,17 @@ wsLoc['J'+r] = { t:'s', v: estado };
   wsLoc['O'+r]={t:'n',f:`CEILING(N${r}*E${r},100)`}; 
   wsLoc['L'+r]={t:'n',f:`CEILING(H${r}*(1 - J${r}),100)`}; 
 });
+
+// === Fila ENVÍO en fallback SheetJS (H..K en la misma fila frDesc)
+const totalQtyRange = `E${startData}:E${startData + items.length - 1}`;
+
+wsLoc['H' + frDesc] = { t:'s', v:'ENVÍO POR ÍTEM:' };
+wsLoc['I' + frDesc] = { t:'n', v:(parseFloat($('#envio').value || '0') || 0) };
+wsLoc['I' + frDesc].z = '"$" #,##0';
+
+wsLoc['J' + frDesc] = { t:'s', v:'TOTAL ENVÍO:' };
+wsLoc['K' + frDesc] = { t:'n', f:`I${frDesc}*SUM(${totalQtyRange})` };
+wsLoc['K' + frDesc].z = '"$" #,##0';
 
     XLSX.utils.book_append_sheet(wb, wsLoc, 'LOCATIVO');
 
