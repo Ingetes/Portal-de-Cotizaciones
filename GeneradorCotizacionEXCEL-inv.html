@@ -911,7 +911,7 @@ function renderInvUI() {
     const t=new Date(); t.setHours(0,0,0,0);
     const diff=Math.floor((d - t)/86400000);
     if(diff <= 6) return '3-5 días. Salvo venta previa';
-    if(diff >= 7 && diff <= 50) return '30-45 días. Salvo venta previa';
+    if(diff >= 7 && diff <= 45) return '30-45 días. Salvo venta previa';
     if(diff >= 46 && diff <= 60) return '6-8 semanas';
     if(diff >= 61 && diff <= 80) return '8-10 semanas';
     if(diff >= 81 && diff <= 100) return '10-12 semanas';
@@ -1783,3 +1783,4 @@ wsLoc['K' + frDesc].z = '"$" #,##0';
 </body>
 
 </html>
+
