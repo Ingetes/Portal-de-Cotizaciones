@@ -371,15 +371,19 @@ function hideContactsUploadUI(){
 
 // Intenta cargar automáticamente CONTACTOS.xlsx de la misma carpeta
 async function tryAutoLoadContactsFromFolder(){
-const CANDIDATES = Array.from(await (async () => {
-  const base = [
-    'CONTACTOS.xlsx','Contactos.xlsx','contactos.xlsx',
-    'CLIENTES.xlsx','informedeContactos.xlsx'
-  ];
-  // Prueba hasta 10 archivos con patrón "Informe de Contactos"
-  for (let i = 0; i < 10; i++) base.push(`Informe de Contactos para PORTAL-${i}.xlsx`);
-  return base;
-})());
+const CANDIDATES = [
+  // 👇 Agregamos tu nombre real con timestamp
+  'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx',
+
+  // 👇 Opcionales/variantes por si en el futuro renombraras sin timestamp
+  'informe de Contactos para PORTAL.xlsx',
+  'InformedeContactos.xlsx',
+  'Informe de Contactos.xlsx',
+
+  // 👇 Los que ya estaban
+  'CONTACTOS.xlsx','Contactos.xlsx','contactos.xlsx',
+  'CLIENTES.xlsx','informedeContactos.xlsx'
+];
   for(const rel of CANDIDATES){
     try{
       // fetch relativo al HTML; si falla, probamos siguiente
@@ -1180,5 +1184,6 @@ descInp?.addEventListener('input', () => {
 </script>
 </body>
 </html>
+
 
 
