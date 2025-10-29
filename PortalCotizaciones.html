@@ -146,6 +146,7 @@
             <div class="stack">
               <button id="goFast" class="btn btn-wide">Cotizador Rápido</button>
               <button id="goNormal" class="btn btn-wide">Cotizador Normal</button>
+              <button id="goImport" class="btn btn-wide">Cotizador de Importaciones</button>
               <button class="btn btn-wide" disabled style="opacity:.6;cursor:not-allowed">Cotizador de proyectos (próx.)</button>
             </div>
           </div>
@@ -177,17 +178,16 @@
           <div class="row"><img src="ingetes.jpg" alt="" style="height:42px"><h2 style="margin-left:10px">Cotizador Rápido</h2></div>
           <button id="backToPanel" class="btn btn-small">← Volver</button>
         </div>
-<iframe
-  id="fastFrame"
-  class="embedded"
-  src="cotizador_rapido_ingetes.html"
-  title="Cotizador Rápido"
-  sandbox="allow-scripts allow-same-origin allow-downloads allow-forms allow-popups allow-popups-to-escape-sandbox"
-  allow="clipboard-read; clipboard-write; file-system-access; fullscreen"
-></iframe>
+          <iframe
+            id="fastFrame"
+            class="embedded"
+            src="cotizador_rapido_ingetes.html"
+            title="Cotizador Rápido"
+            sandbox="allow-scripts allow-same-origin allow-downloads allow-forms allow-popups allow-popups-to-escape-sandbox"
+            allow="clipboard-read; clipboard-write; file-system-access; fullscreen"
+          ></iframe>
       </div>
     </section>
-
 
     <!-- ===== COTIZADOR NORMAL (TABS: Excel | Word) ===== -->
     <section id="cotizadorNormal" class="hidden" aria-hidden="true">
@@ -227,6 +227,46 @@
         </div>
       </div>
     </section>
+
+    <!-- ===== COTIZADOR DE IMPORTACIONES (TABS: Excel | Word) ===== -->
+    <section id="cotizadorImport" class="hidden" aria-hidden="true">
+      <div class="panel-card">
+        <div class="row" style="justify-content:space-between;margin-bottom:12px">
+          <div class="row"><img src="ingetes.jpg" alt="" style="height:42px"><h2 style="margin-left:10px">Cotizador de Importaciones</h2></div>
+          <button id="backToPanelFromImport" class="btn btn-small">← Volver</button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" role="tablist" aria-label="Tipos de generador">
+          <button id="tabExcel" class="tab active" role="tab" aria-selected="true" aria-controls="panelExcel">Excel (.xlsx)</button>
+          <button id="tabWord"  class="tab" role="tab" aria-selected="false" aria-controls="panelWord">Word (.docx)</button>
+        </div>
+
+        <!-- Panel Excel -->
+        <div id="panelExcel" class="tab-panel active" role="tabpanel" aria-labelledby="tabExcel">
+          <iframe
+            id="iframeImportExcel"
+            src="GeneradorImportación.html"
+            sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-popups"
+            allow="download"
+            style="width:100%;height:100vh;border:0">
+          </iframe>
+        </div>
+
+        <!-- Panel Word -->
+        <div id="panelWord" class="tab-panel" role="tabpanel" aria-labelledby="tabWord">
+          <iframe
+            id="normalFrameWord"
+            class="embedded"
+            src="GeneradorCotizacionWORD.html"
+            title="Generador Word"
+            sandbox="allow-scripts allow-same-origin allow-downloads"
+            allow="clipboard-read; clipboard-write; file-system-access; fullscreen"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
     <!-- ===== COTIZACIÓN INGENIERÍA ===== -->
     <section id="cotizacionIngenieria" class="hidden" aria-hidden="true">
       <div class="panel-card">
@@ -348,6 +388,20 @@
     $('goNormal')?.addEventListener('click',e=>{ e.preventDefault(); goNormal(); });
     $('backToPanel')?.addEventListener('click', e=>{ e.preventDefault(); backFromFast(); });
     $('backToPanelFromNormal')?.addEventListener('click', e=>{ e.preventDefault(); backFromNormal(); });
+
+// === Cotizador de Importaciones ===
+function goImport(){
+  hide(panel);
+  show(document.getElementById('cotizadorImport'));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function backFromImport(){
+  hide(document.getElementById('cotizadorImport'));
+  show(panel);
+}
+
+$('goImport')?.addEventListener('click', e=>{ e.preventDefault(); goImport(); });
+$('backToPanelFromImport')?.addEventListener('click', e=>{ e.preventDefault(); backFromImport(); });
 
     // Tabs
     const tabExcel=$('tabExcel'), tabWord=$('tabWord');
