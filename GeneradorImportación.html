@@ -78,10 +78,25 @@ label.label-error{ color:#dc2626 }
     <label class="req">Iniciales comercial</label>
     <input id="iniCom" maxlength="3" placeholder="AAA" style="text-transform:uppercase">
   </div>
-  <div class="field">
-    <label class="req">Cliente</label>
-    <input id="cliente" placeholder="EMPRESA S.A." style="text-transform:uppercase">
+<!-- Cliente (con lista desde Excel de contactos) -->
+<div class="form-group">
+  <label for="cliente" class="form-label">Cliente <span class="req">*</span></label>
+
+  <!-- select que se llena con empresas del Excel -->
+  <select id="clienteSelect" class="form-control" style="margin-bottom:6px;">
+    <option value="" selected disabled>-Seleccionar empresa-</option>
+  </select>
+
+  <!-- input visible: permite filtrar escribiendo o poner manual cuando no hay Excel -->
+  <input id="cliente" type="text" class="form-control" placeholder="Escribe para filtrar o ingresa manual"/>
+
+  <!-- fila para subir Excel cuando no se encontró automáticamente -->
+  <div id="xlsDatosRow" class="mt-2">
+    <label class="form-label">Excel datos de contacto (.xlsx)</label>
+    <input id="fileXlsDatos" type="file" accept=".xlsx" class="form-control"/>
+    <small id="xlsDatosStatus" class="text-muted"></small>
   </div>
+</div>
   <div class="field">
     <label class="req">Fecha de elaboración</label>
     <input id="fechaElab" type="date">
@@ -256,8 +271,158 @@ label.label-error{ color:#dc2626 }
 
 <!-- Librería ExcelJS -->
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js" defer crossorigin="anonymous"></script>
-
 <script>
+// ================== CLIENTES DESDE EXCEL ==================
+let CONTACTS_DB = null;
+
+// Normalizadores ligeros
+const _normStr = s => String(s||'').trim();
+const _normKey = s => _normStr(s).toUpperCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+
+// Cargar la librería XLSX si aún no existe (necesaria para leer CONTACTOS.xlsx)
+async function ensureXLSX(){
+  if (window.XLSX) return;
+  await new Promise((res, rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+    s.onload=res; s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+// Parsea el Excel de contactos y devuelve { byEmpresa, all }
+async function parseContactsWorkbook(fileOrArrayBuffer){
+  await ensureXLSX();                           // ya la usas para otros flujos
+  const data = fileOrArrayBuffer instanceof ArrayBuffer
+    ? new Uint8Array(fileOrArrayBuffer)
+    : new Uint8Array(await fileOrArrayBuffer.arrayBuffer());
+  const wb = XLSX.read(data, { type:'array', cellDates:false, cellText:false, cellStyles:false });
+
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  if(!ws) throw new Error('No se encontró hoja de contactos');
+
+  const range = XLSX.utils.decode_range(ws['!ref']||'A1');
+  const getCell = (r,c) => {
+    const a = XLSX.utils.encode_cell({r,c});
+    const cell = ws[a];
+    if(!cell) return '';
+    if(typeof cell.w === 'string') return cell.w;
+    return cell.v==null ? '' : String(cell.v);
+  };
+
+  // 1) localizar encabezados (buscamos "Nombre de la cuenta")
+  let headerRow = -1, cols = {};
+  for(let r=range.s.r; r<=range.e.r; r++){
+    const names = [];
+    for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
+    const idxEmpresa = names.findIndex(v => v.includes('NOMBRE DE LA CUENTA'));
+    if (idxEmpresa>=0){ headerRow = r; cols = { empresa: idxEmpresa }; break; }
+  }
+  if(headerRow < 0) throw new Error('No se detectó columna "Nombre de la cuenta"');
+
+  // 2) recorrer filas (arrastre de empresa, saltando "subtotal")
+  const rows = [];
+  let lastEmpresa = '';
+  for(let r=headerRow+1; r<=range.e.r; r++){
+    const vEmpresa = _normStr(getCell(r, cols.empresa));
+    const line = (vEmpresa||'').toLowerCase();
+    if (line.includes('subtotal')) continue;
+    if (vEmpresa) lastEmpresa = vEmpresa;
+    const empresa = lastEmpresa;
+    if (!empresa) continue;
+    rows.push({ empresa });
+  }
+
+  // 3) agrupar por empresa
+  const byEmpresa = new Map();
+  rows.forEach(r=>{
+    if(!byEmpresa.has(r.empresa)) byEmpresa.set(r.empresa, []);
+    byEmpresa.get(r.empresa).push(r);
+  });
+
+  return { byEmpresa, all: rows };
+}
+
+// Llena el select con las empresas
+function fillClienteOptions(){
+  const sel = document.getElementById('clienteSelect');
+  if(!sel || !CONTACTS_DB) return;
+  sel.innerHTML = '<option value="" selected disabled>-Seleccionar empresa-</option>';
+
+  const empresas = Array.from(CONTACTS_DB.byEmpresa.keys())
+                        .sort((a,b)=>a.localeCompare(b,'es'));
+  empresas.forEach(e=>{
+    const opt = document.createElement('option');
+    opt.value = e.toUpperCase();
+    opt.textContent = e.toUpperCase();
+    sel.appendChild(opt);
+  });
+
+  const st = document.getElementById('xlsDatosStatus');
+  if (st) st.textContent = `Empresas: ${empresas.length}`;
+}
+
+// Oculta la fila del “sube tu Excel” cuando ya cargamos uno
+function hideContactsUploadUI(){
+  const row = document.getElementById('xlsDatosRow');
+  if (row) row.style.display = 'none';
+}
+
+// Intenta cargar automáticamente CONTACTOS.xlsx de la misma carpeta
+async function tryAutoLoadContactsFromFolder(){
+  const CANDIDATES = ['CONTACTOS.xlsx','Contactos.xlsx','contactos.xlsx'];
+  for(const rel of CANDIDATES){
+    try{
+      // fetch relativo al HTML; si falla, probamos siguiente
+      const res = await fetch(rel, { cache:'no-store' });
+      if(!res.ok) continue;
+      const buf = await res.arrayBuffer();
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      fillClienteOptions();
+      hideContactsUploadUI();
+      return true;
+    }catch(_){}
+  }
+  return false;
+}
+
+// “Cableado” entre select y caja de texto + filtrado escribiendo
+function wireContactsInput(){
+  const sel = document.getElementById('clienteSelect');
+  const inp = document.getElementById('cliente');
+  const up  = document.getElementById('fileXlsDatos');
+
+  // 1) Si se selecciona empresa → pasa al input visible
+  sel.addEventListener('change', ()=>{
+    if(sel.value){ inp.value = sel.value; inp.dispatchEvent(new Event('input')); }
+  });
+
+  // 2) Al escribir en el input → filtra opciones del select (y permite manual)
+  inp.addEventListener('input', ()=>{
+    const q = _normKey(inp.value);
+    Array.from(sel.options).forEach(o=>{
+      if(!o.value){ o.hidden=false; return; } // placeholder
+      o.hidden = q && !o.value.includes(q);
+    });
+  });
+
+  // 3) Si el usuario sube Excel manualmente
+  up.addEventListener('change', async (e)=>{
+    const f = e.target.files?.[0];
+    if(!f) return;
+    try{
+      CONTACTS_DB = await parseContactsWorkbook(f);
+      fillClienteOptions();
+      hideContactsUploadUI();
+    }catch(err){
+      alert('No se pudo leer el Excel de contactos: ' + err.message);
+    }
+  });
+}
+tryAutoLoadContactsFromFolder();   // intenta CONTACTOS.xlsx de la misma carpeta
+wireContactsInput();               // conecta select + input + upload
+
 (function(){
   const $ = s=>document.querySelector(s);
   const fmtMoney = v => new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(v||0);
