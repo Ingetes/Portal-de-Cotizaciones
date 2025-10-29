@@ -238,12 +238,12 @@
 
         <!-- Tabs -->
         <div class="tabs" role="tablist" aria-label="Tipos de generador">
-          <button id="tabExcel" class="tab active" role="tab" aria-selected="true" aria-controls="panelExcel">Excel (.xlsx)</button>
-          <button id="tabWord"  class="tab" role="tab" aria-selected="false" aria-controls="panelWord">Word (.docx)</button>
+          <button id="tabExcelImport" class="tab active" role="tab" aria-selected="true" aria-controls="panelExcelImport">Excel (.xlsx)</button>
+          <button id="tabWordImport"  class="tab" role="tab" aria-selected="false" aria-controls="panelWordImport">Word (.docx)</button>
         </div>
 
         <!-- Panel Excel -->
-        <div id="panelExcel" class="tab-panel active" role="tabpanel" aria-labelledby="tabExcel">
+        <div id="panelExcelImport" class="tab-panel active" role="tabpanel" aria-labelledby="tabExcelImport">
           <iframe
             id="iframeImportExcel"
             src="GeneradorImportación.html"
@@ -254,9 +254,9 @@
         </div>
 
         <!-- Panel Word -->
-        <div id="panelWord" class="tab-panel" role="tabpanel" aria-labelledby="tabWord">
+        <div id="panelWordImport" class="tab-panel" role="tabpanel" aria-labelledby="tabWordImport">
           <iframe
-            id="normalFrameWord"
+            id="importFrameWord"
             class="embedded"
             src="GeneradorCotizacionWORD.html"
             title="Generador Word"
@@ -415,6 +415,21 @@ $('backToPanelFromImport')?.addEventListener('click', e=>{ e.preventDefault(); b
     }
     tabExcel?.addEventListener('click', ()=>activate('excel'));
     tabWord?.addEventListener('click',  ()=>activate('word'));
+    // Tabs de Importaciones (IDs independientes)
+    const tabExcelImp   = $('tabExcelImport');
+    const tabWordImp    = $('tabWordImport');
+    const panelExcelImp = $('panelExcelImport');
+    const panelWordImp  = $('panelWordImport');
+    
+    function activateImport(which){
+      const isExcel = (which === 'excel');
+      tabExcelImp?.classList.toggle('active', isExcel);
+      tabWordImp?.classList.toggle('active', !isExcel);
+      panelExcelImp?.classList.toggle('active', isExcel);
+      panelWordImp?.classList.toggle('active', !isExcel);
+    }
+    tabExcelImp?.addEventListener('click', ()=>activateImport('excel'));
+    tabWordImp?.addEventListener('click',  ()=>activateImport('word'));
 
     // ===== Modal de Ajustes =====
     const modal=$('settingsModal');
@@ -652,7 +667,7 @@ window.addEventListener('message', async (ev)=>{
   const d = ev.data || {};
   if (!d.__ingetes_download) return;
 
-  const filename = d.filename || 'archivo';
+  const filename = d.fileName || d.filename || 'archivo.xlsx';
   const mime     = d.mime || 'application/octet-stream';
 
   // Normaliza a ArrayBuffer
