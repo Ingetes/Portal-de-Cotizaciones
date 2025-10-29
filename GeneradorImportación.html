@@ -937,29 +937,63 @@ wv.eachRow({ includeEmpty: true }, (row) => {
   });
 });
 
-// Descargar (con selector de carpeta y nombre)
-try {
-  const buf = await wb.xlsx.writeBuffer({ useStyles: true });
-  const fileName = (($('#outName').value || 'Q0000-AAA-25') + '.xlsx');
+// ===== DESCARGA COMPATIBLE (GitHub Pages / iframe) =====
+const buf = await wb.xlsx.writeBuffer({ useStyles: true });
+const blob = new Blob([buf], {
+  type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+});
+const fileName = (($('#outName').value || 'Q0000-AAA-25') + '.xlsx');
 
-  // Usa el selector del sistema
-  const handle = await window.showSaveFilePicker({
-    suggestedName: fileName,
-    types: [{
-      description: 'Archivo Excel',
-      accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] }
-    }]
-  });
-
-  const writable = await handle.createWritable();
-  await writable.write(buf);
-  await writable.close();
-
-  alert('Archivo guardado correctamente.');
-
-} catch (err) {
-  console.error(err);
-  alert('No se pudo guardar el archivo (¿tu navegador bloquea showSaveFilePicker?).');
+// 1) Si estamos embebidos en el portal, pedir a la página padre que haga la descarga
+if (window.parent && window.parent !== window) {
+  try {
+    const ab = await blob.arrayBuffer();
+    window.parent.postMessage({
+      __ingetes_download: true,
+      fileName,
+      mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      buffer: ab
+    }, '*');
+  } catch (e) {
+    console.error(e);
+    // fallback local si falla postMessage
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+}
+// 2) Si NO está en iframe: intentar File Picker y si no, <a download>
+else if ('showSaveFilePicker' in window) {
+  try {
+    const handle = await window.showSaveFilePicker({
+      suggestedName: fileName,
+      types: [{
+        description: 'Archivo Excel',
+        accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] }
+      }]
+    });
+    const writable = await handle.createWritable();
+    await writable.write(blob);
+    await writable.close();
+    alert('Archivo guardado correctamente.');
+  } catch (err) {
+    // Usuario canceló o no está permitido -> fallback <a download>
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fileName;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 1500);
+  }
+}
+// 3) Último recurso: <a download>
+else {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = fileName;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
 }
   });
 })();
@@ -973,3 +1007,4 @@ descInp?.addEventListener('input', () => {
 </script>
 </body>
 </html>
+
