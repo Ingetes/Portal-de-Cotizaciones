@@ -96,6 +96,11 @@
     <div class="app-card mb-4">
       <div class="p-5 space-y-4">
 <div class="field">
+  <label>Inventario (.xls / .xlsx)</label>
+  <input id="fileInv" type="file" accept=".xls,.xlsx" class="w-full border rounded-lg px-3 py-2">
+  <div id="invInfo" class="text-sm text-gray-600 mt-1"></div>
+</div>
+<div class="field">
   <label for="ref">Referencia (MLFB)</label>
   <div class="ref-grid">
 <input id="ref" type="text"
@@ -134,23 +139,31 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
             <label class="text-sm text-gray-700">Descuento (%)</label>
-            <input id="discount" type="number" value="0" class="w-full border rounded-lg px-3 py-2">
+            <input id="discount" type="number" placeholder="0" class="w-full border rounded-lg px-3 py-2">
           </div>
           <div>
             <label class="text-sm text-gray-700">Factor de utilidad (opcional)</label>
-            <input id="util" type="number" step="0.01" value="1.00" class="w-full border rounded-lg px-3 py-2">
+            <input id="util" type="number" step="0.01" placeholder="1.00" class="w-full border rounded-lg px-3 py-2">
           </div>
           <div>
             <label class="text-sm text-gray-700">Envío (COP)</label>
-            <input id="shipping" type="number" value="0" class="w-full border rounded-lg px-3 py-2">
-          </div>
-          <div>
-            <label class="text-sm text-gray-700">Cantidad</label>
-            <input id="qty" type="number" min="1" value="1" class="w-full border rounded-lg px-3 py-2">
+            <input id="shipping" type="number" placeholder="0" class="w-full border rounded-lg px-3 py-2">
           </div>
           <div>
             <label class="text-sm text-gray-700">Disponibilidad</label>
             <input id="lead" class="w-full border rounded-lg px-3 py-2" placeholder="Escriba la cantidad de días.">
+          </div>
+          <div>
+            <label class="text-sm text-gray-700">Cantidad</label>
+            <input id="qty" type="number" min="1" placeholder="1" class="w-full border rounded-lg px-3 py-2">
+          </div>
+          <!-- Estado de Inventario (debajo de Disponibilidad) -->
+          <div id="invStatusRow" class="mt-2 hidden">
+            <div class="flex items-center gap-3">
+              <span id="invEstadoPill"
+                    class="px-3 py-1 rounded-full text-xs font-semibold tracking-wide"></span>
+              <span id="invCounts" class="text-sm text-slate-600"></span>
+            </div>
           </div>
         </div>
 
@@ -246,6 +259,170 @@ function scrollToSlide() {
     if (n >= 81 && n <= 90) return "10 - 12 semanas";
     return raw;
   }
+
+// ===== INVENTARIO =====
+let invMap = new Map();
+async function ensureXLSX(){
+  if(window.XLSX) return;
+  const src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+  await new Promise((res, rej) => {
+    const s = document.createElement("script");
+    s.src = src; s.onload = res; s.onerror = rej;
+    document.head.appendChild(s);
+  });
+}
+
+// normaliza referencias
+const normRef = s => String(s||'')
+  .replace(/\u00A0/g,' ')
+  .replace(/[\u200B-\u200D\uFEFF]/g,'')
+  .replace(/[‐-‒–—−]/g,'-')
+  .replace(/\s*-\s*/g,'-')
+  .replace(/\s+/g,' ')
+  .trim()
+  .toUpperCase();
+
+function parseQty(v){ 
+  if (typeof v === 'number') return Math.round(v);
+  const s = String(v ?? '').replace(/[^\d,.-]/g,'').replace(',','.');
+  const n = parseFloat(s);
+  return isFinite(n) ? Math.round(n) : 0;
+}
+
+// ---- NUEVO: mostrar estado abajo/junto a Disponibilidad tras ingresar cantidad
+function updateInvStatusUI() {
+  const wrap   = document.getElementById('invStatusRow');
+  const pill   = document.getElementById('invEstadoPill');
+  const counts = document.getElementById('invCounts');
+
+  const ref = normRef(document.getElementById('ref').value);
+  const qty = parseInt(document.getElementById('qty').value || 0);
+
+  // si no hay ref, cantidad o inventario, oculto
+  if (!ref || !qty || !invMap || invMap.size === 0) {
+    wrap.classList.add('hidden');
+    return;
+  }
+
+  const data = invMap.get(ref);
+
+  // estilos base
+  const setPill = (text, bg, fg) => {
+    pill.textContent = text;
+    pill.style.background = bg;
+    pill.style.color = fg;
+  };
+
+  if (!data) {
+    setPill('NO EN INVENTARIO', '#fee2e2', '#7f1d1d'); // rojo suave
+    counts.textContent = '';
+    wrap.classList.remove('hidden');
+    return;
+  }
+
+  const stock = data.cantidad;
+  if (stock >= qty) {
+    setPill('EN INVENTARIO', '#dcfce7', '#065f46'); // verde
+  } else {
+    setPill('EN INVENTARIO (NO ALCANZA)', '#fef3c7', '#78350f'); // naranja
+  }
+  counts.textContent = `Solicitado: ${qty} • Inventario: ${stock}`;
+  wrap.classList.remove('hidden');
+}
+
+// Enlazamos eventos para que aparezca DESPUÉS de poner cantidad
+document.getElementById('qty').addEventListener('input', updateInvStatusUI);
+
+// Si cambias referencia con cantidad cargada, también actualiza
+document.getElementById('ref').addEventListener('change', () => {
+  if (parseInt(document.getElementById('qty').value || 0) > 0) updateInvStatusUI();
+});
+
+// Si recargas inventario y ya hay ref+cantidad, refresca
+document.getElementById('fileInv').addEventListener('change', () => {
+  if (parseInt(document.getElementById('qty').value || 0) > 0) updateInvStatusUI();
+});
+
+// detectar columnas relevantes del inventario
+function detectInvCols(ws){
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  let colRef=null, colDesc=null, colQty=null;
+  for(let r=range.s.r;r<=range.s.r+10;r++){
+    for(let c=range.s.c;c<=range.e.c;c++){
+      const val = String(ws[XLSX.utils.encode_cell({r,c})]?.v||'').toUpperCase();
+      if(!val) continue;
+      if(!colRef && (val.includes("REFERENCIA") || val.includes("MATERIAL"))) colRef=c;
+      if(!colDesc && val.includes("DESCRIP")) colDesc=c;
+      if(!colQty && (val.includes("CANTIDAD") || val.includes("QTY"))) colQty=c;
+    }
+  }
+  if(colRef==null) colRef=range.s.c;
+  if(colDesc==null) colDesc=colRef+1;
+  if(colQty==null) colQty=colDesc+1;
+  return { colRef, colDesc, colQty };
+}
+
+// parsea todo el inventario
+function parseInventario(ws){
+  const {colRef,colDesc,colQty}=detectInvCols(ws);
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  const map = new Map();
+  for(let r=range.s.r+1;r<=range.e.r;r++){
+    const ref = normRef(ws[XLSX.utils.encode_cell({r,c:colRef})]?.v||"");
+    if(!ref) continue;
+    const desc = String(ws[XLSX.utils.encode_cell({r,c:colDesc})]?.v||"").trim();
+    const qty = parseQty(ws[XLSX.utils.encode_cell({r,c:colQty})]?.v||0);
+    if(!map.has(ref)) map.set(ref,{desc,cantidad:qty});
+    else map.get(ref).cantidad += qty;
+  }
+  return map;
+}
+
+// === Evento: cargar inventario ===
+document.getElementById("fileInv").addEventListener("change", async (ev)=>{
+  const f = ev.target.files?.[0];
+  if(!f) return;
+  await ensureXLSX();
+  const buf = await f.arrayBuffer();
+  const wb = XLSX.read(buf,{type:"array"});
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  invMap = parseInventario(ws);
+  document.getElementById("invInfo").textContent =
+    `Cargado: ${f.name} (${invMap.size} referencias)`;
+});
+
+// === Mostrar disponibilidad al escribir referencia ===
+document.getElementById("ref").addEventListener("input", ()=>{
+  const ref = normRef(document.getElementById("ref").value);
+  const qty = parseInt(document.getElementById("qty").value||1);
+  const data = invMap.get(ref);
+  const wrap = document.getElementById("invStatus");
+  const estadoEl = document.getElementById("invEstado");
+  const cantEl = document.getElementById("invCantidades");
+  if(!data){ 
+    wrap.classList.remove("hidden");
+    estadoEl.textContent = "NO EN INVENTARIO";
+    estadoEl.style.background = "#fde047"; // amarillo
+    cantEl.textContent = "";
+    return;
+  }
+  const stock = data.cantidad;
+  let estado="EN INVENTARIO";
+  let color="#86efac"; // verde
+  if(stock < qty){
+    estado="EN INVENTARIO (NO ALCANZA)";
+    color="#fbbf24"; // naranja
+  }
+  estadoEl.textContent=estado;
+  estadoEl.style.background=color;
+  cantEl.textContent = `Solicitado: ${qty} | Inventario: ${stock}`;
+  wrap.classList.remove("hidden");
+});
+
+document.getElementById("qty").addEventListener("input", ()=>{
+  const ref = document.getElementById("ref").value;
+  if(ref) document.getElementById("ref").dispatchEvent(new Event("input"));
+});
 
   // === AUTOFILL: pedir descripción a tu API ===
   async function fetchMallDescription() {
@@ -530,18 +707,3 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
