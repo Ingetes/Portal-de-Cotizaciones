@@ -931,17 +931,22 @@ function renderInvUI() {
     return null;
   }
     
-  function disponibilidad(val){
+  function disponibilidad(val){ 
     const d=toDate(val); if(!d) return '';
     const t=new Date(); t.setHours(0,0,0,0);
     const diff=Math.floor((d - t)/86400000);
-    if(diff <= 6) return '3-5 días. Salvo venta previa';
-    if(diff >= 7 && diff <= 45) return '30-45 días. Salvo venta previa';
+    if(diff <= 6) return '3-5 días salvo venta previa';
+    if(diff >= 7 && diff <= 45) return '30-45 días salvo venta previa';
     if(diff >= 46 && diff <= 60) return '6-8 semanas';
     if(diff >= 61 && diff <= 80) return '8-10 semanas';
     if(diff >= 81 && diff <= 100) return '10-12 semanas';
     return `${diff} días`;
   }
+
+function unidadesTxt(n){
+  n = Number(n)||0;
+  return `${n} ${n===1 ? 'unidad' : 'unidades'}`;
+}
 
   // ===== Nombre de salida =====
 function updateOutName(){
@@ -1303,11 +1308,24 @@ const items = parsedRows.map((r, idx)=>{
   const refNorm  = normRef(refTxt);
   const invRow   = invMap.get(refNorm);
   const stockInv = Number(invRow?.cantidad || 0);
-  const marcaInv = String(invRow?.marca || '').toUpperCase();
-  const enIngetes = stockInv > 0 || marcaInv.includes('INGETES');
 
-  const dispMall = disponibilidad(r[m.fecha]); // lo que ya tenías
-  const disp     = enIngetes ? '3-5 días. Salvo venta previa' : (dispMall || '');
+  // Tomamos la fecha literal del Mall si viene
+  const fechaMall = String(r[m.fecha] || '').trim(); // columna “Fecha de entrega estimada”
+  let disp = '';
+
+  if (stockInv <= 0) {
+    // 🔴 No hay inventario local: usar directamente la fecha del Mall
+    disp = disponibilidad(fechaMall) || (fechaMall || '');
+  } else if (stockInv >= cant) {
+    // 🟢 Hay inventario suficiente
+    disp = '3-5 días salvo venta previa';
+  } else {
+    // 🟠 Hay pero no alcanza → mezcla cantidades
+    const faltan = Math.max(0, cant - stockInv);
+    const colaMall = disponibilidad(fechaMall) || fechaMall || '';
+    disp = `${unidadesTxt(stockInv)} 3-5 días salvo venta previa\n${unidadesTxt(faltan)} ${colaMall}`;
+  }
+
 
   return {
     item: idx+1,
