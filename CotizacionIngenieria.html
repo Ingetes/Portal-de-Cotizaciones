@@ -522,8 +522,16 @@ function norm(s){
 }
 function canonCond(s){
   let t = norm(s);
+  // Unifica: "lun- vier", "lun-vier", "lun - vier" → "lun- vier"
+  t = t.replace(/lun-\s*vier/g, 'lun- vier');
+  // También tolera "lun-vie" (sin 'r') y lo sube a "lun- vier"
   t = t.replace(/lun-\s*vie(?!r)/g, 'lun- vier');
-  t = t.replace(/\s*,\s*/g, ', ').replace(/\s*\/\s*/g, '/ ');
+
+  // Espacios/puntuación uniformes
+  t = t.replace(/\s*,\s*/g, ', ')
+       .replace(/\s*\/\s*/g, '/ ')
+       .replace(/\s+/g, ' ')
+       .trim();
   t = t.replace(/bogota/g,'bogota');
   return t;
 }
