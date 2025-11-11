@@ -430,7 +430,7 @@ const OPTIONS_MAP = {
   "Programación": ["-Seleccionar opción-","Micro automatización (S7-1200, LOGO)","Automatización","Servos"],
   "Visualización": ["-Seleccionar opción-","Basic Panels, LOGO Panels","Paneles Comfort","(SCADA, WinCC TIA.)"],
   "Configuración": ["-Seleccionar opción-","Comunicaciones","V20","G120","Sistemas de pesaje"],
-  "Especializados": ["-Seleccionar opción-","Analí­tica de gases","(Instrumentación, caudal)","(Instrumentación, presión, temperatura, nivel, por equipo)"]
+  "Especializados": ["-Seleccionar opción-","Analítica de gases","(Instrumentación, caudal)","(Instrumentación, presión, temperatura, nivel, por equipo)"]
 };
 const COND_2  = ["-Seleccionar opción-","Diurno lun- vier campo Bogotá","Diurno lun-vier campo fuera Bogotá"];
 const COND_3  = ["-Seleccionar opción-","Diurno lun- viernes, OFC","Medio dí­a, diurno lun- vier"];
@@ -518,6 +518,7 @@ function norm(s){
   return (s??'').toString()
     .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
     .toLowerCase().replace(/\s+/g,' ').trim()
+    .replace(/[\u00ad\u200b-\u200d\u2060]/g,'')
     .replace(/[â€œâ€"']/g,'').replace(/\s*-\s*/g,'-');
 }
 function canonCond(s){
