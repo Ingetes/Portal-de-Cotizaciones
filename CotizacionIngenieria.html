@@ -1520,8 +1520,9 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
       for (let r=firstData; r<firstData+items; r++){
         for (let c=1; c<=6; c++) ws.getCell(r,c).border = box;
         ws.getCell(r,4).numFmt = '"$" #,##0';
-        ws.getCell(r,6).value  = { formula:`D${r}*E${r}` };
-        ws.getCell(r,6).numFmt = '"$" #,##0';
+// Subtotal = REDONDEAR.MAS(D * E ; 0)
+ws.getCell(r,6).value  = { formula: `ROUNDUP(D${r}*E${r},-3)` };
+ws.getCell(r,6).numFmt = '"$" #,##0';
       }
     }
 
@@ -1531,11 +1532,13 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
     const rImprev    = rSubtotal + 1;
     const rTotalPlus = rSubtotal + 2;
 
-    ws.getCell(rSubtotal,6).value  = (items>0) ? { formula:`SUM(F${firstData}:F${lastData})` } : 0;
+ws.getCell(rSubtotal,6).value  = (items>0)
+  ? { formula:`ROUNDUP(SUM(F${firstData}:F${lastData}),-3)` }
+  : 0;
     ws.getCell(rSubtotal,6).numFmt = '"$" #,##0';
-    ws.getCell(rImprev,6).value    = { formula:`F${rSubtotal}*(${impPct}/100)` };
+    ws.getCell(rImprev,6).value = { formula:`ROUNDUP(F${rSubtotal}*(${impPct}/100),-3)` };
     ws.getCell(rImprev,6).numFmt   = '"$" #,##0';
-    ws.getCell(rTotalPlus,6).value = { formula:`F${rSubtotal}+F${rImprev}` };
+    ws.getCell(rTotalPlus,6).value = { formula:`ROUNDUP(F${rSubtotal}+F${rImprev},-3)` };
     ws.getCell(rTotalPlus,6).numFmt= '"$" #,##0';
 
     const styleTotal = (r, txt) => {
