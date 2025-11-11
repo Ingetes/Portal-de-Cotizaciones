@@ -648,12 +648,12 @@ $('#fileMall').addEventListener('change', async (ev)=>{
   headers = Object.keys(json[0]||{}).map(String);
   buildPreview(json);
 
-  const { colRef, colQty, colOpts } = detectMallCols(ws);
-  const range = XLSX.utils.decode_range(ws['!ref']);
+const { headerRow, colRef, colQty, colOpts } = detectMallCols(ws);
+const range = XLSX.utils.decode_range(ws['!ref']);
 
-  const map=new Map(), order=[];
-  for (let r=range.s.r+1; r<=range.e.r; r++){
-    const cR = ws[XLSX.utils.encode_cell({r, c: colRef})];
+const map = new Map(), order = [];
+for (let r = headerRow + 1; r <= range.e.r; r++) {
+  const cR = ws[XLSX.utils.encode_cell({ r, c: colRef })];
 // Si hay columna de opciones, concatenar
 let refRaw = String(cR?.v || '').trim();
 if (colOpts != null) {
@@ -906,6 +906,7 @@ function renderInvUI() {
     const find=(arr)=>{const hit=cols.find(c=>arr.some(p=>c.n.includes(norm(p)))); return hit?hit.raw:null};
     return {
       referencia: find(['id de material','id material','material','referencia']),
+      opciones:  find(['opcion','opciones','options','option']),
       cantidad:   find(['cantidad','qty','quantity']),
       descripcion:find(['descripcion','descripción','description']),
       precio:     find(['precio unidad (peso colombiano)','precio unidad','precio lista','unidad (peso colombiano)','price (colombian peso)','Price (Colombian Peso)']),
@@ -1080,10 +1081,11 @@ for (let r = range.s.r; r <= maxR; r++){
     const t = H(ws[XLSX.utils.encode_cell({r,c})]?.v);
     if (!t) continue;
 
-    if (colOpts === null && t.includes('OPCION')) {
-      colOpts = c;
-      headerRow = r;
-    }
+if (colOpts === null && (t.includes('OPCION') || t.includes('OPCIONES') || t.includes('OPTION') || t.includes('OPTIONS'))) {
+  colOpts = c;
+  headerRow = r;
+}
+
     if (colRef === null && hitRef(t)) { colRef = c; headerRow = r; }
     if (colQty === null && hitQty(t)) { colQty = c; headerRow = r; }
     if (colDesc === null && (t.includes('DESCRIPCION') || t.includes('DESCRIPTION'))) {
@@ -1305,8 +1307,10 @@ const items = parsedRows.map((r, idx)=>{
   const vUnit = costo*(factor||1) + (envio || 0);
 
   // --- DISPONIBILIDAD: si el inventario dice INGETES (o hay stock) => 3-5 días; si no, la del Mall
-  const refTxt   = String(r[m.referencia]||'').trim();
-  const refNorm  = normRef(refTxt);
+const baseRef = String(r[m.referencia] || '').trim();
+const optRef  = m.opciones ? String(r[m.opciones] || '').trim() : '';
+const refTxt  = (baseRef + optRef).trim();
+const refNorm = normRef(refTxt);
   const invRow   = invMap.get(refNorm);
   const stockInv = Number(invRow?.cantidad || 0);
 
