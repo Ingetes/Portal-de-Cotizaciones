@@ -456,18 +456,14 @@ function fillDirigidoOptions(){
     selDir.appendChild(opt);
   });
 
-
 if (lista.length === 1) { 
   selDir.selectedIndex = 1; 
   onDirigidoChange(); 
-  syncDirigidoInputs();            // <<< asegura que el input también quede lleno
+  syncDirigidoInputs();
 } else {
-  // si no hay autoselección, limpia el input por claridad
   const dirSearch = document.getElementById('dirigidoSearch');
   if (dirSearch) dirSearch.value = '';
 }
-
-  if (lista.length === 1) { selDir.selectedIndex = 1; onDirigidoChange(); }
 }
 
 // combos con buscador (input arriba del select)
@@ -666,7 +662,8 @@ function buildContactFilenameCandidates(){
   ['informe de Contactos para PORTAL.xlsx',
    'informe de Contactos para PORTAL-latest.xlsx',
    'Contactos_PORTAL.xlsx',
-   'Contactos.xlsx'
+   'Contactos.xlsx',
+   'informe de Contactos para PORTAL-2025-09-30-08-58-01.xlsx'
   ].forEach(n => list.push(new URL(n, baseURL).href));
 
   // YYYY-MM-DD y YYYY-MM-DD-hh-mm-ss (incluye “01” por tu patrón)
@@ -692,27 +689,34 @@ async function fetchExcelArrayBuffer(url){
 }
 
 async function autoDetectContactsInSameFolder(){
-  // en file:// puede fallar; lo intentamos y si no, se ignora
   const status = document.getElementById('xlsDatosStatus');
   if (status) status.textContent = 'Buscando Excel de contactos en la carpeta…';
 
-function buildContactFilenameCandidates(){
-  const baseURL = new URL('.', location.href);
-  return [
-    new URL('informedeContactos.xlsx', baseURL).href,
-    new URL('informe de Contactos para PORTAL.xlsx', baseURL).href,
-    new URL('Contactos_PORTAL.xlsx', baseURL).href,
-    new URL('Contactos.xlsx', baseURL).href
-  ];
-}
+  const candidates = (function buildContactFilenameCandidates(){
+    const baseURL = new URL('.', location.href);
+    return [
+      new URL('informedeContactos.xlsx', baseURL).href,
+      new URL('informe de Contactos para PORTAL.xlsx', baseURL).href,
+      new URL('Contactos_PORTAL.xlsx', baseURL).href,
+      new URL('Contactos.xlsx', baseURL).href
+    ];
+  })();
+
+  for (const url of candidates){
+    try{
+      const buf = await fetchExcelArrayBuffer(url); // ya está definida arriba
+      CONTACTS_DB = await parseContactsWorkbook(buf);
+      fillEmpresaOptions();
+      hideContactsUploadUI(); // oculta el uploader si se encontró
+      if (status) status.textContent = 'Contactos cargados automáticamente ✓';
+      return true;
+    }catch(_){
+      // sigue con el siguiente candidato
+    }
+  }
   if (status) status.textContent = 'No se encontró Excel de contactos automáticamente. Selecciónalo manualmente.';
   return false;
 }
-
-
-
-
-
 
 // Inicializar al cargar
 window.addEventListener('load', ()=>{
@@ -1632,7 +1636,7 @@ if ('showSaveFilePicker' in window){
   }
 }
 
-// 5.2 Si está embebido en el Portal, enviar buffer al padre para que abra el diálogo
+// 5.2 Si está embebido en el Portal, delega y EVITA fallback
 try{
   if (window.parent !== window.self){
     const arrBuf = await blob.arrayBuffer();
@@ -1642,7 +1646,7 @@ try{
       mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       buffer: arrBuf
     }, '*');
-    // no hacer return: si el padre no lo maneja, caemos al fallback
+    return; // <<< evita descarga doble
   }
 }catch(_){ /* ignorar y continuar */ }
 
