@@ -1384,6 +1384,20 @@ const refNorm = normRef(refTxt);
     c(3).value=it.cant;
     c(4).value=it.descripcion;
     c(5).value=it.disponibilidad;
+
+// === Fondo "canela (fondo 2, oscuro 30%)" cuando NO sea 3-5 días salvo venta previa ===
+const cellDisp = c(5);
+const norm = s => String(s||'')
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'') // sin tildes
+  .toUpperCase().trim();
+
+const SOLO_RAPIDO = '3-5 DIAS SALVO VENTA PREVIA';
+if (norm(it.disponibilidad) !== SOLO_RAPIDO) {
+  // canela oscuro ~30% (ARGB)
+  cellDisp.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFC6A87D' } };
+  cellDisp.font = { color: { argb: 'FF000000' } }; // (opcional) texto en blanco para mejor contraste
+}
+    
     c(6).value=it.precioLista;
     c(7).value=it.boton;
     c(8).value=it.dcto/100;
@@ -1831,5 +1845,6 @@ wsLoc['K' + frDesc].z = '"$" #,##0';
 </body>
 
 </html>
+
 
 
