@@ -686,15 +686,8 @@ function buildContactFilenameCandidates(){
 }
 
 async function fetchExcelArrayBuffer(url){
-  try{
-    const head = await fetch(url, { method:'HEAD' });
-    if (head.ok) { const res = await fetch(url); if (res.ok) return await res.arrayBuffer(); }
-  }catch(_){}
-  try{
-    const partial = await fetch(url, { headers: { 'Range': 'bytes=0-1024' } });
-    if (partial.ok) { const res = await fetch(url); if (res.ok) return await res.arrayBuffer(); }
-  }catch(_){}
-  const res = await fetch(url); if (!res.ok) throw new Error('GET directa no OK');
+  const res = await fetch(url, { cache:'no-store' });
+  if (!res.ok) throw new Error('No se pudo obtener: '+url);
   return await res.arrayBuffer();
 }
 
@@ -703,21 +696,15 @@ async function autoDetectContactsInSameFolder(){
   const status = document.getElementById('xlsDatosStatus');
   if (status) status.textContent = 'Buscando Excel de contactos en la carpeta…';
 
-  const candidates = buildContactFilenameCandidates();
-  for (const url of candidates) {
-    try{
-      const buf = await fetchExcelArrayBuffer(url);
-      if (buf) {
-        CONTACTS_DB = await parseContactsWorkbook(buf);
-        fillEmpresaOptions();
-        hideContactsUploadUI();
-        const selEmp = document.getElementById('empresa');
-        if (selEmp && selEmp.options.length === 2) { selEmp.selectedIndex = 1; onEmpresaChange(); }
-        if (status) status.textContent = 'Contactos cargados automáticamente.';
-        return true;
-      }
-    }catch(_e){ /* probar siguiente */ }
-  }
+function buildContactFilenameCandidates(){
+  const baseURL = new URL('.', location.href);
+  return [
+    new URL('informedeContactos.xlsx', baseURL).href,
+    new URL('informe de Contactos para PORTAL.xlsx', baseURL).href,
+    new URL('Contactos_PORTAL.xlsx', baseURL).href,
+    new URL('Contactos.xlsx', baseURL).href
+  ];
+}
   if (status) status.textContent = 'No se encontró Excel de contactos automáticamente. Selecciónalo manualmente.';
   return false;
 }
@@ -1556,16 +1543,9 @@ async function generate(){
     const docx = await ensureDOCX(); await ensureXLSX(); await ensureExcelJS();
 
     // 1) Cargar marca de agua (igual que Generador WORD)
-window.addEventListener('load', async () => {
-  try{
-    if (!window.DEFAULT_BG_BUF) { await loadDefaultBackground(); }  // ya existe en tu código
-    if (window.DEFAULT_BG_BUF){
-      const s = document.getElementById('bgStatus');
-      if (s) s.textContent = (window.DEFAULT_BG_NAME ? `${window.DEFAULT_BG_NAME} • cargada automáticamente` : 'Fondo cargado automáticamente');
-      hideBgUploadUI();
-    }
-  }catch(_){}
-});
+    if(!DEFAULT_BG_BUF){ await loadDefaultBackground(); }
+    if(!DEFAULT_BG_BUF) { alert('Debe cargar la imagen de fondo (marca de agua).'); document.getElementById('log').textContent=''; return; }
+    
     // 2) Lee archivos según orden requerido (Normal → Importaciones → Tablero → Ingeniería)
     const fNormal = document.getElementById('fileNormal').files[0] || null;
     const fImp    = document.getElementById('fileImp').files[0]    || null;
@@ -1667,12 +1647,6 @@ try{
 }catch(_){ /* ignorar y continuar */ }
 
 // 5.3 Fallback universal: <a download>
-const url = URL.createObjectURL(blob);
-const a = document.createElement('a');
-a.href = url; a.download = name;
-document.body.appendChild(a); a.click(); a.remove();
-setTimeout(()=>URL.revokeObjectURL(url), 2000);
-document.getElementById('log').textContent = 'Descarga iniciada.';
     const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     document.getElementById('log').textContent='Documento descargado.';
   }catch(e){
@@ -1703,6 +1677,23 @@ function initComerciales(){
 }
 
 window.addEventListener('load', initComerciales);
+
+// Auto-cargar marca de agua al iniciar y ocultar el bloque si se encontró
+window.addEventListener('load', async () => {
+  try {
+    if (!DEFAULT_BG_BUF) await loadDefaultBackground();
+    if (DEFAULT_BG_BUF) {
+      const s = document.getElementById('bgStatus');
+      if (s) s.textContent = (DEFAULT_BG_NAME ? `${DEFAULT_BG_NAME} • cargada automáticamente` : 'Fondo cargado automáticamente');
+      hideBgUploadUI();
+    } else {
+      const s = document.getElementById('bgStatus');
+      if (s) s.textContent = 'Sube una imagen para Marca de agua.';
+    }
+  } catch (e) {
+    console.warn('BG auto error', e);
+  }
+});
 
 window.addEventListener('load', () => {
   // Si no se sube imagen, intenta localizar MarcaDeAgua.png/.jpg en la misma carpeta
