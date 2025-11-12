@@ -708,15 +708,7 @@ async function autoDetectContactsInSameFolder(){
   const status = document.getElementById('xlsDatosStatus');
   if (status) status.textContent = 'Buscando Excel de contactos en la carpeta…';
 
-  const candidates = (function buildContactFilenameCandidates(){
-    const baseURL = new URL('.', location.href);
-    return [
-      new URL('informedeContactos.xlsx', baseURL).href,
-      new URL('informe de Contactos para PORTAL.xlsx', baseURL).href,
-      new URL('Contactos_PORTAL.xlsx', baseURL).href,
-      new URL('Contactos.xlsx', baseURL).href
-    ];
-  })();
+const candidates = buildContactFilenameCandidates();
 
   for (const url of candidates){
     try{
@@ -1131,12 +1123,6 @@ function buildDocCommonMulti(docx, fileName, bgBuf, tablesArray){
     const sel=document.getElementById(selectId); const inp=document.getElementById(inputId);
     const sv=sel && sel.value ? sel.value.trim() : ''; const iv=inp && inp.value ? inp.value.trim() : '';
     return (sv || iv || def).toUpperCase();
-  };
-  const choiceVal=id=>{
-    const sel=document.getElementById(id);
-    if(!sel) return '';
-    if(sel.value==='__OTRO__'){ const o=document.getElementById(id+'_otro'); return (o && o.value.trim()) ? o.value.trim() : ''; }
-    return sel.value || '';
   };
 
   const empresaStr  = comboVal('empresa','empresaSearch','');
@@ -1745,8 +1731,6 @@ function bindOtroToggle(id){
   sel.addEventListener('change',sync); sync();
 }
 window.addEventListener('load', ()=>['garantia','formaPago','sitioEntrega','validezOferta','precios'].forEach(bindOtroToggle));
-window.addEventListener('load', wireContactsInput);
-window.addEventListener('load', ()=>{ autoDetectContactsInSameFolder(); });
 window.addEventListener('load', () => {
   document.querySelectorAll('input, select, textarea').forEach(el => {
     el.addEventListener('input', () => el.classList.remove('input-error'));
