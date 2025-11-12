@@ -653,6 +653,11 @@ function hideContactsUploadUI(){
   if (row) row.remove();
 }
 
+function hideBgUploadUI(){
+  const row = document.getElementById('bgRow');
+  if (row) row.remove(); // ocultar por completo el bloque de subida
+}
+  
 // Autodetectar archivo de contactos en la misma carpeta (patrones del Word)
 function buildContactFilenameCandidates(){
   const baseURL = new URL('.', location.href);
@@ -1236,10 +1241,11 @@ function buildDocCommonMulti(docx, fileName, bgBuf, tablesArray){
     }
     try{
       const buf = await f.arrayBuffer();
-      DEFAULT_BG_BUF  = await downscaleToJpeg(buf);      // mismo pipeline que tu Word
-      DEFAULT_BG_NAME = f.name;
-      const s = document.getElementById('bgStatus');
-      if (s) s.textContent = `${f.name} • ${(f.size/1024/1024).toFixed(2)} MB (cargado)`;
+DEFAULT_BG_BUF  = await downscaleToJpeg(buf);
+DEFAULT_BG_NAME = f.name;
+const s = document.getElementById('bgStatus');
+if (s) s.textContent = `${f.name} • ${(f.size/1024/1024).toFixed(2)} MB (cargado)`;
+hideBgUploadUI(); // <-- NUEVO: ocultar bloque tras cargar manualmente
     }catch(err){
       console.error(err);
       alert('No se pudo leer la imagen de fondo.');
@@ -1550,9 +1556,16 @@ async function generate(){
     const docx = await ensureDOCX(); await ensureXLSX(); await ensureExcelJS();
 
     // 1) Cargar marca de agua (igual que Generador WORD)
-    if(!DEFAULT_BG_BUF){ await loadDefaultBackground(); }
-    if(!DEFAULT_BG_BUF) { alert('Debe cargar la imagen de fondo (marca de agua).'); document.getElementById('log').textContent=''; return; }
-
+window.addEventListener('load', async () => {
+  try{
+    if (!window.DEFAULT_BG_BUF) { await loadDefaultBackground(); }  // ya existe en tu código
+    if (window.DEFAULT_BG_BUF){
+      const s = document.getElementById('bgStatus');
+      if (s) s.textContent = (window.DEFAULT_BG_NAME ? `${window.DEFAULT_BG_NAME} • cargada automáticamente` : 'Fondo cargado automáticamente');
+      hideBgUploadUI();
+    }
+  }catch(_){}
+});
     // 2) Lee archivos según orden requerido (Normal → Importaciones → Tablero → Ingeniería)
     const fNormal = document.getElementById('fileNormal').files[0] || null;
     const fImp    = document.getElementById('fileImp').files[0]    || null;
@@ -1618,16 +1631,48 @@ if (allItems.length){
     const baseName = (document.getElementById('outName').value || 'PROYECTO-COTIZACIONES');
     const doc = buildDocCommonMulti(docx, baseName, DEFAULT_BG_BUF, tables.filter(Boolean));
 
-    // 5) Descarga (igual que tu generador actual)
-    const blob = await docx.Packer.toBlob(doc);
-    const name = baseName + '.docx';
-    if ('showSaveFilePicker' in window){
-      try{
-        const handle = await window.showSaveFilePicker({ suggestedName: name, types:[{ description:'Documento Word', accept:{ 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx'] } }] });
-        const w = await handle.createWritable(); await w.write(blob); await w.close();
-        document.getElementById('log').textContent='Documento guardado.'; return;
-      }catch(e){ if(e && e.name==='AbortError'){ document.getElementById('log').textContent='Operación cancelada.'; return; } }
-    }
+// 5) Descarga (File Picker + delegación al portal + fallback)
+const blob = await docx.Packer.toBlob(doc);
+const name = baseName + '.docx';
+
+// 5.1 File Picker nativo
+if ('showSaveFilePicker' in window){
+  try{
+    const handle = await window.showSaveFilePicker({
+      suggestedName: name,
+      types: [{ description:'Documento Word',
+        accept:{ 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx'] } }]
+    });
+    const w = await handle.createWritable(); await w.write(blob); await w.close();
+    document.getElementById('log').textContent = 'Documento guardado.';
+    return;
+  }catch(e){
+    if (e && e.name === 'AbortError'){ document.getElementById('log').textContent='Operación cancelada'; return; }
+    // si falla diferente a cancelación, seguimos al siguiente paso
+  }
+}
+
+// 5.2 Si está embebido en el Portal, enviar buffer al padre para que abra el diálogo
+try{
+  if (window.parent !== window.self){
+    const arrBuf = await blob.arrayBuffer();
+    window.parent.postMessage({
+      __ingetes_download: true,
+      filename: name,
+      mime: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      buffer: arrBuf
+    }, '*');
+    // no hacer return: si el padre no lo maneja, caemos al fallback
+  }
+}catch(_){ /* ignorar y continuar */ }
+
+// 5.3 Fallback universal: <a download>
+const url = URL.createObjectURL(blob);
+const a = document.createElement('a');
+a.href = url; a.download = name;
+document.body.appendChild(a); a.click(); a.remove();
+setTimeout(()=>URL.revokeObjectURL(url), 2000);
+document.getElementById('log').textContent = 'Descarga iniciada.';
     const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     document.getElementById('log').textContent='Documento descargado.';
   }catch(e){
