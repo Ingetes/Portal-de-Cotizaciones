@@ -321,7 +321,9 @@ function _normKey(s){
 async function parseContactsWorkbook(arrayBuffer){
   const XLSX = await ensureXLSX();
   const wb = XLSX.read(arrayBuffer, { type:'array', cellStyles:false });
-  const ws = wb.Sheets[wb.SheetNames[0]];         // 1ª hoja
+// Prioriza la hoja llamada "VENTA" (mayúsculas/minúsculas) y, si no existe, usa la primera
+const shName = (wb.SheetNames || []).find(n => n.toUpperCase().includes('VENTA')) || wb.SheetNames[0];
+const ws = wb.Sheets[shName];
   if(!ws) throw new Error('No se encontró hoja de contactos');
 
   const range = XLSX.utils.decode_range(ws['!ref']||'A1');
