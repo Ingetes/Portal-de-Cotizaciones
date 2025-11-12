@@ -262,7 +262,7 @@ input:focus, select:focus, textarea:focus {
 <section class="card pad">
   <h3>4) Generar documento</h3>
   <div class="row">
-    <button id="btnGen" class="btn primary">Descargar .DOCX</button>
+    <button id="btnGen" type="button" class="btn primary">Descargar .DOCX</button>
     <button id="btnReset" class="btn">Reiniciar</button>
     <span id="log" class="hint"></span>
   </div>
@@ -339,15 +339,29 @@ async function parseContactsWorkbook(arrayBuffer){
     const names = [];
     for(let c=range.s.c; c<=range.e.c; c++) names.push(_normKey(getCell(r,c)));
 
-    const idxEmpresa = names.findIndex(v => v.includes('nombre de la cuenta'));
-    const idxNombre  = names.findIndex(v => v === 'nombre');
-    const idxApell   = names.findIndex(v => v === 'apellidos');
-    const idxCargo   = names.findIndex(v => v === 'cargo');
+// Empresa: “Nombre de la cuenta” o similares
+const idxEmpresa = names.findIndex(v =>
+  v.includes('nombre de la cuenta') || v.includes('cuenta')
+);
 
-    const idxTel     = names.findIndex(v => v.startsWith('telefono'));  // Teléfono
-    const idxMovil   = names.findIndex(v => v.startsWith('movil'));     // Móvil
-    const idxEmail   = names.findIndex(v => v.startsWith('correo electronico'));
-    const idxCiudad  = names.findIndex(v => v.startsWith('ciudad'));    // Ciudad o País
+// Nombre: cualquier columna que contenga “nombre” pero NO “cuenta”
+const idxNombre = names.findIndex(v =>
+  v.includes('nombre') && !v.includes('cuenta')
+);
+
+// Apellidos: “apellidos” o “apellido”
+const idxApell = names.findIndex(v =>
+  v.includes('apellidos') || v.includes('apellido')
+);
+
+// Cargo
+const idxCargo = names.findIndex(v => v.includes('cargo'));
+
+// Teléfono/Móvil/Correo/Ciudad (más permisivos)
+const idxTel   = names.findIndex(v => v.startsWith('telefono') || v.includes('tel'));
+const idxMovil = names.findIndex(v => v.startsWith('movil')    || v.includes('cel'));
+const idxEmail = names.findIndex(v => v.includes('correo')     || v.includes('email'));
+const idxCiudad= names.findIndex(v => v.startsWith('ciudad')   || v.includes('país') || v.includes('pais'));
 
     if (idxEmpresa>=0 && idxNombre>=0 && idxApell>=0 && idxEmail>=0){
       headerRow = r;
@@ -1540,6 +1554,8 @@ rows.push(new docx.TableRow({
   });
 }
 
+  let __genLock = false;
+
 async function generate(){
   if(!validarFormulario()) return;
   try{
@@ -1735,7 +1751,23 @@ window.addEventListener('load', () => {
     el.addEventListener('change', () => el.classList.remove('input-error'));
   });
 });
-$('#btnGen').addEventListener('click', generate);
+{
+  const btn = document.getElementById('btnGen');
+  if (btn) {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (__genLock) return;
+      __genLock = true;
+      btn.disabled = true;
+      try {
+        await generate();   // SOLO una ejecución
+      } finally {
+        __genLock = false;
+        btn.disabled = false;
+      }
+    });
+  }
+}
 </script>
 </body>
 </html>
