@@ -1006,9 +1006,10 @@ function insertSubtotalImprevistosBeforeViaticos() {
   tbody.insertBefore(trSub, trV);
 
   // ----- IMPREVISTOS -----
-  const trImp = document.createElement('tr');
-  trImp.style.background = '#f1f5f9';
-  trImp.innerHTML = `
+// ----- IMPREVISTOS -----
+const trImp = document.createElement('tr');
+trImp.style.background = '#f1f5f9';
+trImp.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">
       Imprevistos (
         <input id="impPct" type="number" min="5" max="25" step="0.01" 
@@ -1017,8 +1018,23 @@ function insertSubtotalImprevistosBeforeViaticos() {
       <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
     </td>
     <td class="right"><span id="imprevView">$ 0</span></td>
-  `;
-  tbody.insertBefore(trImp, trV);
+`;
+tbody.insertBefore(trImp, trV);
+
+// ⭐⭐⭐ AÑADIR LISTENERS AQUÍ ⭐⭐⭐
+setTimeout(() => {
+  const imp = document.getElementById('impPct');
+  if (!imp) return;
+
+  imp.addEventListener('input', () => {
+    limitImprevistos(imp);   // Corrige y recalcula en vivo
+  });
+
+  imp.addEventListener('blur', () => {
+    if (imp.value.trim() === '') imp.value = 10;
+    limitImprevistos(imp);   // Corrige otra vez y recalcula
+  });
+}, 0);
 
   // ----- TOTAL (AZUL) DESPUÉS DE VIÁTICOS -----
   const trTot = document.createElement('tr');
