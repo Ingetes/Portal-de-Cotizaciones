@@ -449,6 +449,8 @@ const nombreInp = document.getElementById('nombreDoc');
 const ingenieroInp = document.getElementById('ingeniero');
 const alcanceInp = document.getElementById('alcance');
 const clienteInp = document.getElementById('cliente');
+const loadStatus   = document.getElementById('loadStatus');
+const fallbackWrap = document.getElementById('fallbackWrap');
 
 // --- Quitar borde rojo cuando el usuario completa los campos obligatorios ---
 const warnBox = document.getElementById('validacion');
@@ -1016,13 +1018,13 @@ Imprevistos (
   <input
     type="number"
     id="impPct"
-    class="form-control form-control-sm"
     value="10"
     min="5"
     max="25"
     oninput="limitImprevistos(this)"
+    style="width:70px;text-align:right;border-radius:8px;padding:4px 6px;"
   /> %
-  <small id="impMsg" class="text-sm text-red-600 ms-2"></small>
+  <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
 )
       <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
     </td>
@@ -1282,10 +1284,13 @@ function recalcTotals(){
   const totalFinal = subtotal + imprev + viaticos;
 
   // Pintar valores de la tabla azul
-  document.getElementById('subtotalView').textContent = fmtMoney(subtotal);
-  document.getElementById('imprevView').textContent   = fmtMoney(imprev);
-  document.getElementById('viaticosView').textContent = fmtMoney(viaticos);
-  document.getElementById('totalView').textContent    = fmtMoney(totalFinal);
+document.getElementById('subtotalView').textContent = fmtMoney(subtotal);
+document.getElementById('imprevView').textContent   = fmtMoney(imprev);
+
+const vView = document.getElementById('viaticosView');
+if (vView) vView.textContent = fmtMoney(viaticos);
+
+document.getElementById('totalView').textContent    = fmtMoney(totalFinal);
 
   // Pills del bloque 3) totales
   document.getElementById('pillSubtotal').textContent = fmtMoney(subtotal);
