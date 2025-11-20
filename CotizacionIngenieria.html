@@ -682,17 +682,15 @@ async function loadPricingFromURL(){
 
 const impEl = document.getElementById('impPct');
 
-// 1) En vivo: recalcula sin forzar el valor (permite borrar y tipear)
+// Mientras escribe: aplica el límite 5–25 en vivo
 impEl?.addEventListener('input', () => {
-  recalcTotals();
+  limitImprevistos(impEl);   // esta función ya corrige el valor y recalcula
 });
 
-// 2) Al salir del campo: corrige al rango 5â€“25 y recalcula
+// Al salir del campo: si queda vacío, vuelve a 10 y aplica el límite
 impEl?.addEventListener('blur', () => {
-  // si quedó vací­o, usa el default (10) o el que prefieras
   if (impEl.value.trim() === '') impEl.value = 10;
-  impEl.value = clampImprevistos(impEl.value); // 5â€“25%
-  recalcTotals();
+  limitImprevistos(impEl);
 });
 
 document.getElementById('filePicker')?.addEventListener('change', async (ev)=>{
