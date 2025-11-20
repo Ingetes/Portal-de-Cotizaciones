@@ -680,19 +680,6 @@ async function loadPricingFromURL(){
   }
 }
 
-const impEl = document.getElementById('impPct');
-
-// Mientras escribe: aplica el límite 5–25 en vivo
-impEl?.addEventListener('input', () => {
-  limitImprevistos(impEl);   // esta función ya corrige el valor y recalcula
-});
-
-// Al salir del campo: si queda vacío, vuelve a 10 y aplica el límite
-impEl?.addEventListener('blur', () => {
-  if (impEl.value.trim() === '') impEl.value = 10;
-  limitImprevistos(impEl);
-});
-
 document.getElementById('filePicker')?.addEventListener('change', async (ev)=>{
   const f = ev.target.files?.[0]; if(!f) return;
   const arr = await f.arrayBuffer();
@@ -991,6 +978,7 @@ function renderTable(){
 
     tbody.appendChild(tr);
   });
+
 function insertSubtotalImprevistosBeforeViaticos() {
   const idxV = ROW_INDEX['Viáticos'];
   const trV  = tbody.children[idxV];
@@ -1006,10 +994,9 @@ function insertSubtotalImprevistosBeforeViaticos() {
   tbody.insertBefore(trSub, trV);
 
   // ----- IMPREVISTOS -----
-// ----- IMPREVISTOS -----
-const trImp = document.createElement('tr');
-trImp.style.background = '#f1f5f9';
-trImp.innerHTML = `
+  const trImp = document.createElement('tr');
+  trImp.style.background = '#f1f5f9';
+  trImp.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">
       Imprevistos (
         <input id="impPct" type="number" min="5" max="25" step="0.01" 
@@ -1018,37 +1005,41 @@ trImp.innerHTML = `
       <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
     </td>
     <td class="right"><span id="imprevView">$ 0</span></td>
-`;
-tbody.insertBefore(trImp, trV);
+  `;
+  tbody.insertBefore(trImp, trV);
 
-// ⭐⭐⭐ AÑADIR LISTENERS AQUÍ ⭐⭐⭐
-setTimeout(() => {
-  const imp = document.getElementById('impPct');
-  if (!imp) return;
+  // 🔗 CONECTAR AQUÍ LOS EVENTOS DEL INPUT
+  const impInput = trImp.querySelector('#impPct');
+  if (impInput) {
+    // mientras escribe: limita 5–25 y recalcula
+    impInput.addEventListener('input', () => {
+      if (impInput.value === '') {
+        // permitido dejarlo vacío un momento; limpia mensaje y recalcula
+        const msg = document.getElementById('impMsg');
+        if (msg) msg.textContent = '';
+        recalcTotals();
+      } else {
+        limitImprevistos(impInput);   // clamp + recalcTotals()
+      }
+    });
 
-  imp.addEventListener('input', () => {
-    limitImprevistos(imp);   // Corrige y recalcula en vivo
-  });
+    // al salir: si queda vacío vuelve a 10, clamp y recalcula
+    impInput.addEventListener('blur', () => {
+      if (impInput.value.trim() === '') impInput.value = 10;
+      limitImprevistos(impInput);      // asegura 5–25 y recalcula
+    });
+  }
 
-  imp.addEventListener('blur', () => {
-    if (imp.value.trim() === '') imp.value = 10;
-    limitImprevistos(imp);   // Corrige otra vez y recalcula
-  });
-}, 0);
-
-  // ----- TOTAL (AZUL) DESPUÉS DE VIÁTICOS -----
+  // ----- TOTAL DESPUÉS DE VIÁTICOS -----
   const trTot = document.createElement('tr');
   trTot.style.background = '#f1f5f9';
   trTot.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">Total</td>
     <td class="right"><span id="totalView">$ 0</span></td>
   `;
-
-  // Insertar justo DESPUÉS de la fila de viáticos
   tbody.insertBefore(trTot, trV.nextSibling);
 }
 insertSubtotalImprevistosBeforeViaticos();
-}
 
 /* ====== UTILIDADES PARA íNDICES Y SELECCIONES ====== */
 const ROW_INDEX = DESCS.reduce((acc, d, idx)=> (acc[d]=idx, acc), {});
