@@ -1499,6 +1499,30 @@ async function buildTableFromWorkbook(docx, arrayBuffer){
     };
   }
 
+  // === Detectar color principal del encabezado para usarlo en las franjas ===
+  let HEADER_COLOR = null;
+
+  // 1) Buscar en la primera fila de la tabla detectada (sR)
+  for (let c = sC; c <= eC && !HEADER_COLOR; c++) {
+    const st = styleE(sR, c);
+    if (st.fill) HEADER_COLOR = st.fill;
+  }
+
+  // 2) Si no se encontró, probar en las 3 filas siguientes (por si el header está abajo)
+  if (!HEADER_COLOR) {
+    for (let r = sR + 1; r <= Math.min(sR + 3, eR) && !HEADER_COLOR; r++) {
+      for (let c = sC; c <= eC; c++) {
+        const st = styleE(r, c);
+        if (st.fill) { HEADER_COLOR = st.fill; break; }
+      }
+    }
+  }
+
+  // 3) Si aún nada, usamos el verde antiguo como respaldo
+  if (!HEADER_COLOR) {
+    HEADER_COLOR = "92D050"; // fallback
+  }
+
 // Convierte el contenido de la celda ExcelJS a runs de docx,
 // respetando richText (negrillas parciales) y saltos de línea.
 function runsFromCell(r, c) {
@@ -1550,8 +1574,7 @@ function runsFromCell(r, c) {
   const mapV=v=>{v=(v||'').toLowerCase();return v==='bottom'?docx.VerticalAlign.BOTTOM:v==='middle'||v==='center'||v==='distributed'?docx.VerticalAlign.CENTER:docx.VerticalAlign.TOP;};
 
 // ==== Franjas separadoras naranja combinadas ====
-const ORANGE = "FFC000"; // mismo tono
-const GREEN  = "92D050"; // verdecito del encabezado
+const GREEN  = HEADER_COLOR; // el que detectamos del Excel
 const thinB = { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" };
 const cellBorder = { top: thinB, right: thinB, bottom: thinB, left: thinB };
 
@@ -1841,13 +1864,3 @@ requiredFields.forEach(fieldId => {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
