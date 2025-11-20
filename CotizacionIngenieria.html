@@ -680,6 +680,21 @@ async function loadPricingFromURL(){
   }
 }
 
+const impEl = document.getElementById('impPct');
+
+// 1) En vivo: recalcula sin forzar el valor (permite borrar y tipear)
+impEl?.addEventListener('input', () => {
+  recalcTotals();
+});
+
+// 2) Al salir del campo: corrige al rango 5â€“25 y recalcula
+impEl?.addEventListener('blur', () => {
+  // si quedó vací­o, usa el default (10) o el que prefieras
+  if (impEl.value.trim() === '') impEl.value = 10;
+  impEl.value = clampImprevistos(impEl.value); // 5â€“25%
+  recalcTotals();
+});
+
 document.getElementById('filePicker')?.addEventListener('change', async (ev)=>{
   const f = ev.target.files?.[0]; if(!f) return;
   const arr = await f.arrayBuffer();
@@ -978,7 +993,6 @@ function renderTable(){
 
     tbody.appendChild(tr);
   });
-
 function insertSubtotalImprevistosBeforeViaticos() {
   const idxV = ROW_INDEX['Viáticos'];
   const trV  = tbody.children[idxV];
@@ -998,48 +1012,37 @@ function insertSubtotalImprevistosBeforeViaticos() {
   trImp.style.background = '#f1f5f9';
   trImp.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">
-      Imprevistos (
-        <input id="impPct" type="number" min="5" max="25" step="0.01" 
-               value="10" style="width:60px;text-align:right">
-      %)
+Imprevistos (
+  <input
+    type="number"
+    id="impPct"
+    class="form-control form-control-sm"
+    value="10"
+    min="5"
+    max="25"
+    oninput="limitImprevistos(this)"
+  /> %
+  <small id="impMsg" class="text-sm text-red-600 ms-2"></small>
+)
       <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
     </td>
     <td class="right"><span id="imprevView">$ 0</span></td>
   `;
   tbody.insertBefore(trImp, trV);
 
-  // 🔗 CONECTAR AQUÍ LOS EVENTOS DEL INPUT
-  const impInput = trImp.querySelector('#impPct');
-  if (impInput) {
-    // mientras escribe: limita 5–25 y recalcula
-    impInput.addEventListener('input', () => {
-      if (impInput.value === '') {
-        // permitido dejarlo vacío un momento; limpia mensaje y recalcula
-        const msg = document.getElementById('impMsg');
-        if (msg) msg.textContent = '';
-        recalcTotals();
-      } else {
-        limitImprevistos(impInput);   // clamp + recalcTotals()
-      }
-    });
-
-    // al salir: si queda vacío vuelve a 10, clamp y recalcula
-    impInput.addEventListener('blur', () => {
-      if (impInput.value.trim() === '') impInput.value = 10;
-      limitImprevistos(impInput);      // asegura 5–25 y recalcula
-    });
-  }
-
-  // ----- TOTAL DESPUÉS DE VIÁTICOS -----
+  // ----- TOTAL (AZUL) DESPUÉS DE VIÁTICOS -----
   const trTot = document.createElement('tr');
   trTot.style.background = '#f1f5f9';
   trTot.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">Total</td>
     <td class="right"><span id="totalView">$ 0</span></td>
   `;
+
+  // Insertar justo DESPUÉS de la fila de viáticos
   tbody.insertBefore(trTot, trV.nextSibling);
 }
 insertSubtotalImprevistosBeforeViaticos();
+}
 
 /* ====== UTILIDADES PARA íNDICES Y SELECCIONES ====== */
 const ROW_INDEX = DESCS.reduce((acc, d, idx)=> (acc[d]=idx, acc), {});
@@ -1068,9 +1071,9 @@ function toggleHorasBadgesAll(){ DESCS.forEach((d, i)=> toggleHorasBadgeForRow(i
 function findHeaderRow(rows){
   const wantDesc  = ['descripcion','descripción','concepto','item','descrip'];
   const wantPrice = ['precio','valor','tarifa','costo','importe'];
-
-  for (let r = 0; r < rows.length; r++){   // 👈 YA NO LIMITAMOS A 20 FILAS
-    const hdr = (rows[r] || []).map(x => norm(x));
+  const maxScan = Math.min(rows.length, 20); // busca en las primeras 20
+  for (let r = 0; r < maxScan; r++){
+    const hdr = (rows[r]||[]).map(x => norm(x));
     const hasDesc  = hdr.some(h => wantDesc.includes(h));
     const hasPrice = hdr.some(h => wantPrice.includes(h));
     if (hasDesc && hasPrice) return r;
@@ -1220,7 +1223,14 @@ function clampImprevistos(v){
 
 function limitImprevistos(input){
   let v = parseFloat(input.value);
-  if (isNaN(v)) return; // permite borrar momentáneamente sin rebotar
+  if (isNaN(v)) {
+    // permite borrar momentáneamente sin rebotar
+    const elMsg = document.getElementById("impMsg");
+    if (elMsg) elMsg.textContent = "";
+    input.style.borderColor = "";
+    input.style.boxShadow  = "";
+    return;
+  }
 
   let msg = "";
   if (v > 25){
@@ -1230,7 +1240,7 @@ function limitImprevistos(input){
   } else if (v < 5){
     v = 5;
     input.value = v;
-    msg = "Mí­nimo permitido: 5%";
+    msg = "Mínimo permitido: 5%";
   }
 
   // Estilo rojo discreto cuando se corrige
@@ -1243,47 +1253,47 @@ function limitImprevistos(input){
   // Recalcular totales de inmediato
   recalcTotals();
 }
-
+  
 function recalcTotals(){
   let subtotal = 0;
 
-  // SUMA TODO menos viáticos
-  DESCS.forEach((desc,i)=>{
-    if(desc !== 'Viáticos'){
-      let p = parseFloat(precioMap.get(i)||0);
-      let q = parseFloat(diasMap.get(i)||0);
-      subtotal += (p||0)*(q||0);
+  // SUBTOTAL: desde Programación hasta Días de fin de semana (sin Viáticos)
+  DESCS.forEach((desc, i) => {
+    if (desc !== 'Viáticos') {
+      let p = parseFloat(precioMap.get(i) || 0);
+      let q = parseFloat(diasMap.get(i)   || 0);
+      subtotal += (p || 0) * (q || 0);
     }
   });
 
   // VIÁTICOS (precio unitario * días)
   const idxV = ROW_INDEX['Viáticos'];
-  const vP   = parseFloat(precioMap.get(idxV)||0);
-  const vQ   = parseFloat(diasMap.get(idxV)||0);
-  const viaticos = (vP||0)*(vQ||0);
+  const vP   = parseFloat(precioMap.get(idxV) || 0);
+  const vQ   = parseFloat(diasMap.get(idxV)   || 0);
+  const viaticos = (vP || 0) * (vQ || 0);
 
   // % IMPREVISTOS
   let pct = parseFloat(document.getElementById('impPct').value);
-  if(isNaN(pct)) pct = 0;
+  if (isNaN(pct)) pct = 0;
 
-  const imprev = subtotal * (pct/100);
+  const imprev = subtotal * (pct / 100);
 
-  // TOTAL FINAL
+  // TOTAL FINAL = Subtotal + Imprevistos + Viáticos
   const totalFinal = subtotal + imprev + viaticos;
 
-  // Pintar valores
+  // Pintar valores de la tabla azul
   document.getElementById('subtotalView').textContent = fmtMoney(subtotal);
   document.getElementById('imprevView').textContent   = fmtMoney(imprev);
+  document.getElementById('viaticosView').textContent = fmtMoney(viaticos);
   document.getElementById('totalView').textContent    = fmtMoney(totalFinal);
-  document.getElementById('totalView').textContent = fmtMoney(totalFinal);
 
-  // Pills resumen
+  // Pills del bloque 3) totales
   document.getElementById('pillSubtotal').textContent = fmtMoney(subtotal);
   document.getElementById('pillImprev').textContent   = fmtMoney(imprev);
   document.getElementById('pillViaticos').textContent = fmtMoney(viaticos);
   document.getElementById('pillTotal').textContent    = fmtMoney(totalFinal);
 
-  // Actualizar etiqueta de imprevistos
+  // Etiqueta de imprevistos con el porcentaje actual
   document.getElementById('pillImprevLabel').textContent =
     `Imprevistos (${pct}%)`;
 }
