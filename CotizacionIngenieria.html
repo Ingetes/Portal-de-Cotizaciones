@@ -107,7 +107,7 @@ th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;font-size
 th{font-weight:800;background:#f1f5f9}
 td.right{text-align:right}
 
-/* KPIs â€œpillâ€ */
+/* KPIs */
 .kpi{
   display:flex;
   gap:16px;
@@ -116,7 +116,15 @@ td.right{text-align:right}
   margin-top:10px;
 }
 
-.pill{background:#eef2ff;border:1px solid #c7d2fe;border-radius:999px;padding:6px 12px;font-weight:800}
+.pill{
+  background:#f1f5f9;            /* mismo tono del header y totales */
+  border:1px solid #e5e7eb;       /* mismo borde suave */
+  border-radius:10px;
+  padding:6px 12px;
+  font-weight:800;
+  color:#111827;                 /* mismo texto del resto */
+}
+
 .muted{color:var(--muted)}
 .warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:8px 12px;margin-top:12px}
 .mini{
@@ -331,24 +339,6 @@ header .brand{
       </tr>
     </thead>
     <tbody></tbody>
-    <tfoot>
-      <tr><td colspan="5">Subtotal</td><td class="right"><span id="subtotalView">$ 0</span></td></tr>
-<tr>
-  <td colspan="5">
-    Imprevistos (
-<input id="impPct"
-       type="number"
-       min="5" max="25" step="0.01"
-       value="10"
-       style="width:60px;text-align:right"
-       oninput="limitImprevistos(this)"> %)
-    <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
-  </td>
-  <td class="right"><span id="imprevView">$ 0</span></td>
-</tr>
-
-      <tr><td colspan="5">Total</td><td class="right"><span id="totalView">$ 0</span></td></tr>
-    </tfoot>
   </table>
 </div>
 
@@ -1003,6 +993,47 @@ function renderTable(){
 
     tbody.appendChild(tr);
   });
+function insertSubtotalImprevistosBeforeViaticos() {
+  const idxV = ROW_INDEX['Viáticos'];
+  const trV  = tbody.children[idxV];
+  if (!trV) return;
+
+  // ----- SUBTOTAL -----
+  const trSub = document.createElement('tr');
+  trSub.style.background = '#f1f5f9';
+  trSub.innerHTML = `
+    <td colspan="5" style="font-weight:800; text-align:right;">Subtotal</td>
+    <td class="right"><span id="subtotalView">$ 0</span></td>
+  `;
+  tbody.insertBefore(trSub, trV);
+
+  // ----- IMPREVISTOS -----
+  const trImp = document.createElement('tr');
+  trImp.style.background = '#f1f5f9';
+  trImp.innerHTML = `
+    <td colspan="5" style="font-weight:800; text-align:right;">
+      Imprevistos (
+        <input id="impPct" type="number" min="5" max="25" step="0.01" 
+               value="10" style="width:60px;text-align:right">
+      %)
+      <small id="impMsg" style="color:#dc2626;font-size:12px;margin-left:6px;"></small>
+    </td>
+    <td class="right"><span id="imprevView">$ 0</span></td>
+  `;
+  tbody.insertBefore(trImp, trV);
+
+  // ----- TOTAL (AZUL) DESPUÉS DE VIÁTICOS -----
+  const trTot = document.createElement('tr');
+  trTot.style.background = '#f1f5f9';
+  trTot.innerHTML = `
+    <td colspan="5" style="font-weight:800; text-align:right;">Total</td>
+    <td class="right"><span id="totalView">$ 0</span></td>
+  `;
+
+  // Insertar justo DESPUÉS de la fila de viáticos
+  tbody.insertBefore(trTot, trV.nextSibling);
+}
+insertSubtotalImprevistosBeforeViaticos();
 }
 
 /* ====== UTILIDADES PARA íNDICES Y SELECCIONES ====== */
@@ -1209,34 +1240,47 @@ function limitImprevistos(input){
 }
 
 function recalcTotals(){
-  let subtotal=0;
+  let subtotal = 0;
+
+  // SUMA TODO menos viáticos
   DESCS.forEach((desc,i)=>{
-    let p = parseFloat(precioMap.get(i)||0);
-    let q = parseFloat(diasMap.get(i)||0);
-    subtotal += (p||0)*(q||0);
+    if(desc !== 'Viáticos'){
+      let p = parseFloat(precioMap.get(i)||0);
+      let q = parseFloat(diasMap.get(i)||0);
+      subtotal += (p||0)*(q||0);
+    }
   });
+
+  // VIÁTICOS (precio unitario * días)
   const idxV = ROW_INDEX['Viáticos'];
-  const viatPrecio = parseFloat(precioMap.get(idxV)||0);
-  const viatDias   = parseFloat(diasMap.get(idxV)||0);
-  const viatTotal  = (viatPrecio||0) * (viatDias||0);
-  const pillV = document.getElementById('pillViaticos');
-  if (pillV) pillV.textContent = fmtMoney(viatTotal);
+  const vP   = parseFloat(precioMap.get(idxV)||0);
+  const vQ   = parseFloat(diasMap.get(idxV)||0);
+  const viaticos = (vP||0)*(vQ||0);
 
-const pctEl  = document.getElementById('impPct');
-let impPct = parseFloat(pctEl?.value);
-if (!Number.isFinite(impPct)) impPct = 0; // temporal si está vací­o mientras escribes
-const imprev = subtotal * (isNaN(impPct) ? 0 : impPct) / 100;
-const total  = subtotal + imprev;
+  // % IMPREVISTOS
+  let pct = parseFloat(document.getElementById('impPct').value);
+  if(isNaN(pct)) pct = 0;
 
-const pillLbl = document.getElementById('pillImprevLabel');
-if (pillLbl && !isNaN(impPct)) pillLbl.textContent = `Imprevistos (${impPct}%):`;
+  const imprev = subtotal * (pct/100);
 
-  document.getElementById('subtotalView').textContent=fmtMoney(subtotal);
-  document.getElementById('imprevView').textContent=fmtMoney(imprev);
-  document.getElementById('totalView').textContent=fmtMoney(total);
-  document.getElementById('pillSubtotal').textContent=fmtMoney(subtotal);
-  document.getElementById('pillImprev').textContent=fmtMoney(imprev);
-  document.getElementById('pillTotal').textContent=fmtMoney(total);
+  // TOTAL FINAL
+  const totalFinal = subtotal + imprev + viaticos;
+
+  // Pintar valores
+  document.getElementById('subtotalView').textContent = fmtMoney(subtotal);
+  document.getElementById('imprevView').textContent   = fmtMoney(imprev);
+  document.getElementById('totalView').textContent    = fmtMoney(totalFinal);
+  document.getElementById('totalView').textContent = fmtMoney(totalFinal);
+
+  // Pills resumen
+  document.getElementById('pillSubtotal').textContent = fmtMoney(subtotal);
+  document.getElementById('pillImprev').textContent   = fmtMoney(imprev);
+  document.getElementById('pillViaticos').textContent = fmtMoney(viaticos);
+  document.getElementById('pillTotal').textContent    = fmtMoney(totalFinal);
+
+  // Actualizar etiqueta de imprevistos
+  document.getElementById('pillImprevLabel').textContent =
+    `Imprevistos (${pct}%)`;
 }
 
 /* ====== Validación mí­nimos ====== */
