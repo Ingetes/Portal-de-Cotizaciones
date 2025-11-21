@@ -61,7 +61,6 @@ input:focus,select:focus,textarea:focus{
   border-color:#9aa7b4; box-shadow:0 0 0 3px rgba(2,132,199,.15);
 }
 
-/* Botón "Reiniciar" claro */
 .btn.reset{
   background:#eef1f5;
   color:var(--text);
@@ -69,14 +68,12 @@ input:focus,select:focus,textarea:focus{
 }
 .btn.reset:hover{ filter:brightness(0.98); }
 
-/* Grillas responsivas como en Excel */
 .grid{display:grid;gap:12px}
 @media (min-width:900px){
   .grid.two{grid-template-columns:repeat(2,1fr)}
   .grid.three{grid-template-columns:repeat(3,1fr)}
 }
 
-/* Totales con el mismo estilo de la cabecera de la tabla */
 table tfoot tr td{
   background:#f1f5f9;      /* mismo fondo que el encabezado */
   font-weight:800;         /* negrita como el encabezado */
@@ -159,7 +156,6 @@ td.right{text-align:right}
   font-size:13px;
 }
 
-/* Botón principal oscuro */
 button{
   background:var(--accent);color:#fff;border:0;border-radius:12px;
   padding:10px 14px;font-weight:700;cursor:pointer
@@ -192,7 +188,6 @@ header .brand{
   margin-top: 4px;
 }
 
-/* Combo buscable (igual al del generador Excel) */
 .combo-input{
   width:100%;
   margin-bottom:8px;
@@ -203,10 +198,12 @@ header .brand{
   border-radius:10px;
   outline:none;
 }
+  
 .combo-input:focus{
   border-color:#9aa7b4;
   box-shadow:0 0 0 3px rgba(2,132,199,.15);
 }
+  
 .select{
   width:100%;
   padding:10px 12px;
@@ -296,7 +293,7 @@ header .brand{
     </div>
   </div>
 
-  <!-- Columna 1: Lista de precios (solo si falla el autoload) -->
+  <!-- Columna 1: Lista de precios -->
   <div id="fallbackWrap" class="mini" style="display:none">
     <h3>Lista de precios de ingeniería</h3>
     <div class="warn">
@@ -1032,7 +1029,6 @@ Imprevistos (
   `;
   tbody.insertBefore(trImp, trV);
 
-  // ----- TOTAL (AZUL) DESPUÉS DE VIÁTICOS -----
   const trTot = document.createElement('tr');
   trTot.style.background = '#f1f5f9';
   trTot.innerHTML = `
