@@ -403,39 +403,6 @@ document.getElementById("fileInv").addEventListener("change", async (ev)=>{
     `Cargado: ${f.name} (${invMap.size} referencias)`;
 });
 
-// === Mostrar disponibilidad al escribir referencia ===
-document.getElementById("ref").addEventListener("input", ()=>{
-  const ref = normRef(document.getElementById("ref").value);
-  const qty = parseInt(document.getElementById("qty").value||1);
-  const data = invMap.get(ref);
-  const wrap = document.getElementById("invStatus");
-  const estadoEl = document.getElementById("invEstado");
-  const cantEl = document.getElementById("invCantidades");
-  if(!data){ 
-    wrap.classList.remove("hidden");
-    estadoEl.textContent = "NO EN INVENTARIO";
-    estadoEl.style.background = "#fde047"; // amarillo
-    cantEl.textContent = "";
-    return;
-  }
-  const stock = data.cantidad;
-  let estado="EN INVENTARIO";
-  let color="#86efac"; // verde
-  if(stock < qty){
-    estado="EN INVENTARIO (NO ALCANZA)";
-    color="#fbbf24"; // naranja
-  }
-  estadoEl.textContent=estado;
-  estadoEl.style.background=color;
-  cantEl.textContent = `Solicitado: ${qty} | Inventario: ${stock}`;
-  wrap.classList.remove("hidden");
-});
-
-document.getElementById("qty").addEventListener("input", ()=>{
-  const ref = document.getElementById("ref").value;
-  if(ref) document.getElementById("ref").dispatchEvent(new Event("input"));
-});
-
   // === AUTOFILL: pedir descripción a tu API ===
   async function fetchMallDescription() {
     const ref = $("ref").value.trim().toUpperCase();
@@ -626,37 +593,43 @@ function downloadTxt() {
   URL.revokeObjectURL(url);
 }
 
-  function resetAll() {
-    $("ref").value = "";
-    $("desc").value = "";
-    $("priceMode").value = "COP";
-    $("price").value = "";
-    $("trm").value = "4250";
-    $("discount").placeholder = "0";
-    $("util").placeholder = "1.00";
-    $("shipping").placeholder = "0";
-    $("lead").value = "";
-    $("notes").value = "";
-    $("copyMsg").textContent = "";
-    $("copyMsg").className = "text-sm ml-auto";
-    compute();
-    LOCK_PREVIEW = false;        // vuelve a permitir que compute() actualice el preview
-    $("preview").textContent = "";  // limpia el acumulado
-    $("qty").value = "1";
+function resetAll() {
+  $("ref").value = "";
+  $("desc").value = "";
+  $("priceMode").value = "COP";
+  $("price").value = "";
+  $("trm").value = "4250";
+  $("discount").value = "0";
+  $("util").value = "1.00";
+  $("shipping").value = "0";
+  $("lead").value = "";
+  $("notes").value = "";
+  $("copyMsg").textContent = "";
+  $("copyMsg").className = "text-sm ml-auto";
 
-    // 🔹 Limpiar SOLO el estado visual de inventario (NO el archivo cargado)
-    const wrap   = document.getElementById('invStatusRow');
-    const pill   = document.getElementById('invEstadoPill');
-    const counts = document.getElementById('invCounts');
+  // resetea también las tarjetas numéricas
+  $("baseCop").textContent = "—";
+  $("saleAfter").textContent = "—";
+  $("shipVal").textContent = "—";
+  $("totalBefore").textContent = "—";
 
-    if (wrap) wrap.classList.add('hidden');
-    if (pill) {
-      pill.textContent = '';
-      pill.style.background = '';
-      pill.style.color = '';
-    }
-    if (counts) counts.textContent = '';
+  LOCK_PREVIEW = false;
+  $("preview").textContent = "";
+  $("qty").value = "1";
+
+  // 🔹 Limpiar SOLO el estado visual de inventario (NO el archivo cargado)
+  const wrap   = document.getElementById('invStatusRow');
+  const pill   = document.getElementById('invEstadoPill');
+  const counts = document.getElementById('invCounts');
+
+  if (wrap) wrap.classList.add('hidden');
+  if (pill) {
+    pill.textContent = '';
+    pill.style.background = '';
+    pill.style.color = '';
   }
+  if (counts) counts.textContent = '';
+}
 
 function clearInputsForNext(){
   $("ref").value = "";
@@ -665,14 +638,14 @@ function clearInputsForNext(){
   // conservamos modo de precio y TRM para tu flujo
   // $("priceMode").value = $("priceMode").value;
   // $("trm").value = $("trm").value;
-  $("discount").value = "0";
-  $("util").value = "1.00";
-  $("shipping").value = "0";
+  $("discount").placeholder = "0";
+  $("util").placeholder = "1.00";
+  $("shipping").placeholder = "0";
   $("lead").value = "";
   $("notes").value = "";
   $("copyMsg").textContent = "";
   $("copyMsg").className = "text-sm ml-auto";
-  $("qty").value = "1";
+  $("qty").placeholder = "1";
 
   // resetea los resúmenes numéricos sin llamar compute()
   $("baseCop").textContent = "—";
@@ -731,6 +704,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
