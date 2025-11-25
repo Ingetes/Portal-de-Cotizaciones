@@ -942,7 +942,7 @@ function renderInvUI() {
     if(diff >= 46 && diff <= 60) return '6-8 semanas';
     if(diff >= 61 && diff <= 80) return '8-10 semanas';
     if(diff >= 81 && diff <= 100) return '10-12 semanas';
-    return `${diff} días`;
+    return `Más de 13 semanas.`;
   }
 
 function unidadesTxt(n){
@@ -1325,12 +1325,19 @@ const refNorm = normRef(refTxt);
     // 🟢 Hay inventario suficiente
     disp = '3-5 días salvo venta previa';
   } else {
-    // 🟠 Hay pero no alcanza → mezcla cantidades
-    const faltan = Math.max(0, cant - stockInv);
+    // 🟠 Hay inventario pero NO alcanza: parte Ingetes + parte Siemens
+    const faltan   = Math.max(0, cant - stockInv);
     const colaMall = disponibilidad(fechaMall) || fechaMall || '';
-    disp = `${unidadesTxt(stockInv)} 3-5 días salvo venta previa\n${unidadesTxt(faltan)} ${colaMall}`;
+    const LOCAL_TXT = '3-5 días salvo venta previa';
+  
+    // Si Siemens también da 3-5 días, al final TODO llega igual → simplificar
+    if (colaMall && colaMall.trim() === LOCAL_TXT) {
+      disp = LOCAL_TXT;
+    } else {
+      // Si los plazos sí son distintos, mostramos el detalle por unidades
+      disp = `${unidadesTxt(stockInv)} ${LOCAL_TXT}\n${unidadesTxt(faltan)} ${colaMall}`;
+    }
   }
-
 
   return {
     item: idx+1,
@@ -1845,6 +1852,7 @@ wsLoc['K' + frDesc].z = '"$" #,##0';
 </body>
 
 </html>
+
 
 
 
