@@ -322,11 +322,22 @@ function updateInvStatusUI() {
   }
 
   const stock = data.cantidad;
+
+  // 🔹 Si el inventario es 0, trátalo como NO EN INVENTARIO
+  if (stock <= 0) {
+    setPill('NO EN INVENTARIO', '#fee2e2', '#7f1d1d'); // rojo suave
+    counts.textContent = '';
+    wrap.classList.remove('hidden');
+    return;
+  }
+
+  // 🔹 Si sí hay stock, ya miramos si alcanza o no
   if (stock >= qty) {
     setPill('EN INVENTARIO', '#dcfce7', '#065f46'); // verde
   } else {
     setPill('EN INVENTARIO (NO ALCANZA)', '#fef3c7', '#78350f'); // naranja
   }
+
   counts.textContent = `Solicitado: ${qty} • Inventario: ${stock}`;
   wrap.classList.remove('hidden');
 }
@@ -615,15 +626,21 @@ function downloadTxt() {
   URL.revokeObjectURL(url);
 }
 
+  const wrap = document.getElementById("invStatus");
+  const estadoEl = document.getElementById("invEstado");
+  const cantEl = document.getElementById("invCantidades");
+
+  if (!wrap || !estadoEl || !cantEl) return;
+
   function resetAll() {
     $("ref").value = "";
     $("desc").value = "";
     $("priceMode").value = "COP";
     $("price").value = "";
     $("trm").value = "4250";
-    $("discount").value = "0";
-    $("util").value = "1.00";
-    $("shipping").value = "0";
+    $("discount").placeholder = "0";
+    $("util").placeholder = "1.00";
+    $("shipping").placeholder = "0";
     $("lead").value = "";
     $("notes").value = "";
     $("copyMsg").textContent = "";
@@ -633,6 +650,18 @@ function downloadTxt() {
     $("preview").textContent = "";  // limpia el acumulado
     $("qty").value = "1";
 
+    // 🔹 Limpiar SOLO el estado visual de inventario (NO el archivo cargado)
+    const wrap   = document.getElementById('invStatusRow');
+    const pill   = document.getElementById('invEstadoPill');
+    const counts = document.getElementById('invCounts');
+
+    if (wrap) wrap.classList.add('hidden');
+    if (pill) {
+      pill.textContent = '';
+      pill.style.background = '';
+      pill.style.color = '';
+    }
+    if (counts) counts.textContent = '';
   }
 
 function clearInputsForNext(){
@@ -708,4 +737,5 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
