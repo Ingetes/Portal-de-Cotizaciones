@@ -598,10 +598,14 @@ function resetAll() {
   $("desc").value = "";
   $("priceMode").value = "COP";
   $("price").value = "";
-  $("trm").value = "4250";
-  $("discount").value = "0";
-  $("util").value = "1.00";
-  $("shipping").value = "0";
+  $("trm").value = "4250"; // este sí lo dejamos con valor
+  // 👉 estos quedan vacíos y usan placeholder
+  $("discount").value = "";
+  $("discount").placeholder = "0";
+  $("util").value = "";
+  $("util").placeholder = "1.00";
+  $("shipping").value = "";
+  $("shipping").placeholder = "0";
   $("lead").value = "";
   $("notes").value = "";
   $("copyMsg").textContent = "";
@@ -615,7 +619,8 @@ function resetAll() {
 
   LOCK_PREVIEW = false;
   $("preview").textContent = "";
-  $("qty").value = "1";
+  $("qty").value = "";
+  $("qty").placeholder = "1";
 
   // 🔹 Limpiar SOLO el estado visual de inventario (NO el archivo cargado)
   const wrap   = document.getElementById('invStatusRow');
@@ -635,16 +640,21 @@ function clearInputsForNext(){
   $("ref").value = "";
   $("desc").value = "";
   $("price").value = "";
-  // conservamos modo de precio y TRM para tu flujo
-  // $("priceMode").value = $("priceMode").value;
-  // $("trm").value = $("trm").value;
+
+  // 👉 que queden vacíos y usando placeholder
+  $("discount").value = "";
   $("discount").placeholder = "0";
+  $("util").value = "";
   $("util").placeholder = "1.00";
+  $("shipping").value = "";
   $("shipping").placeholder = "0";
+
   $("lead").value = "";
   $("notes").value = "";
   $("copyMsg").textContent = "";
   $("copyMsg").className = "text-sm ml-auto";
+
+  $("qty").value = "";
   $("qty").placeholder = "1";
 
   // resetea los resúmenes numéricos sin llamar compute()
@@ -652,7 +662,21 @@ function clearInputsForNext(){
   $("saleAfter").textContent = "—";
   $("shipVal").textContent = "—";
   $("totalBefore").textContent = "—";
+
   $("mallLink").href = "#";
+
+  // 🔹 también limpiamos el estado visual de inventario
+  const wrap   = document.getElementById('invStatusRow');
+  const pill   = document.getElementById('invEstadoPill');
+  const counts = document.getElementById('invCounts');
+
+  if (wrap) wrap.classList.add('hidden');
+  if (pill) {
+    pill.textContent = '';
+    pill.style.background = '';
+    pill.style.color = '';
+  }
+  if (counts) counts.textContent = '';
 }
 
   // Eventos
@@ -704,6 +728,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
