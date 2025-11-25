@@ -626,12 +626,6 @@ function downloadTxt() {
   URL.revokeObjectURL(url);
 }
 
-  const wrap = document.getElementById("invStatus");
-  const estadoEl = document.getElementById("invEstado");
-  const cantEl = document.getElementById("invCantidades");
-
-  if (!wrap || !estadoEl || !cantEl) return;
-
   function resetAll() {
     $("ref").value = "";
     $("desc").value = "";
@@ -737,5 +731,6 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
