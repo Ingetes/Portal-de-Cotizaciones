@@ -458,7 +458,7 @@ const ref = $("ref").value.trim().toUpperCase();
 const qty = Math.max(1, parseInt(($("qty").value || 1), 10));
 const url = ref
   ? `https://mall.industry.siemens.com/mall/es/ww/Catalog/Product/?mlfb=${encodeURIComponent(ref)}`
-  : "#";
+  : "https://mall.industry.siemens.com/goos/WelcomePage.aspx?language=es&regionUrl=/co";
 
 $("mallLink").href = url;          // <- solo actualiza el href
 
@@ -728,6 +728,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
