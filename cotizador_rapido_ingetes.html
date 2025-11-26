@@ -634,6 +634,8 @@ function resetAll() {
     pill.style.color = '';
   }
   if (counts) counts.textContent = '';
+
+  compute();
 }
 
 function clearInputsForNext(){
@@ -663,8 +665,6 @@ function clearInputsForNext(){
   $("shipVal").textContent = "—";
   $("totalBefore").textContent = "—";
 
-  $("mallLink").href = "#";
-
   // 🔹 también limpiamos el estado visual de inventario
   const wrap   = document.getElementById('invStatusRow');
   const pill   = document.getElementById('invEstadoPill');
@@ -677,6 +677,8 @@ function clearInputsForNext(){
     pill.style.color = '';
   }
   if (counts) counts.textContent = '';
+
+  compute();
 }
 
   // Eventos
@@ -728,6 +730,7 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
 
 
 
