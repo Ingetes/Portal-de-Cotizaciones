@@ -505,18 +505,18 @@ let block = "(Completa referencia, descripción y valores para ver el bloque fin
 if (ref && desc && roundedTotal != null) {
   if (qty === 1) {
     // Solo costo total
-    block = `${ref}
-    ${desc}
-    Costo total: ${moneyCOP(roundedTotal)} + IVA
-    Disponibilidad: ${availability}${notesPart}`;
+block = `${ref}
+${desc}
+Costo total: ${moneyCOP(roundedTotal)} + IVA
+Disponibilidad: ${availability}${notesPart}`;
   } else {
   // Cantidad + unitario redondeado (CON envío prorrateado) + total
-  block = `${ref}
-    ${desc}
-    Cantidad: ${qty}
-    Precio unitario: ${moneyCOP(roundedUnitWithShip)}
-    Costo total: ${moneyCOP(roundedTotal)} + IVA
-    Disponibilidad: ${availability}${notesPart}`;
+block = `${ref}
+${desc}
+Cantidad: ${qty}
+Precio unitario: ${moneyCOP(roundedUnitWithShip)}
+Costo total: ${moneyCOP(roundedTotal)} + IVA
+Disponibilidad: ${availability}${notesPart}`;
   }
 }
 
@@ -726,3 +726,4 @@ function clearInputsForNext(){
 </script>
 </body>
 </html>
+
