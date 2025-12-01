@@ -1720,10 +1720,36 @@ ws.getCell(rSubtotal,6).value  = (items>0)
 
     wb.calcProperties.fullCalcOnLoad = true;
 
-    /* =====================================================
-       6) Guardar
-    ===================================================== */
-    const buf  = await wb.xlsx.writeBuffer({ useStyles:true });
+/* =====================================================
+   CONFIGURACIÓN DE IMPRESIÓN – HOJA INGENIERIA
+===================================================== */
+ws.pageSetup = {
+  fitToPage: true,
+  fitToWidth: 1,
+  fitToHeight: 0,
+  orientation: 'portrait',
+  horizontalCentered: true,
+  margins: {
+    left: 0.3, right: 0.3,
+    top: 0.5, bottom: 0.5,
+    header: 0.2, footer: 0.2
+  }
+};
+
+const lastRowPrint = ws.lastRow.number;
+ws.pageSetup.printArea = `A1:F${lastRowPrint}`;
+
+ws.eachRow({ includeEmpty: true }, row => {
+  row.eachCell({ includeEmpty: true }, cell => {
+    const prev = cell.alignment || {};
+    cell.alignment = { ...prev, wrapText: true };
+  });
+});
+
+/* =====================================================
+   6) Guardar
+===================================================== */
+const buf  = await wb.xlsx.writeBuffer({ useStyles:true });
     const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     await saveBlob(blob, 'CotizacionIngenieria.xlsx');
 
