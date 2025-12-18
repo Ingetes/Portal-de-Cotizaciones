@@ -107,7 +107,7 @@ details.acc-accordion[open] .chev{transform:rotate(90deg)}
   </div>
 </div>
 
-<div class="card">
+<div class="card" id="card_catalogo_refs">
   <h2>📁 Cargar catálogo de referencias</h2>
   <input type="file" id="file_refs" accept=".xlsx" />
   <p class="note">Seleccione el archivo referencias_tablero.xlsx</p>
@@ -1338,11 +1338,7 @@ function getColFlexible(row, logicalName) {
   return '';
 }
 
-document.getElementById("file_refs").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const arrayBuffer = await file.arrayBuffer();
+async function cargarCatalogoDesdeArrayBuffer(arrayBuffer){
   const workbook = XLSX.read(arrayBuffer, { type: "array" });
 
   // 🟢 Hoja 1: "Accesorios de puerta" (o la primera hoja si no coincide el nombre)
@@ -1680,6 +1676,32 @@ if (window.refreshConsumiblesFromExcel) {
   }
 
   alert("Catálogo de referencias cargado correctamente.");
+}
+
+document.getElementById("file_refs").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await cargarCatalogoDesdeArrayBuffer(await file.arrayBuffer());
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const card = document.getElementById("card_catalogo_refs");
+
+  try{
+    // IMPORTANTE: mismo nombre exacto y respetando mayúsculas/minúsculas
+    const res = await fetch("referencias_tablero.xlsx", { cache: "no-store" });
+    if (!res.ok) throw new Error("No se encontró referencias_tablero.xlsx");
+
+    const buf = await res.arrayBuffer();
+    await cargarCatalogoDesdeArrayBuffer(buf);
+
+    // Si cargó bien, escondemos la sección
+    if (card) card.style.display = "none";
+  }catch(err){
+    // Si no existe o GitHub lo bloquea, queda visible para cargar manual
+    console.warn("Auto-carga de catálogo falló:", err);
+    if (card) card.style.display = "";
+  }
 });
 
 function filterRefs({categoria, material, color, tension, posicion}) {
