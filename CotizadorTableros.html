@@ -1359,7 +1359,6 @@ REF_AP = rowsAcc.map(r => ({
   referencia:        (r.referencia ?? r.Referencia ?? '').toString().trim()
 }));
 
-  console.log("Catálogo accesorios de puerta:", REF_AP);
   if (typeof window.refreshAccCombosFromExcel === 'function') {
     window.refreshAccCombosFromExcel();
   }
@@ -1391,7 +1390,6 @@ contactos_aux:     getColFlexible(r, 'Contactos auxiliares') || getColFlexible(r
   referencia:        getColFlexible(r, 'referencia')
 }));
 
-    console.log("Catálogo de interruptores (Breakers):", REF_BRK);
   } else {
     REF_BRK = [];
     console.warn("No se encontró la hoja 'Interruptores' en el Excel.");
@@ -1461,15 +1459,6 @@ function fillBorneRefs(selectId, funcionFilter, calibreFilter) {
 
     // Calibre debe coincidir exactamente (2812, 2810, 248…)
     return calExcel === calTarget;
-  });
-
-  console.log(`Bornes → ${selectId}`, {
-    funcionFilter,
-    calibreFilter,
-    funcTarget,
-    calTarget,
-    matchesCount: matches.length,
-    matches
   });
 
   const refs = Array.from(new Set(
@@ -1554,12 +1543,6 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
     console.warn("No se encontró la hoja 'Bornes' en el Excel.");
   }
 
-  console.log('Catálogo Bornes cargado:', REF_BOR);
-  console.log('Bornes (preview):', REF_BOR
-  .filter(r => (r.funcion || '').toLowerCase().includes('plaquitas'))
-  .map(r => ({ funcion: r.funcion, rango: r.rango, referencia: r.referencia }))
-);
-
   // 👉 refrescar combos de bornes si la sección ya existe
   if (window.refreshBornesFromExcel) {
     window.refreshBornesFromExcel();
@@ -1589,8 +1572,6 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
     console.warn("No se encontró la hoja 'Reles' / 'Relés' en el Excel.");
   }
 
-  console.log('Catálogo Relés cargado:', REF_REL);
-
   // 👉 Hoja 5: Accesorios para tablero
   const sheetAccTab =
     workbook.Sheets["Accesorios para tablero"] ||
@@ -1609,8 +1590,6 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
     REF_ACC_TAB = [];
     console.warn("No se encontró la hoja 'Accesorios para tablero' en el Excel.");
   }
-
-  console.log('Catálogo Accesorios para tablero cargado:', REF_ACC_TAB);
 
 // 🟠 Hoja X: "Consumibles"
 const sheetCons = workbook.Sheets["Consumibles"] || workbook.Sheets["CONSUMIBLES"];
@@ -1668,8 +1647,6 @@ if (window.refreshConsumiblesFromExcel) {
     console.warn("No se encontró la hoja 'Comunicaciones' en el Excel.");
   }
 
-  console.log('Catálogo Comunicaciones cargado:', REF_COM);
-
   // 👉 refrescar combos de comunicaciones si ya existe la sección
   if (window.refreshComFromExcel) {
     window.refreshComFromExcel();
@@ -1696,8 +1673,6 @@ window.addEventListener("DOMContentLoaded", async () => {
     // Si cargó bien, escondemos la sección
     if (card) card.style.display = "none";
   }catch(err){
-    // Si no existe o GitHub lo bloquea, queda visible para cargar manual
-    console.warn("Auto-carga de catálogo falló:", err);
     if (card) card.style.display = "";
   }
 });
@@ -2715,13 +2690,6 @@ if (rangoFilter) {
     return true;
   });
 
-  console.log(`fillBorneRefs simple: ${selectId}`, {
-    funcionTarget,
-    calibreTarget,
-    matchesCount: matches.length,
-    matches
-  });
-
   // Obtener referencias únicas
   const refs = Array.from(new Set(
     matches
@@ -2892,13 +2860,6 @@ root.querySelector('#bor_pla_rango')?.addEventListener('change', () => {
   // ✅ filtra SOLO con el rango (no recarga todo)
   fillPlaquitaRefsByRango(root.querySelector('#bor_pla_rango')?.value || '');
 });
-
-// En la parte donde cargas REF_BOR, después de cargarlo, agrega:
-console.log('Catálogo Bornes cargado:', REF_BOR.map(r => ({
-  funcion: r.funcion,
-  calibre: r.calibre,
-  referencia: r.referencia
-})));
 
         // Helper para agregar filas a la tabla de bornes
         function pushBorneRow(desc, qty, ref, descPct){
