@@ -658,6 +658,10 @@ btnSave?.addEventListener('click', async ()=>{
 document.getElementById('goBoard')?.addEventListener('click', ()=>{
   hide(panel);
   show(tablero);
+
+  const fr = document.getElementById('frameTablero');
+  if (fr) fr.src = 'CotizadorTableros.html'; // fuerza carga
+
   window.scrollTo({top:0,behavior:'smooth'});
 });
 
