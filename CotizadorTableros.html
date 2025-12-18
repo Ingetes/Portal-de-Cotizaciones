@@ -380,7 +380,7 @@ function actualizarBornesAuto() {
   <summary class="acc-accordion-summary"><span>1. Pulsadores</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
     <!-- 1. Pulsadores -->
-  <div class="acc-row-fields grid eight">
+  <div class="acc-row-fields grid seven">
     <div>
       <label>Tipo</label>
       <select id="acc_puls_tipo">
@@ -446,7 +446,7 @@ function actualizarBornesAuto() {
 <details class="acc-accordion">
   <summary class="acc-accordion-summary"><span>2. Pulsador doble iluminado</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
-            <div class="acc-row-fields grid seven">
+            <div class="acc-row-fields grid four">
               <div>
                 <label>Cantidad</label>
                 <input id="acc_pdi_qty" type="number" min="0" step="1" value="1">
@@ -478,7 +478,7 @@ function actualizarBornesAuto() {
   <summary class="acc-accordion-summary"><span>3. Paro de emergencia</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
     <!-- 3. Paro de emergencia -->
-            <div class="acc-row-fields grid six">
+            <div class="acc-row-fields grid five">
               <div>
                 <label>Cantidad</label>
                 <input id="acc_pe_qty" type="number" min="0" step="1" value="1">
@@ -599,7 +599,7 @@ function actualizarBornesAuto() {
                 </select>
               </div>
 <div>
-  <label>¿Requiere señalización LED?</label>
+  <label>Señalización LED</label>
   <select id="acc_mul_led">
     <option value="">– Seleccionar –</option>
     <option value="no">No</option>
@@ -607,7 +607,7 @@ function actualizarBornesAuto() {
   </select>
 </div>
 <div>
-  <label>¿Con llave de seguridad?</label>
+  <label>Llave de seguridad</label>
   <select id="acc_mul_key">
     <option value="">– Seleccionar –</option>
     <option value="si">Sí</option>
@@ -643,7 +643,7 @@ function actualizarBornesAuto() {
 <details class="acc-accordion">
   <summary class="acc-accordion-summary"><span>6. Puerto ethernet</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
-            <div class="acc-row-fields grid seven">
+            <div class="acc-row-fields grid five">
               <div>
                 <label>Material</label>
                 <select id="acc_eth_mat">
@@ -681,7 +681,7 @@ function actualizarBornesAuto() {
 <details class="acc-accordion">
   <summary class="acc-accordion-summary"><span>7. Seccionador de potencia</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
-            <div class="acc-row-fields grid seven">
+            <div class="acc-row-fields grid six">
               <div>
                 <label>Color</label>
                 <select id="acc_3ld_color">
@@ -733,7 +733,7 @@ function actualizarBornesAuto() {
 <details class="acc-accordion">
   <summary class="acc-accordion-summary"><span>8. Puerto usb</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
-  <div class="acc-row-fields grid seven">
+  <div class="acc-row-fields grid four">
     <div>
       <label>Cantidad</label>
       <input id="acc_usb_qty" type="number" min="0" step="1" value="1">
@@ -766,7 +766,7 @@ function actualizarBornesAuto() {
 <details class="acc-accordion">
   <summary class="acc-accordion-summary"><span>9. Baliza</span><span class="chev">▶</span></summary>
   <div class="acc-accordion-inner">
-            <div class="acc-row-fields grid seven">
+            <div class="acc-row-fields grid five">
               <div>
                 <label>Color</label>
                 <select id="acc_bal_color">
@@ -1901,7 +1901,7 @@ if (s.key === 'tablero') {
       </div>
 
       <div>
-        <label>¿Necesita contactos auxiliares?</label>
+        <label>Contactos auxiliares</label>
         <select id="int_tm_aux">
           <option value="no">No</option>
           <option value="si">Sí</option>
@@ -2434,7 +2434,7 @@ selector.innerHTML = `
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid six" data-bor-scope="ind">
+    <div class="acc-row-fields grid five" data-bor-scope="ind">
       <div>
         <label>Calibre</label>
         <select id="bor_ind_cal" class="form-select">
@@ -2473,7 +2473,7 @@ selector.innerHTML = `
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid six" data-bor-scope="porta">
+    <div class="acc-row-fields grid four" data-bor-scope="porta">
       <div>
         <label>Cantidad</label>
         <input id="bor_porta_qty" type="number" min="1" step="1" value="0">
@@ -2503,7 +2503,7 @@ selector.innerHTML = `
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid six" data-bor-scope="tierra">
+    <div class="acc-row-fields grid five" data-bor-scope="tierra">
       <div>
         <label>Calibre</label>
         <select id="bor_tierra_cal" class="form-select">
@@ -2542,7 +2542,7 @@ selector.innerHTML = `
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid six" data-bor-scope="sep">
+    <div class="acc-row-fields grid four" data-bor-scope="sep">
       <div>
         <label>Cantidad</label>
         <input id="bor_sep_qty" type="number" min="1" step="1" value="1">
@@ -2952,7 +2952,7 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
           </summary>
 
           <div class="acc-accordion-inner">
-            <div class="acc-row-fields grid six">
+            <div class="acc-row-fields grid five">
               <div>
                 <label>Tipo de cable</label>
                 <select id="com_cable_tipo">
@@ -2994,7 +2994,7 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
   </summary>
 
   <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid seven">
+    <div class="acc-row-fields grid six">
       <div>
         <label>Tipo de red</label>
         <select id="com_con_tipo">
@@ -4757,14 +4757,14 @@ const fillYellow = {
 ws.columns = [
   { width: 6 },   // A ITEM
   { width: 22 },  // B REFERENCIA
-  { width: 45 },  // C DESCRIPCIÓN
+  { width: 65 },  // C DESCRIPCIÓN
   { width: 10 },  // D CANTIDAD
   { width: 12 },  // E V/LISTA
-  { width: 14 },  // F DESCUENTO (%)
+  { width: 16 },  // F DESCUENTO (%)
   { width: 12 },  // G V/COSTO
   { width: 12 },  // H V/UNIT
   { width: 12 },  // I V/TOTAL
-  { width: 14 },  // J V/COSTO TOTAL
+  { width: 18 },  // J V/COSTO TOTAL
 ];
 
 // ----- Encabezado superior (sin cotización/cliente)
