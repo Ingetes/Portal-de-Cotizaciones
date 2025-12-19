@@ -4852,7 +4852,7 @@ ws.getCell(r, 5).value = (it.vlista ? Number(it.vlista) : 0);
 ws.getCell(r, 6).value = Number(it.descuento || 0);
 
 // V/COSTO (G) = V/LISTA * (1 - DESCUENTO/100)
-ws.getCell(r, 7).value = { formula: `ROUNDUP(E${r}*(F${r}/100),-2)` };
+ws.getCell(r, 7).value = { formula: `ROUNDUP(E${r}*IF(F${r}=0,1,F${r}/100),-2)` };
 
 // V/UNIT (H) = V/COSTO * factor utilidad
 ws.getCell(r, 8).value = { formula: `ROUNDUP(G${r}*$C$2,-2)` };
