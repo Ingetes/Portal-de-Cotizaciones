@@ -214,7 +214,6 @@ details.acc-accordion[open] .chev{transform:rotate(90deg)}
           </div>
         </div>
       </template>
-
       <div id="wrap-sections" class="grid" style="gap:14px"></div>
     </div>
 
@@ -222,11 +221,39 @@ details.acc-accordion[open] .chev{transform:rotate(90deg)}
     <div class="card" style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
       <div class="warn" id="msg" style="display:none"></div>
       <button class="btn ghost" id="btn-reset" type="button">Reiniciar</button>
+      <button class="btn ghost" id="btn-copy-refs" type="button"> Copiar referencias </button>    
       <button class="btn primary" id="btn-export" type="button">Exportar Excel</button>
     </div>
   </main>
-
   <script>
+
+document.getElementById('btn-copy-refs')?.addEventListener('click', () => {
+  const refs = [];
+
+  document.querySelectorAll('.section table tbody tr').forEach(tr => {
+    const tdRef = tr.querySelector('td:first-child input, td:first-child select');
+    const ref = tdRef?.value?.trim();
+    if (ref) refs.push(ref);
+  });
+
+  if (!refs.length) {
+    alert('No hay referencias para copiar');
+    return;
+  }
+
+  const texto = refs.join('\n');
+
+  navigator.clipboard.writeText(texto)
+    .then(() => {
+      console.log('Referencias copiadas');
+      // si quieres feedback visual rápido:
+      alert(`✔ ${refs.length} referencias copiadas al portapapeles`);
+    })
+    .catch(err => {
+      console.error(err);
+      alert('No se pudo copiar al portapapeles');
+    });
+});
 
 function actualizarIOAjustadas() {
   const fs = parseFloat(document.getElementById("f_fs")?.value) || 1;
