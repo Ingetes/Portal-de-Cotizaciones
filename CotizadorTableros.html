@@ -458,7 +458,9 @@ function actualizarBornesAuto() {
         <!-- se llena desde Excel -->
       </select>
     </div>
-
+<div class="acc-img-wrap">
+  <img id="img_acc_pulsadores" class="acc-img" style="display:none;">
+</div>
     <div>
       <label>&nbsp;</label>
       <button type="button" class="btn primary acc-add" data-acc="pulsadores">
@@ -1379,11 +1381,12 @@ REF_AP = rowsAcc.map(r => ({
   tension:           (r.tension   ?? r.Tension   ?? '').toString().trim(),
   posicion:          (r.posicion  ?? r.Posicion  ?? '').toString().trim(),
   corriente_termica: (r['corriente termica'] ?? r.corriente_termica ?? r['Corriente termica'] ?? '').toString().trim(),
-
+ 
   // ✅ NUEVO: Llave de seguridad (columna H del Excel)
   llave_seguridad:   (r['Llave de seguridad'] ?? r['llave de seguridad'] ?? r.llave_seguridad ?? '').toString().trim(),
-
   referencia:        (r.referencia ?? r.Referencia ?? '').toString().trim()
+  imagen:            (r.Imagen ?? r.imagen ?? '').toString().trim()
+
 }));
 
   if (typeof window.refreshAccCombosFromExcel === 'function') {
