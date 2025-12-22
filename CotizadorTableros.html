@@ -9,6 +9,20 @@
       --bg:#f6f8fb; --card:#fff; --ink:#0b1020; --muted:#6b7280; --line:#e5e7eb;
       --brand:#16a34a; --brand2:#f59e0b; --radius:16px;
     }
+.acc-img-wrap{
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.acc-img{
+  max-width: 180px;
+  max-height: 180px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px;
+  background: #fff;
+}
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
     header{background:#fff;border-bottom:1px solid var(--line);padding:20px 12px}
@@ -280,6 +294,28 @@ function actualizarIOAjustadas() {
 // compatibilidad por si quedó alguna llamada vieja
 function actualizarSDAjustadas() { actualizarIOAjustadas(); }
 
+function updateAccImage(selectRefId, imgId){
+  const ref = document.getElementById(selectRefId)?.value || '';
+  const img = document.getElementById(imgId);
+  if (!img) return;
+
+  if (!ref || !Array.isArray(REF_AP) || !REF_AP.length){
+    img.style.display = 'none';
+    img.src = '';
+    return;
+  }
+
+  const row = REF_AP.find(r => (r.referencia || '').trim() === ref.trim());
+
+  if (row && row.imagen){
+    img.src = `${location.pathname.replace(/\/[^\/]*$/, '/') }img/${row.imagen}`;
+    img.style.display = 'inline-block';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+  }
+}
+
 function actualizarTermoencogibleAuto() {
   const paso  = Number(document.getElementById("bor_ind_qty")?.value || 0);
   const tierra= Number(document.getElementById("bor_tierra_qty")?.value || 0);
@@ -492,6 +528,9 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pdi" class="acc-img" style="display:none;">
+</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="pulsador_doble">
@@ -524,6 +563,9 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pe" class="acc-img" style="display:none;">
+</div>
 <div>
   <label>Collar de protección</label>
   <select id="acc_pe_collar">
@@ -596,6 +638,9 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pil" class="acc-img" style="display:none;">
+</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="piloto">
@@ -658,6 +703,9 @@ function actualizarBornesAuto() {
                   <!-- luego aquí cargamos desde Excel -->
                 </select>
               </div>
+ <div class="acc-img-wrap">
+  <img id="img_acc_mul" class="acc-img" style="display:none;">
+</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="muletilla">
@@ -696,6 +744,9 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
+ <div class="acc-img-wrap">
+  <img id="img_acc_eth" class="acc-img" style="display:none;">
+</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="eth">
@@ -748,6 +799,9 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_3ld" class="acc-img" style="display:none;">
+</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="3ld">
@@ -780,7 +834,9 @@ function actualizarBornesAuto() {
         <!-- se llena desde Excel -->
       </select>
     </div>
-
+<div class="acc-img-wrap">
+  <img id="img_acc_usb" class="acc-img" style="display:none;">
+</div>
     <div>
       <label>&nbsp;</label>
       <button type="button" class="btn primary acc-add" data-acc="usb">
@@ -826,6 +882,9 @@ function actualizarBornesAuto() {
                   <!-- luego aquí cargamos desde Excel -->
                 </select>
               </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_bal" class="acc-img" style="display:none;">
+</div>
                 <div>
                   <label>&nbsp;</label>
                   <button type="button" class="btn primary acc-add" data-acc="baliza">
@@ -1066,7 +1125,7 @@ section.querySelector('[data-acc="usb"]')?.addEventListener('click',()=>{
     const tbody = section.querySelector('tbody');
     if (!tbody) return false;
     return Array.from(tbody.querySelectorAll('tr')).some(tr=>{
-      const inpRef = tr.querySelector('td:first-child input');
+      const inpRef = tr.querySelector('td:first-child input, td:first-child select');
       return inpRef && inpRef.value.trim() === ref;
     });
   }
@@ -1151,6 +1210,35 @@ function updatePulsTensionVisibility(){
     if (id === 'acc_puls_tipo') updatePulsTensionVisibility();
     updatePulsRefs();
   });
+}); // ✅ aquí se cierra y ya
+
+// ✅ Listeners de imagen (UNA sola vez)
+document.getElementById('acc_puls_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_puls_ref', 'img_acc_pulsadores');
+});
+document.getElementById('acc_pdi_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pdi_ref', 'img_acc_pdi');
+});
+document.getElementById('acc_pe_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pe_ref', 'img_acc_pe');
+});
+document.getElementById('acc_pil_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pil_ref', 'img_acc_pil');
+});
+document.getElementById('acc_mul_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_mul_ref', 'img_acc_mul');
+});
+document.getElementById('acc_eth_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_eth_ref', 'img_acc_eth');
+});
+document.getElementById('acc_3ld_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_3ld_ref', 'img_acc_3ld');
+});
+document.getElementById('acc_usb_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_usb_ref', 'img_acc_usb');
+});
+document.getElementById('acc_bal_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_bal_ref', 'img_acc_bal');
 });
 
 window.refreshAccCombosFromExcel = function(){
@@ -1221,6 +1309,20 @@ if (selTen){
 
   // --- 4) Collar de protección ---
   if (typeof updateCollarRefs === 'function') updateCollarRefs();
+// Piloto (base)
+fillRefsFor('acc_pil_ref', r => catEq(r,'Piloto'));
+
+// Muletilla (base)
+fillRefsFor('acc_mul_ref', r => catEq(r,'Muletilla'));
+
+// Ethernet (base)
+fillRefsFor('acc_eth_ref', r => catEq(r,'Puerto ethernet') || catEq(r,'ethernet'));
+
+// Seccionador (base)
+fillRefsFor('acc_3ld_ref', r => catEq(r,'Seccionador de potencia') || catEq(r,'3ld'));
+
+// Baliza (base)
+fillRefsFor('acc_bal_ref', r => catEq(r,'Baliza'));
 };
 
 document.getElementById('acc_puls_tipo')?.addEventListener('change', () => {
@@ -1384,7 +1486,7 @@ REF_AP = rowsAcc.map(r => ({
  
   // ✅ NUEVO: Llave de seguridad (columna H del Excel)
   llave_seguridad:   (r['Llave de seguridad'] ?? r['llave de seguridad'] ?? r.llave_seguridad ?? '').toString().trim(),
-  referencia:        (r.referencia ?? r.Referencia ?? '').toString().trim()
+  referencia:        (r.referencia ?? r.Referencia ?? '').toString().trim(),
   imagen:            (r.Imagen ?? r.imagen ?? '').toString().trim()
 
 }));
@@ -4505,7 +4607,11 @@ selector.querySelector('.btn-add-row').addEventListener('click', () => {
         renderAccPuertaSection();
       }
     });
-
+renderAccPuertaSection();
+function initAccesoriosPuerta(){
+  renderAccPuertaSection();
+  if (REF_AP.length) refreshAccCombosFromExcel();
+}
 function addRow(key, item={ref:'',desc:'',qty:1,u:'und',vu:0,descuento:0,vlista:''}) {
   const sect = document.querySelector(`.section[data-key="${key}"]`);
   const tbody = sect.querySelector('tbody');
