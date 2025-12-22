@@ -212,17 +212,17 @@ details.acc-accordion[open] .chev{transform:rotate(90deg)}
 
             <!-- Tabla final de materiales de la sección -->
             <table>
-<thead>
-  <tr>
-    <th style="width:150px">Referencia</th>
-    <th>Descripción</th>
-    <th style="width:80px">Cant.</th>
-    <th style="width:120px" class="right">V/Lista</th>
-    <th style="width:120px" class="right">Descuento (%)</th>
-    <th style="width:120px" class="right">Total</th>
-    <th style="width:70px"></th>
-  </tr>
-</thead>
+                <thead>
+                  <tr>
+                    <th style="width:150px">Referencia</th>
+                    <th>Descripción</th>
+                    <th style="width:80px">Cant.</th>
+                    <th style="width:120px" class="right">V/Lista</th>
+                    <th style="width:120px" class="right">Descuento (%)</th>
+                    <th style="width:120px" class="right">Total</th>
+                    <th style="width:70px"></th>
+                  </tr>
+                </thead>
               <tbody></tbody>
             </table>
           </div>
@@ -494,17 +494,17 @@ function actualizarBornesAuto() {
         <!-- se llena desde Excel -->
       </select>
     </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_pulsadores" class="acc-img" style="display:none;">
-</div>
     <div>
       <label>&nbsp;</label>
       <button type="button" class="btn primary acc-add" data-acc="pulsadores">
         Agregar a la tabla
       </button>
     </div>
+      <div class="acc-img-wrap">
+        <img id="img_acc_pulsadores" class="acc-img" style="display:none;">
+      </div>
+    </div>
   </div>
-</div>
 </details>
 
 <!-- 2. Pulsador doble iluminado -->
@@ -520,22 +520,22 @@ function actualizarBornesAuto() {
                 <label>Descuento (%)</label>
                 <input id="acc_pdi_desc" type="number" min="0" max="100" step="1" value="55">
               </div>
-  <!-- NUEVO: referencia -->
-  <div>
-    <label>Referencia</label>
-    <select id="acc_pdi_ref">
-      <option value="">– Seleccionar –</option>
-      <!-- luego aquí cargamos desde Excel -->
-    </select>
-  </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_pdi" class="acc-img" style="display:none;">
-</div>
+              <!-- NUEVO: referencia -->
+              <div>
+                <label>Referencia</label>
+                <select id="acc_pdi_ref">
+                  <option value="">– Seleccionar –</option>
+                  <!-- luego aquí cargamos desde Excel -->
+                </select>
+              </div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="pulsador_doble">
                   Agregar a la tabla
                 </button>
+              </div>
+              <div class="acc-img-wrap">
+                <img id="img_acc_pdi" class="acc-img" style="display:none;">
               </div>
             </div>
           </div>
@@ -563,9 +563,6 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_pe" class="acc-img" style="display:none;">
-</div>
 <div>
   <label>Collar de protección</label>
   <select id="acc_pe_collar">
@@ -588,6 +585,9 @@ function actualizarBornesAuto() {
                   Agregar a la tabla
                 </button>
               </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pe" class="acc-img" style="display:none;">
+</div>
             </div>
           </div>
 </details>
@@ -638,15 +638,15 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_pil" class="acc-img" style="display:none;">
-</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="piloto">
                   Agregar a la tabla
                 </button>
               </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pil" class="acc-img" style="display:none;">
+</div>
             </div>
           </div>
 </details>
@@ -703,15 +703,15 @@ function actualizarBornesAuto() {
                   <!-- luego aquí cargamos desde Excel -->
                 </select>
               </div>
- <div class="acc-img-wrap">
-  <img id="img_acc_mul" class="acc-img" style="display:none;">
-</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="muletilla">
                   Agregar a la tabla
                 </button>
               </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_mul" class="acc-img" style="display:none;">
+</div>
             </div>
           </div>
 </details>
@@ -744,15 +744,15 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
- <div class="acc-img-wrap">
-  <img id="img_acc_eth" class="acc-img" style="display:none;">
-</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="eth">
                   Agregar a la tabla
                 </button>
               </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_eth" class="acc-img" style="display:none;">
+</div>
             </div>
           </div>
 </details>
@@ -799,15 +799,15 @@ function actualizarBornesAuto() {
       <!-- luego aquí cargamos desde Excel -->
     </select>
   </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_3ld" class="acc-img" style="display:none;">
-</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="3ld">
                   Agregar a la tabla
                 </button>
               </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_3ld" class="acc-img" style="display:none;">
+</div>
             </div>
           </div>
 </details>
@@ -834,15 +834,15 @@ function actualizarBornesAuto() {
         <!-- se llena desde Excel -->
       </select>
     </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_usb" class="acc-img" style="display:none;">
-</div>
     <div>
       <label>&nbsp;</label>
       <button type="button" class="btn primary acc-add" data-acc="usb">
         Agregar a la tabla
       </button>
     </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_usb" class="acc-img" style="display:none;">
+</div>
   </div>
 </div>
 </details>
@@ -882,20 +882,19 @@ function actualizarBornesAuto() {
                   <!-- luego aquí cargamos desde Excel -->
                 </select>
               </div>
-<div class="acc-img-wrap">
-  <img id="img_acc_bal" class="acc-img" style="display:none;">
-</div>
-                <div>
+              <div>
                   <label>&nbsp;</label>
                   <button type="button" class="btn primary acc-add" data-acc="baliza">
                     Agregar a la tabla
                   </button>
                 </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_bal" class="acc-img" style="display:none;">
+</div>
             </div>
           </div>
         </div>
 </details>
-
 
           <!-- Tabla de accesorios de puerta -->
           <div style="margin-top:12px">
