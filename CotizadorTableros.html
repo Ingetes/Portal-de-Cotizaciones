@@ -2522,18 +2522,6 @@ document.getElementById('int_tot_ref')?.addEventListener('change', () => {
   }, 0);
 });
 
-// Botón agregar Contacto auxiliar (accesorio)
-selector.querySelector('[data-int="aux"]')?.addEventListener('click', () => {
-  const ref  = document.getElementById('int_aux_ref')?.value || '';
-  let   qty  = Number(document.getElementById('int_aux_qty')?.value || 1);
-  const dcto = Number(document.getElementById('int_aux_desc')?.value || 0);
-
-  if (qty <= 0) qty = 1;
-  if (!ref) return;
-
-  addRow('breakers', { ref, desc, qty, descuento: dcto });
-});
-
       // Botón agregar Totalizador
       selector.querySelector('[data-int="tot"]')?.addEventListener('click', () => {
         const cap  = document.getElementById('int_tot_cap')?.value || '';
