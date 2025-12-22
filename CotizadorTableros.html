@@ -316,6 +316,28 @@ function updateAccImage(selectRefId, imgId){
   }
 }
 
+function updateBrkImage(selectRefId, imgId){
+  const ref = document.getElementById(selectRefId)?.value || '';
+  const img = document.getElementById(imgId);
+  if (!img) return;
+
+  if (!ref || !Array.isArray(REF_BRK) || !REF_BRK.length){
+    img.style.display = 'none';
+    img.src = '';
+    return;
+  }
+
+  const row = REF_BRK.find(r => (r.referencia || '').trim() === ref.trim());
+
+  if (row && row.imagen){
+    img.src = `${location.pathname.replace(/\/[^\/]*$/, '/') }img/${row.imagen}`;
+    img.style.display = 'inline-block';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+  }
+}
+
 function actualizarTermoencogibleAuto() {
   const paso  = Number(document.getElementById("bor_ind_qty")?.value || 0);
   const tierra= Number(document.getElementById("bor_tierra_qty")?.value || 0);
@@ -1519,6 +1541,7 @@ contactos_aux:     getColFlexible(r, 'Contactos auxiliares') || getColFlexible(r
   corriente_termica: getColFlexible(r, 'Corriente termica'),
   compatibilidad:    getColFlexible(r, 'Compatibilidad'),
   referencia:        getColFlexible(r, 'referencia')
+  imagen:            getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
 }));
 
   } else {
@@ -1912,7 +1935,7 @@ if (s.key === 'tablero') {
       </div>
 
       <div>
-        <label>Regulación Térmica [A]</label>
+        <label>Regulación magnética [A]</label>
         <select id="int_tot_reg">
           <option value="">– Seleccionar –</option>
         </select>
@@ -1945,6 +1968,9 @@ if (s.key === 'tablero') {
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-int="tot">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_int_tot" class="acc-img" style="display:none;">
+</div>
     </div>
 
     <!-- 1.1 Accesorio prolongado para Totalizador -->
@@ -1978,6 +2004,9 @@ if (s.key === 'tablero') {
           <label>&nbsp;</label>
           <button type="button" class="btn primary" data-int="accprol">Agregar a la tabla</button>
         </div>
+<div class="acc-img-wrap">
+  <img id="img_int_accp" class="acc-img" style="display:none;">
+</div>
       </div>
     </div>
   </div>
@@ -2050,6 +2079,9 @@ if (s.key === 'tablero') {
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-int="tm">Agregar a la tabla</button>
       </div>
+      <div class="acc-img-wrap">
+        <img id="img_int_tm" class="acc-img" style="display:none;">
+      </div>
     </div>
 
     <!-- 2.1 Contactos auxiliares (solo si lo piden) -->
@@ -2077,14 +2109,28 @@ if (s.key === 'tablero') {
           <label>&nbsp;</label>
           <button type="button" class="btn primary" data-int="aux">Agregar a la tabla</button>
         </div>
+        <div class="acc-img-wrap">
+          <img id="img_int_aux" class="acc-img" style="display:none;">
+        </div>
       </div>
     </div>
-
   </div>
 </details>
-
       `;
-
+  
+document.getElementById('int_tot_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_tot_ref', 'img_int_tot');
+});
+document.getElementById('int_accp_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_accp_ref', 'img_int_accp');
+});
+document.getElementById('int_tm_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_tm_ref', 'img_int_tm');
+});
+document.getElementById('int_aux_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_aux_ref', 'img_int_aux');
+});
+  
       // Helper para rellenar selects de referencias desde REF_BRK
       function fillRefSelect(selectId, filterFn) {
         const sel = document.getElementById(selectId);
@@ -2108,6 +2154,12 @@ if (s.key === 'tablero') {
         });
 
         if (refs.includes(prev)) sel.value = prev;
+        
+// auto-imagen si el select tiene 1 sola ref
+if (sel.options.length === 2) {
+  sel.selectedIndex = 1;
+  sel.dispatchEvent(new Event('change'));
+}
       }
 
 // Helper: normalizador de texto (sin tildes, en minúsculas, sin dobles espacios)
