@@ -370,6 +370,58 @@ function updateBrkImage(selectRefId, imgId){
   img.style.display = 'inline-block';
 }
 
+function updateBorImage(selectRefId, imgId){
+  const sel = document.getElementById(selectRefId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '')
+    .toString()
+    .replace(/\u00A0/g,' ')   // NBSP
+    .trim();
+
+  const ref = clean(sel.value);
+  if (!ref || !Array.isArray(REF_BOR) || !REF_BOR.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
+
+  // Si tu hoja Bornes no tiene columna Imagen aún, esto quedará vacío (y se ocultará)
+  const file = clean(row?.imagen);
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  let src;
+  if (/^https?:\/\//i.test(file)) {
+    src = file;
+  } else if (file.startsWith('img/')) {
+    src = base + file;
+  } else if (file.includes('/')) {
+    src = base + file;
+  } else {
+    src = base + 'img/' + file;
+  }
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    console.warn('Imagen Bornes no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
+}
+
 function actualizarTermoencogibleAuto() {
   const paso  = Number(document.getElementById("bor_ind_qty")?.value || 0);
   const tierra= Number(document.getElementById("bor_tierra_qty")?.value || 0);
@@ -1723,6 +1775,7 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
       calibre:    getColFlexible(r, 'Calibre'),
       rango:      getColFlexible(r, 'Rango'),
       referencia: getColFlexible(r, 'Referencia')
+      imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
     })).filter(row => row.referencia); // solo filas con referencia
   } else {
     REF_BOR = [];
@@ -2665,6 +2718,9 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_ind" class="acc-img" style="display:none;">
+</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="ind">Agregar a la tabla</button>
@@ -2695,6 +2751,9 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_porta" class="acc-img" style="display:none;">
+</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
@@ -2734,6 +2793,9 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_tierra" class="acc-img" style="display:none;">
+</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
@@ -2764,6 +2826,9 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_sep" class="acc-img" style="display:none;">
+</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
@@ -2814,7 +2879,9 @@ selector.innerHTML = `
       <option value="">– Seleccionar –</option>
     </select>
   </div>
-
+<div class="acc-img-wrap">
+  <img id="img_bor_otros" class="acc-img" style="display:none;">
+</div>
   <div>
     <label>&nbsp;</label>
     <button type="button" class="btn primary" data-bor="otros">Agregar a la tabla</button>
@@ -2823,6 +2890,22 @@ selector.innerHTML = `
   </div>
 </details>
 `;
+
+root.querySelector('#bor_ind_ref')?.addEventListener('change', () => {
+  updateBorImage('bor_ind_ref', 'img_bor_ind');
+});
+root.querySelector('#bor_porta_ref')?.addEventListener('change', () => {
+  updateBorImage('bor_porta_ref', 'img_bor_porta');
+});
+root.querySelector('#bor_tierra_ref')?.addEventListener('change', () => {
+  updateBorImage('bor_tierra_ref', 'img_bor_tierra');
+});
+root.querySelector('#bor_sep_ref')?.addEventListener('change', () => {
+  updateBorImage('bor_sep_ref', 'img_bor_sep');
+});
+root.querySelector('#bor_otros_ref')?.addEventListener('change', () => {
+  updateBorImage('bor_otros_ref', 'img_bor_otros');
+});
 
 // Helper normalizador de texto
 const n = (v) => (v || '')
@@ -3049,6 +3132,11 @@ if (selOtros && !tipoOtros) {
     fillBorneRefs('bor_otros_ref', keyword);
   }
   }
+updateBorImage('bor_ind_ref',   'img_bor_ind');
+updateBorImage('bor_porta_ref', 'img_bor_porta');
+updateBorImage('bor_tierra_ref','img_bor_tierra');
+updateBorImage('bor_sep_ref',   'img_bor_sep');
+updateBorImage('bor_otros_ref', 'img_bor_otros');
 };
 
 // === Event listeners ===
@@ -4891,7 +4979,7 @@ out.push({ ref, desc, qty, descuento, vlista });
   return out;
 }
 
-/* ========= Descarga con File System Access API (igual al cotizador EXCEL) ========= */
+/* ========= Descarga con File System Access API ========= */
 async function downloadExcelWithFilePicker(blob, fileName) {
   try {
     if ('showSaveFilePicker' in window) {
