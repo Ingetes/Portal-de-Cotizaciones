@@ -3394,13 +3394,10 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
 </details>
         `;
 
-// Metemos la sección al DOM
-wrap.appendChild(root);
-  
-document.getElementById('com_cable_ref')?.addEventListener('change', () => {
+root.querySelector('#com_cable_ref')?.addEventListener('change', () => {
   updateComImage('com_cable_ref', 'img_com_cable');
 });
-document.getElementById('com_con_ref')?.addEventListener('change', () => {
+root.querySelector('#com_con_ref')?.addEventListener('change', () => {
   updateComImage('com_con_ref', 'img_com_con');
 });
 
@@ -3517,12 +3514,9 @@ window.refreshComFromExcel = function () {
   refreshCableRefs();
   syncHembraUI();
   refreshConnectorRefs();
+
 updateComImage('com_cable_ref', 'img_com_cable');
 updateComImage('com_con_ref',   'img_com_con');
-
-console.log('REF_COM sample:', REF_COM?.[0]);
-console.log('Cable ref:', document.getElementById('com_cable_ref')?.value);
-console.log('Cable img element:', document.getElementById('img_com_cable'));
 
 };
 
@@ -3541,10 +3535,18 @@ document.getElementById('com_con_tipo')?.addEventListener('change', () => {
 document.getElementById('com_con_plug')?.addEventListener('change', () => {
   syncHembraUI();
   refreshConnectorRefs();
+  updateComImage('com_con_ref', 'img_com_con');
 });
 
-document.getElementById('com_con_hembra')?.addEventListener('change', refreshConnectorRefs);
-document.getElementById('com_cable_tipo')?.addEventListener('change', refreshCableRefs);
+document.getElementById('com_con_hembra')?.addEventListener('change', () => {
+  refreshConnectorRefs();
+  updateComImage('com_con_ref', 'img_com_con');
+});
+  
+document.getElementById('com_cable_tipo')?.addEventListener('change', () => {
+  refreshCableRefs();
+  updateComImage('com_cable_ref', 'img_com_cable');
+});
 
         // Helper para agregar filas a la tabla de comunicaciones
         function pushComRow(desc, qty, ref, descPct) {
