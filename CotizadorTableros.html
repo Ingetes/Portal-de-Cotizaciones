@@ -1774,7 +1774,7 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
       funcion:    getColFlexible(r, 'Funcion'),
       calibre:    getColFlexible(r, 'Calibre'),
       rango:      getColFlexible(r, 'Rango'),
-      referencia: getColFlexible(r, 'Referencia')
+      referencia: getColFlexible(r, 'Referencia'),
       imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
     })).filter(row => row.referencia); // solo filas con referencia
   } else {
