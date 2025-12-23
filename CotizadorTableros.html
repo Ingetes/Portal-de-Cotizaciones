@@ -317,25 +317,57 @@ function updateAccImage(selectRefId, imgId){
 }
 
 function updateBrkImage(selectRefId, imgId){
-  const ref = document.getElementById(selectRefId)?.value || '';
+  const sel = document.getElementById(selectRefId);
   const img = document.getElementById(imgId);
-  if (!img) return;
+  if (!sel || !img) return;
 
+  const clean = (v) => (v ?? '')
+    .toString()
+    .replace(/\u00A0/g,' ') // NBSP
+    .trim();
+
+  const ref = clean(sel.value);
   if (!ref || !Array.isArray(REF_BRK) || !REF_BRK.length){
     img.style.display = 'none';
-    img.src = '';
+    img.removeAttribute('src');
     return;
   }
 
-  const row = REF_BRK.find(r => (r.referencia || '').trim() === ref.trim());
+  // normaliza referencias para comparar (quita NBSP, espacios dobles, etc.)
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
 
-  if (row && row.imagen){
-    img.src = `${location.pathname.replace(/\/[^\/]*$/, '/') }img/${row.imagen}`;
-    img.style.display = 'inline-block';
-  } else {
+  const row = REF_BRK.find(r => normRef(r.referencia) === normRef(ref));
+  const file = clean(row?.imagen);
+
+  if (!file){
     img.style.display = 'none';
-    img.src = '';
+    img.removeAttribute('src');
+    return;
   }
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  // Si Excel ya trae ruta (con /) o trae "img/..." no le metemos "img/" a la fuerza
+  let src;
+  if (/^https?:\/\//i.test(file)) {
+    src = file;
+  } else if (file.startsWith('img/')) {
+    src = base + file;                 // ya viene con img/
+  } else if (file.includes('/')) {
+    src = base + file;                 // viene con carpeta tipo "interruptores/xxx.png"
+  } else {
+    src = base + 'img/' + file;        // caso normal: solo "xxx.png"
+  }
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    // para depurar rápido en consola:
+    console.warn('Imagen no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
 }
 
 function actualizarTermoencogibleAuto() {
@@ -2118,16 +2150,16 @@ if (s.key === 'tablero') {
 </details>
       `;
   
-document.getElementById('int_tot_ref')?.addEventListener('change', () => {
+root.querySelector('#int_tot_ref')?.addEventListener('change', () => {
   updateBrkImage('int_tot_ref', 'img_int_tot');
 });
-document.getElementById('int_accp_ref')?.addEventListener('change', () => {
+root.querySelector('#int_accp_ref')?.addEventListener('change', () => {
   updateBrkImage('int_accp_ref', 'img_int_accp');
 });
-document.getElementById('int_tm_ref')?.addEventListener('change', () => {
+root.querySelector('#int_tm_ref')?.addEventListener('change', () => {
   updateBrkImage('int_tm_ref', 'img_int_tm');
 });
-document.getElementById('int_aux_ref')?.addEventListener('change', () => {
+root.querySelector('#int_aux_ref')?.addEventListener('change', () => {
   updateBrkImage('int_aux_ref', 'img_int_aux');
 });
   
@@ -2412,6 +2444,10 @@ fillRefSelect('int_tm_ref', r => {
 
   return true;
 });
+updateBrkImage('int_tot_ref', 'img_int_tot');
+updateBrkImage('int_accp_ref', 'img_int_accp');
+updateBrkImage('int_tm_ref', 'img_int_tm');
+updateBrkImage('int_aux_ref', 'img_int_aux');
 };
 
 // Mostrar / ocultar combos de contactos y polos según función
