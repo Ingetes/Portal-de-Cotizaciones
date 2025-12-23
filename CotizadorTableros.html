@@ -2766,9 +2766,6 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="ind">Agregar a la tabla</button>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_ind" class="acc-img" style="display:none;">
-</div>
     </div>
   </div>
 </details>
@@ -2799,9 +2796,6 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_porta" class="acc-img" style="display:none;">
-</div>
     </div>
   </div>
 </details>
@@ -2841,9 +2835,6 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_tierra" class="acc-img" style="display:none;">
-</div>
     </div>
   </div>
 </details>
@@ -2874,9 +2865,6 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_sep" class="acc-img" style="display:none;">
-</div>
     </div>
   </div>
 </details>
@@ -2923,33 +2911,15 @@ selector.innerHTML = `
       <option value="">– Seleccionar –</option>
     </select>
   </div>
+
   <div>
     <label>&nbsp;</label>
     <button type="button" class="btn primary" data-bor="otros">Agregar a la tabla</button>
   </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_otros" class="acc-img" style="display:none;">
-</div>
 </div>
   </div>
 </details>
 `;
-
-root.querySelector('#bor_ind_ref')?.addEventListener('change', () => {
-  updateBorImage('bor_ind_ref', 'img_bor_ind');
-});
-root.querySelector('#bor_porta_ref')?.addEventListener('change', () => {
-  updateBorImage('bor_porta_ref', 'img_bor_porta');
-});
-root.querySelector('#bor_tierra_ref')?.addEventListener('change', () => {
-  updateBorImage('bor_tierra_ref', 'img_bor_tierra');
-});
-root.querySelector('#bor_sep_ref')?.addEventListener('change', () => {
-  updateBorImage('bor_sep_ref', 'img_bor_sep');
-});
-root.querySelector('#bor_otros_ref')?.addEventListener('change', () => {
-  updateBorImage('bor_otros_ref', 'img_bor_otros');
-});
 
 // Helper normalizador de texto
 const n = (v) => (v || '')
@@ -3176,11 +3146,6 @@ if (selOtros && !tipoOtros) {
     fillBorneRefs('bor_otros_ref', keyword);
   }
   }
-updateBorImage('bor_ind_ref',   'img_bor_ind');
-updateBorImage('bor_porta_ref', 'img_bor_porta');
-updateBorImage('bor_tierra_ref','img_bor_tierra');
-updateBorImage('bor_sep_ref',   'img_bor_sep');
-updateBorImage('bor_otros_ref', 'img_bor_otros');
 };
 
 // === Event listeners ===
