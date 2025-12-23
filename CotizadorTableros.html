@@ -1845,7 +1845,8 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
         pines:      getColFlexible(r, 'Pines'),
         voltaje:    getColFlexible(r, 'Voltaje de alimentacion'),
         capacidad:  getColFlexible(r, 'Capacidad de salida max'),
-        referencia: getColFlexible(r, 'Referencia')
+        referencia: getColFlexible(r, 'Referencia'),
+        imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
       }))
       .filter(r => r.referencia); // sólo filas con referencia
   } else {
@@ -3655,40 +3656,6 @@ if (tipo === 'PROFIBUS' && plug === '90' && hem) {
 
         setTimeout(refreshBreakerRefs, 0);
 
-      } else if (s.key === 'bornes') {
-
-        function refreshBornesRefs() {
-          const tipo   = root.querySelector('#p_bor_tipo')?.value || '';
-          const opcion = root.querySelector('#p_bor_sec')?.value || '';
-
-          const matches = (typeof BORNE_CATALOG !== 'undefined' ? BORNE_CATALOG : []).filter(b =>
-            (!tipo   || b.tipo   === tipo) &&
-            (!opcion || b.opcion === opcion)
-          );
-
-          selRef.innerHTML = '';
-          if (!matches.length) {
-            const o = document.createElement('option');
-            o.value = '';
-            o.textContent = 'Sin referencia sugerida';
-            selRef.appendChild(o);
-          } else {
-            matches.forEach(b => {
-              const o = document.createElement('option');
-              o.value = b.ref;
-              o.textContent = b.ref;
-              selRef.appendChild(o);
-            });
-          }
-        }
-
-        const tipoEl = root.querySelector('#p_bor_tipo');
-        const optEl  = root.querySelector('#p_bor_sec');
-        if (tipoEl) tipoEl.addEventListener('change', refreshBornesRefs);
-        if (optEl)  optEl.addEventListener('change', refreshBornesRefs);
-
-        setTimeout(refreshBornesRefs, 0);
-
       } else if (s.key === 'reles') {
         // 🔹 Sección Relés basada en Excel (Bloque de relé / Accesorio peine / Relés enchufables tipo universal)
         root.querySelector('h3').textContent = 'Relés';
@@ -3729,6 +3696,9 @@ selector.innerHTML = `
           <label>&nbsp;</label>
           <button type="button" class="btn primary" data-rel="bloque">Agregar a la tabla</button>
         </div>
+        <div class="acc-img-wrap">
+          <img id="img_rel_bloq" class="acc-img" style="display:none;">
+        </div>
       </div>
     </div>
   </details>
@@ -3765,6 +3735,9 @@ selector.innerHTML = `
         <div>
           <label>&nbsp;</label>
           <button type="button" class="btn primary" data-rel="peine">Agregar a la tabla</button>
+        </div>
+        <div class="acc-img-wrap">
+          <img id="img_rel_peine" class="acc-img" style="display:none;">
         </div>
       </div>
     </div>
@@ -3814,6 +3787,9 @@ selector.innerHTML = `
           <label>&nbsp;</label>
           <button type="button" class="btn primary" data-rel="univ">Agregar a la tabla</button>
         </div>
+        <div class="acc-img-wrap">
+          <img id="img_rel_univ" class="acc-img" style="display:none;">
+        </div>
       </div>
     </div>
   </details>
@@ -3821,6 +3797,17 @@ selector.innerHTML = `
 
         // 👉 Insertamos la sección en el DOM
         wrap.appendChild(root);
+
+  // ✅ Listeners de imagen (usar root.querySelector, como bornes)
+  root.querySelector('#rel_bloq_ref')?.addEventListener('change', () => {
+    updateRelImage('rel_bloq_ref', 'img_rel_bloq');
+  });
+  root.querySelector('#rel_peine_ref')?.addEventListener('change', () => {
+    updateRelImage('rel_peine_ref', 'img_rel_peine');
+  });
+  root.querySelector('#rel_univ_ref')?.addEventListener('change', () => {
+    updateRelImage('rel_univ_ref', 'img_rel_univ');
+  });
 
         // ====================
         // Helpers de Relés
@@ -3890,6 +3877,10 @@ selector.innerHTML = `
             if (unVolt  && relayNormTxt(r.voltaje) !== relayNormTxt(unVolt))  return false;
             return true;
           });
+    // ✅ refrescar imágenes después de llenar refs
+    updateRelImage('rel_bloq_ref', 'img_rel_bloq');
+    updateRelImage('rel_peine_ref', 'img_rel_peine');
+    updateRelImage('rel_univ_ref', 'img_rel_univ');
         };
 
         // Listeners para que al cambiar filtros se refresquen las referencias
