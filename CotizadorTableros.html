@@ -316,6 +316,48 @@ function updateAccImage(selectRefId, imgId){
   }
 }
 
+function updateComImage(selectRefId, imgId){
+  const sel = document.getElementById(selectRefId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '').toString().replace(/\u00A0/g,' ').trim();
+  const ref = clean(sel.value);
+
+  if (!ref || !Array.isArray(REF_COM) || !REF_COM.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = REF_COM.find(r => normRef(r.referencia) === normRef(ref));
+  const file = clean(row?.imagen);
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  let src;
+  if (/^https?:\/\//i.test(file)) src = file;
+  else if (file.startsWith('img/')) src = base + file;
+  else if (file.includes('/')) src = base + file;
+  else src = base + 'img/' + file;
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    console.warn('Imagen Comunicaciones no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
+}
+
 function updateBrkImage(selectRefId, imgId){
   const sel = document.getElementById(selectRefId);
   const img = document.getElementById(imgId);
@@ -1878,7 +1920,8 @@ if (window.refreshConsumiblesFromExcel) {
         funcion:          getColFlexible(r, 'Funcion'),
         plug:             getColFlexible(r, 'Plug'),
         conectorHembra:   getColFlexible(r, 'Conector hembra'), // ✅ NUEVO
-        referencia:       getColFlexible(r, 'Referencia')
+        referencia:       getColFlexible(r, 'Referencia'),
+        imagen: getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
       }))
       .filter(r => r.referencia);
   } else {
@@ -2718,13 +2761,13 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_ind" class="acc-img" style="display:none;">
-</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="ind">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_ind" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2751,13 +2794,13 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_porta" class="acc-img" style="display:none;">
-</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_porta" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2793,13 +2836,13 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_tierra" class="acc-img" style="display:none;">
-</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_tierra" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2826,13 +2869,13 @@ selector.innerHTML = `
           <option value="">– Seleccionar –</option>
         </select>
       </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_sep" class="acc-img" style="display:none;">
-</div>
       <div>
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_sep" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2879,13 +2922,13 @@ selector.innerHTML = `
       <option value="">– Seleccionar –</option>
     </select>
   </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_otros" class="acc-img" style="display:none;">
-</div>
   <div>
     <label>&nbsp;</label>
     <button type="button" class="btn primary" data-bor="otros">Agregar a la tabla</button>
   </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_otros" class="acc-img" style="display:none;">
+</div>
 </div>
   </div>
 </details>
@@ -3276,7 +3319,9 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
                   Agregar a la tabla
                 </button>
               </div>
-            </div>
+<div class="acc-img-wrap">
+  <img id="img_com_cable" class="acc-img" style="display:none;">
+</div>
           </div>
         </div>
       </details>
@@ -3341,10 +3386,19 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
           Agregar a la tabla
         </button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_com_con" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
         `;
+document.getElementById('com_cable_ref')?.addEventListener('change', () => {
+  updateComImage('com_cable_ref', 'img_com_cable');
+});
+document.getElementById('com_con_ref')?.addEventListener('change', () => {
+  updateComImage('com_con_ref', 'img_com_con');
+});
 
         // Metemos la sección al DOM
         wrap.appendChild(root);
@@ -3459,6 +3513,8 @@ window.refreshComFromExcel = function () {
   refreshCableRefs();
   syncHembraUI();
   refreshConnectorRefs();
+updateComImage('com_cable_ref', 'img_com_cable');
+updateComImage('com_con_ref',   'img_com_con');
 };
 
         // Listeners
@@ -3466,26 +3522,20 @@ window.refreshComFromExcel = function () {
           refreshCableRefs();
         });
 
+document.getElementById('com_con_tipo')?.addEventListener('change', () => {
+  document.getElementById('com_con_plug').value = '';
+  document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
+  syncHembraUI();
+  refreshConnectorRefs();
+});
+
 document.getElementById('com_con_plug')?.addEventListener('change', () => {
   syncHembraUI();
   refreshConnectorRefs();
 });
 
-document.getElementById('com_con_hembra')?.addEventListener('change', () => {
-  refreshConnectorRefs();
-});
-
-document.getElementById('com_con_tipo')?.addEventListener('change', () => {
-  document.getElementById('com_con_plug').value = '';
-  document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
-  syncHembraUI();
-});
-
-        ['com_con_tipo','com_con_plug'].forEach(id => {
-          document.getElementById(id)?.addEventListener('change', () => {
-            refreshConnectorRefs();
-          });
-        });
+document.getElementById('com_con_hembra')?.addEventListener('change', refreshConnectorRefs);
+document.getElementById('com_cable_tipo')?.addEventListener('change', refreshCableRefs);
 
         // Helper para agregar filas a la tabla de comunicaciones
         function pushComRow(desc, qty, ref, descPct) {
