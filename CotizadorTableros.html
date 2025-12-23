@@ -3393,6 +3393,10 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
   </div>
 </details>
         `;
+
+// Metemos la sección al DOM
+wrap.appendChild(root);
+  
 document.getElementById('com_cable_ref')?.addEventListener('change', () => {
   updateComImage('com_cable_ref', 'img_com_cable');
 });
@@ -3515,6 +3519,11 @@ window.refreshComFromExcel = function () {
   refreshConnectorRefs();
 updateComImage('com_cable_ref', 'img_com_cable');
 updateComImage('com_con_ref',   'img_com_con');
+
+console.log('REF_COM sample:', REF_COM?.[0]);
+console.log('Cable ref:', document.getElementById('com_cable_ref')?.value);
+console.log('Cable img element:', document.getElementById('img_com_cable'));
+
 };
 
         // Listeners
