@@ -313,7 +313,7 @@ function updateBorneImage(selectId, imgId){
     return;
   }
 
-  const BOR = window.REF_BOR || REF_BOR;
+  const BOR = (Array.isArray(REF_BOR) && REF_BOR.length) ? REF_BOR : (window.REF_BOR || []);
 
   const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
   const row = BOR.find(r => normRef(r.referencia) === normRef(ref));
@@ -1850,6 +1850,8 @@ window.fillBorneRefs = fillBorneRefs;
       referencia: getColFlexible(r, 'Referencia'),
       imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
     })).filter(row => row.referencia); // solo filas con referencia
+  window.REF_BOR = REF_BOR; // 🔥 clave: sincroniza el array nuevo para las imágenes
+
   } else {
     REF_BOR = [];
     console.warn("No se encontró la hoja 'Bornes' en el Excel.");
