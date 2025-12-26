@@ -1798,56 +1798,20 @@ updateBorneImage('bor_porta_ref',  'img_bor_porta');
 updateBorneImage('bor_tierra_ref', 'img_bor_tierra');
 updateBorneImage('bor_sep_ref',    'img_bor_sep');
 updateBorneImage('bor_otros_ref',  'img_bor_otros');
+
+  if (refs.includes(prev)) sel.value = prev;
+
+  // ✅ NUEVO: refresca imagen del select que acabas de llenar
+  const mapImg = {
+    bor_ind_ref: 'img_bor_ind',
+    bor_porta_ref: 'img_bor_porta',
+    bor_tierra_ref: 'img_bor_tierra',
+    bor_sep_ref: 'img_bor_sep',
+    bor_otros_ref: 'img_bor_otros',
+  };
+  if (mapImg[selectId]) updateBorneImage(selectId, mapImg[selectId]);
+
 }
-
-// Refresca TODOS los combos de bornes según el Excel + calibre elegido
-window.refreshBornesFromExcel = function () {
-  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
-
-  // Calibres seleccionados en los combos
-  const calInd = document.getElementById('bor_ind_cal')?.value || '';
-  const calTi  = document.getElementById('bor_tierra_cal')?.value || '';
-
-['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
-  document.getElementById(id)?.addEventListener('change', () => {
-    const map = {
-      bor_ind_ref: 'img_bor_ind',
-      bor_porta_ref: 'img_bor_porta',
-      bor_tierra_ref: 'img_bor_tierra',
-      bor_sep_ref: 'img_bor_sep',
-      bor_otros_ref: 'img_bor_otros'
-    };
-    updateBorneImage(id, map[id]);
-  });
-});
-
-  // 1) Conexión individuales → función + calibre
-  fillBorneRefs('bor_ind_ref', 'conexion individuales', calInd);
-
-  // 2) Portafusibles → solo función (no tiene calibre)
-  fillBorneRefs('bor_porta_ref', 'portafusibles', '');
-
-  // 3) Conexión a tierra → función + calibre
-  fillBorneRefs('bor_tierra_ref', 'conexion a tierra', calTi);
-
-  // 4) Separador para bornes → solo función
-  fillBorneRefs('bor_sep_ref', 'separador para bornes', '');
-
-  // 5) Otros (Freno de bornes / Marcador de grupo / Plaquitas para bornas)
-  const tipoOtros = document.getElementById('bor_otros_tipo')?.value || '';
-  const selOtros  = document.getElementById('bor_otros_ref');
-
-  if (selOtros) {
-    if (!tipoOtros) {
-      // si no han elegido función, dejamos solo la opción vacía
-      selOtros.innerHTML = '<option value="">– Seleccionar –</option>';
-    } else {
-      // usamos exactamente el texto que ves en el combo:
-      // "Freno de bornes", "Marcador de grupo", "Plaquitas para bornas"
-      fillBorneRefs('bor_otros_ref', tipoOtros, '');
-    }
-  }
-};
 
 // Listeners: cuando cambie el calibre, actualizamos las referencias
 ['bor_ind_cal','bor_tierra_cal'].forEach(id => {
@@ -2989,6 +2953,25 @@ selector.innerHTML = `
 </details>
 `;
 
+// ✅ Listeners de imagen (UNA sola vez)
+const borImgMap = {
+  bor_ind_ref: 'img_bor_ind',
+  bor_porta_ref: 'img_bor_porta',
+  bor_tierra_ref: 'img_bor_tierra',
+  bor_sep_ref: 'img_bor_sep',
+  bor_otros_ref: 'img_bor_otros'
+};
+
+Object.keys(borImgMap).forEach(selId => {
+  document.getElementById(selId)?.addEventListener('change', () => {
+    updateBorneImage(selId, borImgMap[selId]);
+  });
+});
+
+Object.keys(borImgMap).forEach(selId => {
+  updateBorneImage(selId, borImgMap[selId]);
+});
+  
 // Helper normalizador de texto
 const n = (v) => (v || '')
   .toString()
