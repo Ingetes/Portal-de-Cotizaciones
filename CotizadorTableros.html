@@ -2978,6 +2978,7 @@ selector.innerHTML = `
 </details>
 `;
 
+
 ['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
   document.getElementById(id)?.addEventListener('change', () => {
     const map = {
@@ -3165,12 +3166,12 @@ window.refreshBornesFromExcel = function () {
   updateBorneImage('bor_otros_ref',  'img_bor_otros');
 };
 
-// Si el Excel ya estaba cargado antes de crear la sección, refrescamos combos e imágenes
+// Si el Excel ya estaba cargado, refrescamos de una vez
 if (Array.isArray(REF_BOR) && REF_BOR.length) {
-  window.refreshBornesFromExcel?.();
+  togglePlaquitaRangoUI();
+  window.refreshBornesFromExcel();
 }
 
-// IMPORTANTE: ya manejamos toda la sección Bornes, no seguir con la lógica genérica
 wrap.appendChild(root);
 return;
 
