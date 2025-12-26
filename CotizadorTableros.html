@@ -299,10 +299,11 @@ function updateBorneImage(selectId, imgId){
   const img = document.getElementById(imgId);
   if (!sel || !img) return;
 
-const clean = (v) => (v ?? '')
-  .toString()
-  .replace(/\u00A0/g,' ')   // NBSP
-  .trim();
+  const clean = (v) => (v ?? '')
+    .toString()
+    .replace(/\u00A0/g,' ')   // ✅ NBSP (espacio invisible de Excel)
+    .trim();
+
   const ref = clean(sel.value);
 
   if (!ref || !Array.isArray(REF_BOR) || !REF_BOR.length){
@@ -313,19 +314,26 @@ const clean = (v) => (v ?? '')
 
   const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
   const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
-let file = clean(row?.imagen);
-file = file.replace(/\\/g,'/'); // si el Excel trae rutas con "\"
-file = file.replace(/\s+/g,' '); // por si viene con dobles espacios
+
+  let file = clean(row?.imagen);
+
+  // ✅ normalizaciones CLAVE (Excel / Windows)
+  file = file.replace(/\\/g,'/');    // "img\bornes\a.png" -> "img/bornes/a.png"
+  file = file.replace(/\s+/g,' ');   // dobles espacios -> 1 espacio
+
   if (!file){
     img.style.display = 'none';
     img.removeAttribute('src');
     return;
   }
 
-  // 🔥 Esto evita líos con GitHub Pages / rutas / file://
+  // ✅ Construcción de src (si es URL la deja, si es archivo lo resuelve)
   const src = /^https?:\/\//i.test(file)
     ? file
-    : new URL(file.startsWith('img/') || file.includes('/') ? file : ('img/' + file), location.href).href;
+    : new URL(
+        (file.startsWith('img/') || file.includes('/')) ? file : ('img/' + file),
+        location.href
+      ).href;
 
   img.onload = () => { img.style.display = 'inline-block'; };
   img.onerror = () => {
@@ -1938,7 +1946,12 @@ if (window.refreshConsumiblesFromExcel) {
         plug:             getColFlexible(r, 'Plug'),
         conectorHembra:   getColFlexible(r, 'Conector hembra'), // ✅ NUEVO
         referencia:       getColFlexible(r, 'Referencia'),
-        imagen: getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
+        imagen:
+  getColFlexible(r, 'Imagen') ||
+  getColFlexible(r, 'Imagenes') ||
+  getColFlexible(r, 'imagenes') ||
+  getColFlexible(r, 'imagen')
+
       }))
       .filter(r => r.referencia);
   } else {
