@@ -294,6 +294,56 @@ function actualizarIOAjustadas() {
 // compatibilidad por si quedó alguna llamada vieja
 function actualizarSDAjustadas() { actualizarIOAjustadas(); }
 
+function updateRelImage(selectId, imgId){
+  const sel = document.getElementById(selectId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '').toString().trim();
+  const ref = clean(sel.value);
+
+  if (!ref || !Array.isArray(REF_REL) || !REF_REL.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = REF_REL.find(r => normRef(r.referencia) === normRef(ref));
+
+  // 👇 toma el nombre desde la columna "imagen" del Excel
+  const file = clean(row?.imagen);
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  // base = misma carpeta donde vive tu HTML en GitHub Pages
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  let src;
+  if (/^https?:\/\//i.test(file)) {
+    src = file;
+  } else if (file.startsWith('img/')) {
+    src = base + file;
+  } else if (file.includes('/')) {
+    src = base + file;
+  } else {
+    src = base + 'img/' + file;
+  }
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    console.warn('Imagen Relés no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
+}
+
 function updateAccImage(selectRefId, imgId){
   const ref = document.getElementById(selectRefId)?.value || '';
   const img = document.getElementById(imgId);
