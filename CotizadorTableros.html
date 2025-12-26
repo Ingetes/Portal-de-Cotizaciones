@@ -1800,11 +1800,6 @@ window.refreshBornesFromExcel = function () {
   });
 });
 
-// Cuando cambie la función de "Otros", refrescamos su combo de referencia
-document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
-  window.refreshBornesFromExcel();
-});
-
   // 🟢 Hoja 3: "Bornes"
   const sheetBornes = workbook.Sheets["Bornes"] || workbook.Sheets[workbook.SheetNames[2]];
   if (sheetBornes) {
@@ -1828,6 +1823,7 @@ document.getElementById('bor_otros_tipo')?.addEventListener('change', () => {
   if (window.refreshBornesFromExcel) {
     window.refreshBornesFromExcel();
   }
+if (window.refreshConsumiblesFromExcel) window.refreshConsumiblesFromExcel();
 
   // 🟣 Hoja 4: "Reles" / "Relés"
   const sheetRel =
@@ -1888,10 +1884,6 @@ if (sheetCons) {
   REF_CONS = [];
   console.warn("No se encontró la hoja 'Consumibles' en el Excel.");
 }
-
-document.getElementById('cons_base_color')?.addEventListener('change', () => {
-  window.refreshConsumiblesFromExcel();
-});
 
 if (window.refreshConsumiblesFromExcel) {
   window.refreshConsumiblesFromExcel();
@@ -1955,9 +1947,10 @@ window.addEventListener("DOMContentLoaded", async () => {
 
     // Si cargó bien, escondemos la sección
     if (card) card.style.display = "none";
-  }catch(err){
-    if (card) card.style.display = "";
-  }
+}catch(err){
+  console.error("Falló auto-carga referencias_tablero.xlsx:", err);
+  if (card) card.style.display = "";
+}
 });
 
 function filterRefs({categoria, material, color, tension, posicion}) {
@@ -3360,13 +3353,6 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
 </details>
         `;
 
-root.querySelector('#com_cable_ref')?.addEventListener('change', () => {
-  updateComImage('com_cable_ref', 'img_com_cable');
-});
-root.querySelector('#com_con_ref')?.addEventListener('change', () => {
-  updateComImage('com_con_ref', 'img_com_con');
-});
-
         // Metemos la sección al DOM
         wrap.appendChild(root);
         // ===== Helpers para Comunicaciones =====
@@ -3579,6 +3565,25 @@ if (tipo === 'PROFIBUS' && plug === '90' && hem) {
         descWrapper.appendChild(descInput);
 
         selDesc = selector.querySelector('.sel-desc');
+// ✅ Listeners SOLO cuando la sección ya existe en el DOM
+root.querySelector('#cons_base_color')?.addEventListener('change', () => {
+  window.refreshConsumiblesFromExcel?.();
+});
+
+root.querySelector('#cons_base_calibre')?.addEventListener('change', () => {
+  window.refreshConsumiblesFromExcel?.();
+});
+
+// si tienes referencia + imagen
+root.querySelector('#cons_base_ref')?.addEventListener('change', () => {
+  updateConsImage?.('cons_base_ref', 'img_cons_base');
+});
+
+// ✅ Si el Excel ya estaba cargado, refresca y pinta imagen inicial
+if (Array.isArray(REF_CONS) && REF_CONS.length) {
+  window.refreshConsumiblesFromExcel?.();
+  updateConsImage?.('cons_base_ref', 'img_cons_base');
+}
       }
 
       // Catálogo para cada sección
