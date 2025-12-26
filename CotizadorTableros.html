@@ -2993,7 +2993,7 @@ function normRango(v){
     .toString()
     .replace(/\u00A0/g, ' ')                 // NBSP -> espacio normal
     .replace(/[–—−]/g, '-')                  // en dash/em dash/minus -> "-"
-    .replace(/\s*/g,'')                      // quita TODOS los espacios
+    .replace(/\s+/g,'')
     .trim();
 }
 
@@ -3139,6 +3139,15 @@ window.refreshBornesFromExcel = function () {
   updateBorneImage('bor_sep_ref',    'img_bor_sep');
   updateBorneImage('bor_otros_ref',  'img_bor_otros');
 };
+
+// Si el Excel ya estaba cargado antes de crear la sección, refrescamos combos e imágenes
+if (Array.isArray(REF_BOR) && REF_BOR.length) {
+  window.refreshBornesFromExcel?.();
+}
+
+// IMPORTANTE: ya manejamos toda la sección Bornes, no seguir con la lógica genérica
+wrap.appendChild(root);
+return;
 
 // === Event listeners ===
 ['bor_ind_cal','bor_tierra_cal'].forEach(id => {
