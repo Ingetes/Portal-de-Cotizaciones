@@ -310,27 +310,25 @@ function updateBorneImage(selectId, imgId){
 
   const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
   const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
-
-  const file = clean(row?.imagen); // <-- columna "imagen" de la hoja Bornes
+  const file = clean(row?.imagen);
   if (!file){
     img.style.display = 'none';
     img.removeAttribute('src');
     return;
   }
 
-  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+  // 🔥 Esto evita líos con GitHub Pages / rutas / file://
+  const src = /^https?:\/\//i.test(file)
+    ? file
+    : new URL(file.startsWith('img/') || file.includes('/') ? file : ('img/' + file), location.href).href;
 
-  let src;
-  if (/^https?:\/\//i.test(file)) src = file;
-  else if (file.startsWith('img/')) src = base + file;
-  else if (file.includes('/')) src = base + file;
-  else src = base + 'img/' + file;
-
-  img.onload = () => { img.style.display = ''; };
+  img.onload = () => { img.style.display = 'inline-block'; };
   img.onerror = () => {
     img.style.display = 'none';
     img.removeAttribute('src');
+    console.warn('Imagen Bornes no encontrada:', src, 'ref:', ref, 'file:', file);
   };
+
   img.src = src;
 }
 
