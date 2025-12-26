@@ -2953,14 +2953,18 @@ selector.innerHTML = `
 </details>
 `;
 
-// ✅ Listeners de imagen (UNA sola vez)
-const borImgMap = {
-  bor_ind_ref: 'img_bor_ind',
-  bor_porta_ref: 'img_bor_porta',
-  bor_tierra_ref: 'img_bor_tierra',
-  bor_sep_ref: 'img_bor_sep',
-  bor_otros_ref: 'img_bor_otros'
-};
+['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change', () => {
+    const map = {
+      bor_ind_ref: 'img_bor_ind',
+      bor_porta_ref: 'img_bor_porta',
+      bor_tierra_ref: 'img_bor_tierra',
+      bor_sep_ref: 'img_bor_sep',
+      bor_otros_ref: 'img_bor_otros'
+    };
+    updateBorneImage(id, map[id]);
+  });
+});
 
 Object.keys(borImgMap).forEach(selId => {
   document.getElementById(selId)?.addEventListener('change', () => {
@@ -3153,50 +3157,57 @@ function fillPlaquitaRefsByRango(rangoKeyNorm) {
 window.refreshBornesFromExcel = function () {
   if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
 
-  // 1) Conexión individuales
+  // 1) Bornes de paso
   const calInd = document.getElementById('bor_ind_cal')?.value || '';
-  const calibreInd = calInd; // 👈 usamos directamente 2812 / 2810 / 248
-  
-  fillBorneRefs('bor_ind_ref', 'conexion individuales', calibreInd);
+  fillBorneRefs('bor_ind_ref', 'conexion individuales', calInd);
 
-  // 2) Portafusibles (sin calibre)
+  // 2) Portafusibles
   fillBorneRefs('bor_porta_ref', 'portafusibles');
 
-  // 3) Conexión a tierra
+  // 3) Tierra
   const calTi = document.getElementById('bor_tierra_cal')?.value || '';
-  const calibreTi = calTi;   // 👈 igual aquí
-  
-  fillBorneRefs('bor_tierra_ref', 'conexion a tierra', calibreTi);
+  fillBorneRefs('bor_tierra_ref', 'conexion a tierra', calTi);
 
-  // 4) Separador para bornes (sin calibre)
+  // 4) Separador
   fillBorneRefs('bor_sep_ref', 'separador para bornes');
 
-// 5) Otros
-const tipoOtrosSel = root.querySelector('#bor_otros_tipo');
-const selOtros     = root.querySelector('#bor_otros_ref');
-const rangoValue   = root.querySelector('#bor_pla_rango')?.value || '';
+  // 5) Otros
+  const tipoSel  = document.getElementById('bor_otros_tipo');
+  const refSel   = document.getElementById('bor_otros_ref');
+  const rangoSel = document.getElementById('bor_pla_rango');
+  const wrapRng  = document.getElementById('bor_pla_rango_wrap');
 
-togglePlaquitaRangoUI();
+  const tipo = (tipoSel?.value || '').trim();
+  const tipoNorm = (tipo || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 
-const tipoOtros = tipoOtrosSel?.value || '';
+  // mostrar/ocultar rango
+  const isPla = tipoNorm.includes('plaq');
+  if (wrapRng) wrapRng.style.display = isPla ? '' : 'none';
 
-if (selOtros && !tipoOtros) {
-  selOtros.innerHTML = '<option value="">– Seleccionar –</option>';
-} else if (selOtros && tipoOtros) {
-  const tNorm = n(tipoOtros);
+  if (!refSel) return;
 
-  if (tNorm.includes('plaq')) {
-    // ✅ plaquitas: llena con "REF — RANGO"
-    fillPlaquitaRefsByRango(rangoValue);
+  if (!tipo) {
+    refSel.innerHTML = '<option value="">– Seleccionar –</option>';
+  } else if (isPla) {
+    // plaquitas: rango manda
+    fillPlaquitaRangos(); // llena el combo de rangos si aplica
+
+    const key = (rangoSel?.value || '').trim();
+    fillPlaquitaRefsByRango(key);
   } else {
-    // los otros siguen igual
-    let keyword = tipoOtros;
-    if (tNorm.includes('freno')) keyword = 'freno';
-    else if (tNorm.includes('marcador')) keyword = 'marcador';
-
+    // freno / marcador
+    let keyword = tipo;
+    if (tipoNorm.includes('freno')) keyword = 'freno';
+    else if (tipoNorm.includes('marcador')) keyword = 'marcador';
     fillBorneRefs('bor_otros_ref', keyword);
   }
-  }
+
+  // ✅ refrescar imágenes (por si quedó auto-seleccionado)
+  updateBorneImage('bor_ind_ref',    'img_bor_ind');
+  updateBorneImage('bor_porta_ref',  'img_bor_porta');
+  updateBorneImage('bor_tierra_ref', 'img_bor_tierra');
+  updateBorneImage('bor_sep_ref',    'img_bor_sep');
+  updateBorneImage('bor_otros_ref',  'img_bor_otros');
 };
 
 // === Event listeners ===
