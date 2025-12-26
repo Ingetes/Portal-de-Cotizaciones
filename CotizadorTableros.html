@@ -4857,11 +4857,11 @@ selector.querySelector('.btn-add-row').addEventListener('click', () => {
   }
 });
     
-renderAccPuertaSection();
 function initAccesoriosPuerta(){
-  renderAccPuertaSection();
+  // NO renderizar aquí (ya se renderiza después de 'tablero')
   if (REF_AP.length) refreshAccCombosFromExcel();
 }
+
 function addRow(key, item={ref:'',desc:'',qty:1,u:'und',vu:0,descuento:0,vlista:''}) {
   const sect = document.querySelector(`.section[data-key="${key}"]`);
   const tbody = sect.querySelector('tbody');
