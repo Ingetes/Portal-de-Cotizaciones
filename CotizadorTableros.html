@@ -301,25 +301,27 @@ function updateBorneImage(selectId, imgId){
 
   const clean = (v) => (v ?? '')
     .toString()
-    .replace(/\u00A0/g,' ')   // ✅ NBSP (espacio invisible de Excel)
+    .replace(/\u00A0/g,' ')   // NBSP de Excel
     .trim();
 
   const ref = clean(sel.value);
 
-  if (!ref || !Array.isArray(REF_BOR) || !REF_BOR.length){
+  // 👇 OJO: si REF_BOR NO existe, esto antes te explotaba
+  if (!ref || !Array.isArray(window.REF_BOR || REF_BOR) || !(window.REF_BOR || REF_BOR).length){
     img.style.display = 'none';
     img.removeAttribute('src');
     return;
   }
 
+  const BOR = window.REF_BOR || REF_BOR;
+
   const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
-  const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
+  const row = BOR.find(r => normRef(r.referencia) === normRef(ref));
 
   let file = clean(row?.imagen);
 
-  // ✅ normalizaciones CLAVE (Excel / Windows)
-  file = file.replace(/\\/g,'/');    // "img\bornes\a.png" -> "img/bornes/a.png"
-  file = file.replace(/\s+/g,' ');   // dobles espacios -> 1 espacio
+  // normaliza rutas estilo Windows
+  file = file.replace(/\\/g,'/');
 
   if (!file){
     img.style.display = 'none';
@@ -327,13 +329,15 @@ function updateBorneImage(selectId, imgId){
     return;
   }
 
-  // ✅ Construcción de src (si es URL la deja, si es archivo lo resuelve)
+  // ✅ regla PRO: todo lo que no sea URL lo resolvemos dentro de /img/
+  if (!/^https?:\/\//i.test(file)) {
+    file = file.replace(/^\.?\//,'');     // quita ./ o /
+    if (!file.startsWith('img/')) file = 'img/' + file;  // fuerza prefijo img/
+  }
+
   const src = /^https?:\/\//i.test(file)
     ? file
-    : new URL(
-        (file.startsWith('img/') || file.includes('/')) ? file : ('img/' + file),
-        location.href
-      ).href;
+    : new URL(file, location.href).href;
 
   img.onload = () => { img.style.display = 'inline-block'; };
   img.onerror = () => {
@@ -1634,6 +1638,7 @@ let REF_BRK = [];
 
 // Hoja 3: Bornes
 let REF_BOR = [];
+window.REF_BOR = REF_BOR; // opcional pero recomendado para debug
 
 // Hoja 4: Relés
 let REF_REL = [];
