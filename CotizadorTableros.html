@@ -294,6 +294,46 @@ function actualizarIOAjustadas() {
 // compatibilidad por si quedó alguna llamada vieja
 function actualizarSDAjustadas() { actualizarIOAjustadas(); }
 
+function updateBorneImage(selectId, imgId){
+  const sel = document.getElementById(selectId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '').toString().trim();
+  const ref = clean(sel.value);
+
+  if (!ref || !Array.isArray(REF_BOR) || !REF_BOR.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
+
+  const file = clean(row?.imagen); // <-- columna "imagen" de la hoja Bornes
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  let src;
+  if (/^https?:\/\//i.test(file)) src = file;
+  else if (file.startsWith('img/')) src = base + file;
+  else if (file.includes('/')) src = base + file;
+  else src = base + 'img/' + file;
+
+  img.onload = () => { img.style.display = ''; };
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+  };
+  img.src = src;
+}
+
 function updateRelImage(selectId, imgId){
   const sel = document.getElementById(selectId);
   const img = document.getElementById(imgId);
@@ -456,58 +496,6 @@ function updateBrkImage(selectRefId, imgId){
     img.removeAttribute('src');
     // para depurar rápido en consola:
     console.warn('Imagen no encontrada:', src, 'ref:', ref, 'file:', file);
-  };
-
-  img.src = src;
-  img.style.display = 'inline-block';
-}
-
-function updateBorImage(selectRefId, imgId){
-  const sel = document.getElementById(selectRefId);
-  const img = document.getElementById(imgId);
-  if (!sel || !img) return;
-
-  const clean = (v) => (v ?? '')
-    .toString()
-    .replace(/\u00A0/g,' ')   // NBSP
-    .trim();
-
-  const ref = clean(sel.value);
-  if (!ref || !Array.isArray(REF_BOR) || !REF_BOR.length){
-    img.style.display = 'none';
-    img.removeAttribute('src');
-    return;
-  }
-
-  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
-  const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
-
-  // Si tu hoja Bornes no tiene columna Imagen aún, esto quedará vacío (y se ocultará)
-  const file = clean(row?.imagen);
-
-  if (!file){
-    img.style.display = 'none';
-    img.removeAttribute('src');
-    return;
-  }
-
-  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
-
-  let src;
-  if (/^https?:\/\//i.test(file)) {
-    src = file;
-  } else if (file.startsWith('img/')) {
-    src = base + file;
-  } else if (file.includes('/')) {
-    src = base + file;
-  } else {
-    src = base + 'img/' + file;
-  }
-
-  img.onerror = () => {
-    img.style.display = 'none';
-    img.removeAttribute('src');
-    console.warn('Imagen Bornes no encontrada:', src, 'ref:', ref, 'file:', file);
   };
 
   img.src = src;
@@ -1805,6 +1793,11 @@ function fillBorneRefs(selectId, funcionFilter, calibreFilter) {
   });
 
   if (refs.includes(prev)) sel.value = prev;
+updateBorneImage('bor_ind_ref',    'img_bor_ind');
+updateBorneImage('bor_porta_ref',  'img_bor_porta');
+updateBorneImage('bor_tierra_ref', 'img_bor_tierra');
+updateBorneImage('bor_sep_ref',    'img_bor_sep');
+updateBorneImage('bor_otros_ref',  'img_bor_otros');
 }
 
 // Refresca TODOS los combos de bornes según el Excel + calibre elegido
@@ -1814,6 +1807,19 @@ window.refreshBornesFromExcel = function () {
   // Calibres seleccionados en los combos
   const calInd = document.getElementById('bor_ind_cal')?.value || '';
   const calTi  = document.getElementById('bor_tierra_cal')?.value || '';
+
+['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change', () => {
+    const map = {
+      bor_ind_ref: 'img_bor_ind',
+      bor_porta_ref: 'img_bor_porta',
+      bor_tierra_ref: 'img_bor_tierra',
+      bor_sep_ref: 'img_bor_sep',
+      bor_otros_ref: 'img_bor_otros'
+    };
+    updateBorneImage(id, map[id]);
+  });
+});
 
   // 1) Conexión individuales → función + calibre
   fillBorneRefs('bor_ind_ref', 'conexion individuales', calInd);
@@ -2811,6 +2817,9 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="ind">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_ind" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2841,6 +2850,9 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_porta" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2880,6 +2892,9 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_tierra" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2910,6 +2925,9 @@ selector.innerHTML = `
         <label>&nbsp;</label>
         <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
       </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_sep" class="acc-img" style="display:none;">
+</div>
     </div>
   </div>
 </details>
@@ -2961,6 +2979,11 @@ selector.innerHTML = `
     <label>&nbsp;</label>
     <button type="button" class="btn primary" data-bor="otros">Agregar a la tabla</button>
   </div>
+
+<div class="acc-img-wrap">
+  <img id="img_bor_otros" class="acc-img" style="display:none;">
+</div>
+
 </div>
   </div>
 </details>
