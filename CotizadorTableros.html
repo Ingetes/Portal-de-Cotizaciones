@@ -2015,6 +2015,9 @@ function filterRefs({categoria, material, color, tension, posicion}) {
 
     // Render de secciones con parámetros + selector + tabla
     SECTIONS.forEach(s => {
+try {
+    console.log('[render] sección:', s.key);
+  
       const node = document.getElementById('tpl-table').content.cloneNode(true);
       const root = node.querySelector('.section');
       root.dataset.key = s.key;
@@ -4875,7 +4878,16 @@ selector.querySelector('.btn-add-row').addEventListener('click', () => {
         // Justo después de tablero: accesorios de puerta
         renderAccPuertaSection();
       }
-    });
+  } catch (err) {
+    console.error('💥 Error renderizando sección:', s.key, err);
+    // Opcional: deja una “tapa” visible para que no se pierda el layout
+    // const fallback = document.createElement('div');
+    // fallback.className = 'section';
+    // fallback.innerHTML = `<header><h3>${s.title}</h3></header><div class="body">Error en esta sección. Revisa consola.</div>`;
+    // wrap.appendChild(fallback);
+  }
+});
+    
 renderAccPuertaSection();
 function initAccesoriosPuerta(){
   renderAccPuertaSection();
