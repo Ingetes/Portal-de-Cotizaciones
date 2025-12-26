@@ -1570,10 +1570,11 @@ const desc  = `Muletilla ${mat} ${pos}${key ? ' llave ' + key : ''}`;
     );
   });
 
-["bor_ind_qty", "bor_tierra_qty", "bor_porta_qty"].forEach(id => {
-  document.addEventListener("input", (e) => {
-    if (e.target && e.target.id === id) actualizarTermoencogibleAuto();
-  });
+document.addEventListener("input", (e) => {
+  const id = e.target?.id;
+  if (id === "bor_ind_qty" || id === "bor_tierra_qty" || id === "bor_porta_qty") {
+    actualizarTermoencogibleAuto();
+  }
 });
 
 // 3LD
@@ -1631,6 +1632,8 @@ let REF_ACC_TAB = [];
 
 // Hoja 6: Comunicaciones
 let REF_COM = [];
+
+let REF_CONS = [];
 
 // Helper genérico para leer columnas del Excel aunque cambien tildes / espacios / mayúsculas
 function getColFlexible(row, logicalName) {
@@ -1793,15 +1796,11 @@ function fillBorneRefs(selectId, funcionFilter, calibreFilter) {
   });
 
   if (refs.includes(prev)) sel.value = prev;
-updateBorneImage('bor_ind_ref',    'img_bor_ind');
-updateBorneImage('bor_porta_ref',  'img_bor_porta');
-updateBorneImage('bor_tierra_ref', 'img_bor_tierra');
-updateBorneImage('bor_sep_ref',    'img_bor_sep');
-updateBorneImage('bor_otros_ref',  'img_bor_otros');
 
+  // Restaurar selección si existe
   if (refs.includes(prev)) sel.value = prev;
 
-  // ✅ NUEVO: refresca imagen del select que acabas de llenar
+  // ✅ refresca imagen SOLO del select que acabas de llenar
   const mapImg = {
     bor_ind_ref: 'img_bor_ind',
     bor_porta_ref: 'img_bor_porta',
@@ -1810,7 +1809,6 @@ updateBorneImage('bor_otros_ref',  'img_bor_otros');
     bor_otros_ref: 'img_bor_otros',
   };
   if (mapImg[selectId]) updateBorneImage(selectId, mapImg[selectId]);
-
 }
 
 // Listeners: cuando cambie el calibre, actualizamos las referencias
