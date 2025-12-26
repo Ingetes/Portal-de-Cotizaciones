@@ -1873,7 +1873,6 @@ window.refreshBornesFromExcel = function () {
   if (window.refreshBornesFromExcel) {
     window.refreshBornesFromExcel();
   }
-if (window.refreshConsumiblesFromExcel) window.refreshConsumiblesFromExcel();
 
   // 🟣 Hoja 4: "Reles" / "Relés"
   const sheetRel =
@@ -3282,10 +3281,10 @@ if (Array.isArray(REF_BOR) && REF_BOR.length) {
   window.refreshBornesFromExcel();
 }
 
-        wrap.appendChild(root);
-        return;
+wrap.appendChild(root);
+return;
 
-          } else if (s.key === 'comunicaciones') {
+} else if (s.key === 'comunicaciones') {
         // 🔹 Sección Comunicaciones
         root.querySelector('h3').textContent = 'Comunicaciones';
 
@@ -3607,36 +3606,6 @@ if (tipo === 'PROFIBUS' && plug === '90' && hem) {
 
         // Ya manejamos toda la sección Comunicaciones
         return;
-
-      // CONSUMIBLES: descripción editable
-      } else if (s.key === 'consumibles') {
-        const descWrapper = selDesc.parentElement;
-        descWrapper.removeChild(selDesc);
-        const descInput = document.createElement('input');
-        descInput.type = 'text';
-        descInput.className = 'sel-desc';
-        descWrapper.appendChild(descInput);
-
-        selDesc = selector.querySelector('.sel-desc');
-// ✅ Listeners SOLO cuando la sección ya existe en el DOM
-root.querySelector('#cons_base_color')?.addEventListener('change', () => {
-  window.refreshConsumiblesFromExcel?.();
-});
-
-root.querySelector('#cons_base_calibre')?.addEventListener('change', () => {
-  window.refreshConsumiblesFromExcel?.();
-});
-
-// si tienes referencia + imagen
-root.querySelector('#cons_base_ref')?.addEventListener('change', () => {
-  updateConsImage?.('cons_base_ref', 'img_cons_base');
-});
-
-// ✅ Si el Excel ya estaba cargado, refresca y pinta imagen inicial
-if (Array.isArray(REF_CONS) && REF_CONS.length) {
-  window.refreshConsumiblesFromExcel?.();
-  updateConsImage?.('cons_base_ref', 'img_cons_base');
-}
       }
 
       // Catálogo para cada sección
