@@ -2965,16 +2965,6 @@ selector.innerHTML = `
     updateBorneImage(id, map[id]);
   });
 });
-
-Object.keys(borImgMap).forEach(selId => {
-  document.getElementById(selId)?.addEventListener('change', () => {
-    updateBorneImage(selId, borImgMap[selId]);
-  });
-});
-
-Object.keys(borImgMap).forEach(selId => {
-  updateBorneImage(selId, borImgMap[selId]);
-});
   
 // Helper normalizador de texto
 const n = (v) => (v || '')
@@ -3005,66 +2995,6 @@ function normRango(v){
     .replace(/[–—−]/g, '-')                  // en dash/em dash/minus -> "-"
     .replace(/\s*/g,'')                      // quita TODOS los espacios
     .trim();
-}
-
-// === VERSIÓN ALTERNATIVA MÁS SIMPLE ===
-function fillBorneRefs(selectId, funcionFilter, calibreFilter = null, rangoFilter = null) {
-  const sel = document.getElementById(selectId);
-  if (!sel) return;
-
-  const prev = sel.value;
-  sel.innerHTML = '<option value="">– Seleccionar –</option>';
-  
-  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
-
-  // Convertir filtros a minúsculas y limpiar
-  const funcionTarget = (funcionFilter || '').toLowerCase().trim();
-  const calibreTarget = calibreFilter ? (calibreFilter || '').toLowerCase().trim() : null;
-
-  // Filtrar
-  const matches = REF_BOR.filter(r => {
-    const funcionExcel = (r.funcion || '').toLowerCase().trim();
-    const calibreExcel = (r.calibre || '').toLowerCase().trim();
-    
-    // Verificar función
-    if (!funcionExcel.includes(funcionTarget) && !funcionTarget.includes(funcionExcel)) {
-      return false;
-    }
-    
-    // Verificar calibre si hay filtro
-    if (calibreTarget && calibreExcel) {
-      // Buscar coincidencias parciales
-      if (!calibreExcel.includes(calibreTarget) && !calibreTarget.includes(calibreExcel)) {
-        return false;
-      }
-    }
-
-// Verificar rango si hay filtro (solo aplica a plaquitas)
-if (rangoFilter) {
-  const rangoExcel  = (getRangoRow(r) || '').toString().trim();
-  const rangoTarget = (rangoFilter || '').toString().trim();
-  if (rangoExcel !== rangoTarget) return false; // exacto
-}
-
-    return true;
-  });
-
-  // Obtener referencias únicas
-  const refs = Array.from(new Set(
-    matches
-      .map(r => r.referencia)
-      .filter(ref => ref && ref.trim() !== '')
-  ));
-
-  // Llenar el select
-  refs.forEach(ref => {
-    const o = document.createElement('option');
-    o.value = ref;
-    o.textContent = ref;
-    sel.appendChild(o);
-  });
-
-  if (refs.includes(prev)) sel.value = prev;
 }
 
 function fillPlaquitaRangos() {
