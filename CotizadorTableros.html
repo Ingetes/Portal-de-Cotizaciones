@@ -299,7 +299,10 @@ function updateBorneImage(selectId, imgId){
   const img = document.getElementById(imgId);
   if (!sel || !img) return;
 
-  const clean = (v) => (v ?? '').toString().trim();
+const clean = (v) => (v ?? '')
+  .toString()
+  .replace(/\u00A0/g,' ')   // NBSP
+  .trim();
   const ref = clean(sel.value);
 
   if (!ref || !Array.isArray(REF_BOR) || !REF_BOR.length){
@@ -310,7 +313,9 @@ function updateBorneImage(selectId, imgId){
 
   const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
   const row = REF_BOR.find(r => normRef(r.referencia) === normRef(ref));
-  const file = clean(row?.imagen);
+let file = clean(row?.imagen);
+file = file.replace(/\\/g,'/'); // si el Excel trae rutas con "\"
+file = file.replace(/\s+/g,' '); // por si viene con dobles espacios
   if (!file){
     img.style.display = 'none';
     img.removeAttribute('src');
