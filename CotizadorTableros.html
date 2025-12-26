@@ -2980,7 +2980,7 @@ selector.innerHTML = `
 
 
 ['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
-  document.getElementById(id)?.addEventListener('change', () => {
+  root.querySelector('#' + id)?.addEventListener('change', () => {
     const map = {
       bor_ind_ref: 'img_bor_ind',
       bor_porta_ref: 'img_bor_porta',
@@ -3166,18 +3166,9 @@ window.refreshBornesFromExcel = function () {
   updateBorneImage('bor_otros_ref',  'img_bor_otros');
 };
 
-// Si el Excel ya estaba cargado, refrescamos de una vez
-if (Array.isArray(REF_BOR) && REF_BOR.length) {
-  togglePlaquitaRangoUI();
-  window.refreshBornesFromExcel();
-}
-
-wrap.appendChild(root);
-return;
-
 // === Event listeners ===
 ['bor_ind_cal','bor_tierra_cal'].forEach(id => {
-  document.getElementById(id)?.addEventListener('change', () => {
+  root.querySelector('#' + id)?.addEventListener('change', () => {
     window.refreshBornesFromExcel();
   });
 });
