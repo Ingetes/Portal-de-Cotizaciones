@@ -1809,6 +1809,8 @@ function fillBorneRefs(selectId, funcionFilter, calibreFilter) {
   if (mapImg[selectId]) updateBorneImage(selectId, mapImg[selectId]);
 }
 
+window.fillBorneRefs = fillBorneRefs;
+
 // Listeners: cuando cambie el calibre, actualizamos las referencias
 ['bor_ind_cal','bor_tierra_cal'].forEach(id => {
   document.getElementById(id)?.addEventListener('change', () => {
@@ -1836,9 +1838,11 @@ function fillBorneRefs(selectId, funcionFilter, calibreFilter) {
   }
 
   // 👉 refrescar combos de bornes si la sección ya existe
-  if (window.refreshBornesFromExcel) {
-    window.refreshBornesFromExcel();
-  }
+try {
+  window.refreshBornesFromExcel?.();
+} catch (e) {
+  console.error('Error refrescando Bornes:', e);
+}
 
   // 🟣 Hoja 4: "Reles" / "Relés"
   const sheetRel =
