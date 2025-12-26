@@ -3179,8 +3179,23 @@ root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
 });
 
 root.querySelector('#bor_pla_rango')?.addEventListener('change', () => {
-  // ✅ filtra SOLO con el rango (no recarga todo)
-  fillPlaquitaRefsByRango(root.querySelector('#bor_pla_rango')?.value || '');
+  const rango = root.querySelector('#bor_pla_rango')?.value || '';
+
+  // ✅ borrar selección anterior de referencia
+  const refSel = root.querySelector('#bor_otros_ref');
+  if (refSel) refSel.value = '';
+
+  // ✅ rellenar refs segun el rango
+  fillPlaquitaRefsByRango(rango);
+
+  // ✅ si quedó 1 sola referencia, dejarla seleccionada (o la primera si hay varias)
+  if (refSel && refSel.options.length > 1) {
+    // opción 0 es "– Seleccionar –"
+    refSel.value = refSel.options[1].value;
+  }
+
+  // ✅ refrescar imagen de la referencia nueva
+  updateBorneImage('bor_otros_ref', 'img_bor_otros');
 });
 
         // Helper para agregar filas a la tabla de bornes
