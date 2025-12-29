@@ -774,11 +774,24 @@ function actualizarBornesAuto() {
 </div>
 
 <div id="wrap_acc_pe_collar" style="display:none">
-  <label>Referencia Collar de protección</label>
-  <select id="acc_pe_collar_ref">
-    <option value="">– Seleccionar –</option>
-    <!-- Se llenará desde el Excel -->
-  </select>
+  <div class="acc-row-fields grid three" style="margin-top:8px">
+    <div>
+      <label>Descuento Collar (%)</label>
+      <input id="acc_pe_collar_desc" type="number" min="0" max="100" step="1" value="55">
+    </div>
+
+    <div>
+      <label>Referencia Collar de protección</label>
+      <select id="acc_pe_collar_ref">
+        <option value="">– Seleccionar –</option>
+        <!-- Se llenará desde el Excel -->
+      </select>
+    </div>
+
+    <div class="acc-img-wrap">
+      <img id="img_acc_pe_collar" class="acc-img" style="display:none;">
+    </div>
+  </div>
 </div>
               <div>
                 <label>&nbsp;</label>
@@ -1126,9 +1139,14 @@ document.getElementById('acc_pe_collar')?.addEventListener('change', (e) => {
   if (e.target.value === 'si') {
     wrap.style.display = 'block'; // Mostrar
     updateCollarRefs();           // <-- ESTA LÍNEA
+    setTimeout(() => updateAccImage('acc_pe_collar_ref', 'img_acc_pe_collar'), 0);
   } else {
     wrap.style.display = 'none'; // Ocultar
   }
+});
+
+document.getElementById('acc_pe_collar_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pe_collar_ref', 'img_acc_pe_collar');
 });
 
 // Llamamos a la función para llenar las referencias cuando cargue el Excel
@@ -1212,7 +1230,8 @@ section.querySelector('[data-acc="pulsador_doble"]')?.addEventListener('click',(
 // Evento "Agregar a la tabla" de Paro de emergencia
 section.querySelector('[data-acc="paro_emerg"]')?.addEventListener('click', () => {
   const qty   = Number(document.getElementById('acc_pe_qty')?.value || 0);
-  const dscto = document.getElementById('acc_pe_desc')?.value || 0;
+const dscto = Number(document.getElementById('acc_pe_desc')?.value || 0);
+const collarDscto = Number(document.getElementById('acc_pe_collar_desc')?.value || dscto);
 
   const paroRef   = document.getElementById('acc_pe_ref')?.value || '';
   const collarSel = document.getElementById('acc_pe_collar')?.value || '';
@@ -1222,9 +1241,9 @@ section.querySelector('[data-acc="paro_emerg"]')?.addEventListener('click', () =
   pushAccRow('Paro de emergencia', qty, paroRef, dscto);
 
   // 2) Fila del collar (si aplica) -> REFERENCIA = collarRef, DESCRIPCIÓN normal
-  if (collarSel === 'si' && collarRef) {
-    pushAccRow('Collar de protección', qty, collarRef, dscto);
-  }
+if (collarSel === 'si' && collarRef) {
+  pushAccRow('Collar de protección', qty, collarRef, collarDscto);
+}
 });
 
   // 5) Piloto
@@ -4467,13 +4486,15 @@ selector.innerHTML = `
         <label>Tamaño</label>
         <select id="cons_canaleta_tam">
           <option value="">– Seleccionar –</option>
-          <option value="13 x 7 mm">13 x 7 mm</option>
-          <option value="20 x 12 mm">20 x 12 mm</option>
-          <option value="32 x 12 mm">32 x 12 mm</option>
-          <option value="40 x 22 mm">40 x 22 mm</option>
+          <option value="100 x 100 mm">100 x 100 mm</option>
+          <option value="25 x 25 mm">25 x 25 mm</option>
+          <option value="40 x 40 mm">40 x 40 mm</option>
           <option value="60 x 40 mm">60 x 40 mm</option>
-          <option value="100 x 40 mm">100 x 40 mm</option>
-          <option value="100 x 60 mm">100 x 60 mm</option>
+          <option value="60 x 60 mm">60 x 60 mm</option>
+          <option value="25 x 40 mm">25 x 40 mm</option>
+          <option value="60 x 80 mm">60 x 80 mm</option>
+          <option value="80 x 80 mm">80 x 80 mm</option>
+          <option value="60 x 80 mm">60 x 80 mm</option>
         </select>
       </div>
 
