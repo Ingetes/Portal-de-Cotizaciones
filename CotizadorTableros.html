@@ -771,26 +771,7 @@ function actualizarBornesAuto() {
     <option value="no">No</option>
   </select>
 </div>
-<div id="wrap_acc_pe_collar" style="display:none">
-  <div class="acc-row-fields grid three" style="margin-top:8px">
-    <div>
-      <label>Descuento Collar (%)</label>
-      <input id="acc_pe_collar_desc" type="number" min="0" max="100" step="1" value="55">
-    </div>
 
-    <div>
-      <label>Referencia Collar de protección</label>
-      <select id="acc_pe_collar_ref">
-        <option value="">– Seleccionar –</option>
-        <!-- Se llenará desde el Excel -->
-      </select>
-    </div>
-
-    <div class="acc-img-wrap">
-      <img id="img_acc_pe_collar" class="acc-img" style="display:none;">
-    </div>
-  </div>
-</div>
               <div>
                 <label>&nbsp;</label>
                 <button type="button" class="btn primary acc-add" data-acc="paro_emerg">
@@ -802,6 +783,28 @@ function actualizarBornesAuto() {
 </div>
             </div>
           </div>
+<!-- Sub-sección: Collar de protección (aparte, como accesorio prolongado) -->
+<div id="wrap_acc_pe_collar" style="display:none; margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);">
+  <div class="params-title">Collar de protección</div>
+
+  <div class="acc-row-fields grid three" style="margin-top:8px">
+    <div>
+      <label>Descuento Collar (%)</label>
+      <input id="acc_pe_collar_desc" type="number" min="0" max="100" step="1" value="55">
+    </div>
+
+    <div>
+      <label>Referencia Collar de protección</label>
+      <select id="acc_pe_collar_ref">
+        <option value="">– Seleccionar –</option>
+      </select>
+    </div>
+
+    <div class="acc-img-wrap">
+      <img id="img_acc_pe_collar" class="acc-img" style="display:none;">
+    </div>
+  </div>
+</div>
 </details>
 
           <!-- 4. Piloto (lámpara de señalización) -->
