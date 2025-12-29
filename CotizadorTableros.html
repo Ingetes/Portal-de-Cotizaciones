@@ -787,7 +787,7 @@ function actualizarBornesAuto() {
 <div id="wrap_acc_pe_collar" style="display:none; margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);">
   <div class="params-title">Collar de protección</div>
 
-  <div class="acc-row-fields grid three" style="margin-top:8px">
+ <div class="acc-row-fields grid four" style="margin-top:8px">
     <div>
       <label>Descuento Collar (%)</label>
       <input id="acc_pe_collar_desc" type="number" min="0" max="100" step="1" value="55">
@@ -799,7 +799,12 @@ function actualizarBornesAuto() {
         <option value="">– Seleccionar –</option>
       </select>
     </div>
-
+<div>
+  <label>&nbsp;</label>
+  <button type="button" class="btn primary" id="btn_add_pe_collar">
+    Agregar a la tabla
+  </button>
+</div>
     <div class="acc-img-wrap">
       <img id="img_acc_pe_collar" class="acc-img" style="display:none;">
     </div>
@@ -1228,6 +1233,28 @@ section.querySelector('[data-acc="pulsador_doble"]')?.addEventListener('click',(
   pushAccRow(desc, qty, ref, dscto);
 });
 
+document.getElementById('btn_add_pe_collar')?.addEventListener('click', () => {
+  const collarSel = document.getElementById('acc_pe_collar')?.value || '';
+  if (collarSel !== 'si') {
+    alert('⚠️ Selecciona "Sí" en Collar de protección para agregarlo.');
+    return;
+  }
+
+  const qty   = Number(document.getElementById('acc_pe_qty')?.value || 0);
+  const ref   = document.getElementById('acc_pe_collar_ref')?.value || '';
+  const dscto = Number(document.getElementById('acc_pe_collar_desc')?.value || 0);
+
+  if (!qty || qty <= 0) return;
+
+  // ✅ No permitir sin referencia (tu addRow ya lo bloquea, pero mejor UX)
+  if (!ref) {
+    alert('⚠️ Debes seleccionar la referencia del collar.');
+    return;
+  }
+
+  pushAccRow('Collar de protección', qty, ref, dscto);
+});
+      
 // Evento "Agregar a la tabla" de Paro de emergencia
 section.querySelector('[data-acc="paro_emerg"]')?.addEventListener('click', () => {
   const qty   = Number(document.getElementById('acc_pe_qty')?.value || 0);
@@ -1238,13 +1265,14 @@ const collarDscto = Number(document.getElementById('acc_pe_collar_desc')?.value 
   const collarSel = document.getElementById('acc_pe_collar')?.value || '';
   const collarRef = document.getElementById('acc_pe_collar_ref')?.value || '';
 
-  // 1) Fila del paro (normal)
-  pushAccRow('Paro de emergencia', qty, paroRef, dscto);
+  if (!qty || qty <= 0) return;
 
-  // 2) Fila del collar (si aplica) -> REFERENCIA = collarRef, DESCRIPCIÓN normal
-if (collarSel === 'si' && collarRef) {
-  pushAccRow('Collar de protección', qty, collarRef, collarDscto);
-}
+  if (!ref) {
+    alert('⚠️ Debes seleccionar la referencia del paro de emergencia.');
+    return;
+  }
+
+  pushAccRow('Paro de emergencia', qty, ref, dscto);
 });
 
   // 5) Piloto
