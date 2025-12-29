@@ -1258,12 +1258,8 @@ document.getElementById('btn_add_pe_collar')?.addEventListener('click', () => {
 // Evento "Agregar a la tabla" de Paro de emergencia
 section.querySelector('[data-acc="paro_emerg"]')?.addEventListener('click', () => {
   const qty   = Number(document.getElementById('acc_pe_qty')?.value || 0);
-const dscto = Number(document.getElementById('acc_pe_desc')?.value || 0);
-const collarDscto = Number(document.getElementById('acc_pe_collar_desc')?.value || dscto);
-
-  const paroRef   = document.getElementById('acc_pe_ref')?.value || '';
-  const collarSel = document.getElementById('acc_pe_collar')?.value || '';
-  const collarRef = document.getElementById('acc_pe_collar_ref')?.value || '';
+  const dscto = Number(document.getElementById('acc_pe_desc')?.value || 0);
+  const ref   = document.getElementById('acc_pe_ref')?.value || '';
 
   if (!qty || qty <= 0) return;
 
