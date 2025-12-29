@@ -4253,6 +4253,10 @@ window.refreshAccTabFromExcel = function () {
           const dsct = document.getElementById('acc_tab_toma_desc')?.value || 0;
           const ref  = document.getElementById('acc_tab_toma_ref')?.value || '';
           if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
           pushAccTabRow('Tomacorriente', qty, ref, dsct);
         });
 
@@ -4261,6 +4265,10 @@ window.refreshAccTabFromExcel = function () {
           const dsct = document.getElementById('acc_tab_lam_desc')?.value || 0;
           const ref  = document.getElementById('acc_tab_lam_ref')?.value || '';
           if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
           pushAccTabRow('Lámpara LED', qty, ref, dsct);
         });
 
@@ -4269,6 +4277,10 @@ window.refreshAccTabFromExcel = function () {
           const dsct = document.getElementById('acc_tab_micro_desc')?.value || 0;
           const ref  = document.getElementById('acc_tab_micro_ref')?.value || '';
           if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
           pushAccTabRow('Microswitch', qty, ref, dsct);
         });
 
@@ -4277,6 +4289,10 @@ window.refreshAccTabFromExcel = function () {
           const dsct = document.getElementById('acc_tab_transf_desc')?.value || 0;
           const ref  = document.getElementById('acc_tab_transf_ref')?.value || '';
           if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
           pushAccTabRow('Transformador', qty, ref, dsct);
         });
 
@@ -4852,6 +4868,27 @@ function initAccesoriosPuerta(){
 function addRow(key, item={ref:'',desc:'',qty:1,u:'und',vu:0,descuento:0,vlista:''}) {
   const sect = document.querySelector(`.section[data-key="${key}"]`);
   const tbody = sect.querySelector('tbody');
+const sect = document.querySelector(`.section[data-key="${key}"]`);
+const tbody = sect.querySelector('tbody');
+
+// ❌ No permitir agregar sin referencia (excepto tablero)
+if (key !== 'tablero' && !item.ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
+
+// 🚫 Evitar referencias duplicadas
+if (item.ref) {
+  const exists = [...tbody.querySelectorAll('tr')].some(tr => {
+    const refInput = tr.querySelector('td input');
+    return refInput && refInput.value === item.ref;
+  });
+
+  if (exists) {
+    alert('ℹ️ Esta referencia ya fue agregada a la tabla.');
+    return;
+  }
+}
   const tr = document.createElement('tr');
 
   if (key === 'acc_puerta') {
