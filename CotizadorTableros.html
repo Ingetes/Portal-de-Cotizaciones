@@ -290,6 +290,7 @@ function actualizarIOAjustadas() {
   setIntUp("ea_ajustadas", ea * fs);
   setIntUp("sa_ajustadas", sa * fs);
 if (typeof window.syncRelQtyFromSD === 'function') window.syncRelQtyFromSD();
+if (typeof actualizarTermoencogibleAuto === 'function') actualizarTermoencogibleAuto();
 }
 
 window.syncRelQtyFromSD = function () {
@@ -530,16 +531,19 @@ function updateBrkImage(selectRefId, imgId){
 }
 
 function actualizarTermoencogibleAuto() {
-  const paso  = Number(document.getElementById("bor_ind_qty")?.value || 0);
-  const tierra= Number(document.getElementById("bor_tierra_qty")?.value || 0);
-  const porta = Number(document.getElementById("bor_porta_qty")?.value || 0);
+  // ✅ Total señales = ED + SD + EA + SA (todas AJUSTADAS)
+  const ed = Number(document.getElementById("ed_ajustadas")?.value || 0);
+  const sd = Number(document.getElementById("sd_ajustadas")?.value || 0);
+  const ea = Number(document.getElementById("ea_ajustadas")?.value || 0);
+  const sa = Number(document.getElementById("sa_ajustadas")?.value || 0);
 
-  const totalBornas = paso + tierra + porta;
+  const totalSenales = ed + sd + ea + sa;
 
-  // (((bornas paso + tierra + portafusible) * 1.2) * 2) / 20
-  const cartuchosRaw = (totalBornas * 1.2 * 2) / 20;
+  // ✅ Misma lógica que venías usando:
+  // +20% de reserva y x2 marquillas por señal (si esa era tu intención)
+  const cartuchosRaw = (totalSenales * 1.2 * 2) / 20;
 
-  const cartuchos = totalBornas > 0 ? Math.ceil(cartuchosRaw) : 0;
+  const cartuchos = totalSenales > 0 ? Math.ceil(cartuchosRaw) : 0;
 
   const el = document.getElementById("cons_termo_qty");
   if (el) el.value = cartuchos;
@@ -573,8 +577,6 @@ function actualizarBornesAuto() {
   setVal("bor_tierra_qty", bornesTierra);
   setVal("bor_ind_qty", bornesPaso);
 
-  // ✅ NUEVO: recalcula termo y fusibles cuando cambian bornes
-  if (typeof actualizarTermoencogibleAuto === 'function') actualizarTermoencogibleAuto();
   actualizarFusiblesAuto();
 }
 
@@ -3788,7 +3790,7 @@ selector.innerHTML = `
           </select>
         </div>
         <div>
-          <label>Cantidad</label>
+          <label>Cantidad (paquete x 10 unidades)</label>
           <input id="rel_peine_qty" type="number" min="1" step="1" value="1">
         </div>
         <div>
