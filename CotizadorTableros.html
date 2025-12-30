@@ -391,6 +391,20 @@ function updateBorneImage(selectId, imgId){
   img.src = src;
 }
 
+function resolveImgSrc(file){
+  const clean = (v) => (v ?? '').toString().replace(/\u00A0/g,' ').trim();
+  let f = clean(file).replace(/\\/g,'/'); // por si Excel trae \
+
+  if (!f) return '';
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  if (/^https?:\/\//i.test(f)) return f;
+  if (f.startsWith('img/')) return base + f;
+  if (f.includes('/')) return base + f;  // viene con carpeta
+  return base + 'img/' + f;             // caso normal: solo "archivo.jpg"
+}
+
 function updateRelImage(selectId, imgId){
   const sel = document.getElementById(selectId);
   const img = document.getElementById(imgId);
@@ -1501,11 +1515,18 @@ const grid = document.createElement('div');
 grid.className = 'baliza-img-grid';
 
 function appendImg(row, label){
-  const file = (row?.imagen || '').toString().trim();
-  if (!file) return;
+  const file = row?.imagen || row?.Imagen || ''; // por si el parser la dejó con mayúscula
+  const src = resolveImgSrc(file);
+  if (!src) return;
+
   const img = document.createElement('img');
-  img.src = `/img/${file}`;
+  img.src = src;
   img.alt = `${label} ${row?.referencia || ''}`.trim();
+
+  img.onerror = () => {
+    console.warn('Baliza: imagen no encontrada', { label, ref: row?.referencia, file, src });
+  };
+
   grid.appendChild(img);
 }
 
