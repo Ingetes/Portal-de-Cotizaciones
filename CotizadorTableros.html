@@ -1,0 +1,5574 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Cotización de Tablero – INGETES</title>
+  <style>
+    :root{
+      --bg:#f6f8fb; --card:#fff; --ink:#0b1020; --muted:#6b7280; --line:#e5e7eb;
+      --brand:#16a34a; --brand2:#f59e0b; --radius:16px;
+    }
+.acc-img-wrap{
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.baliza-img-grid{
+  display:flex;
+  gap:8px;
+  margin-top:6px;
+
+  justify-content: center;   /* 🔥 CENTRA horizontalmente */
+  align-items: center;
+
+  overflow-x:auto;
+  overflow-y:hidden;
+  white-space:nowrap;
+  padding-bottom:6px;
+}
+
+.baliza-img-grid img{
+  flex:0 0 auto;
+  width:110px;
+  height:80px;
+  object-fit:contain;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:#fff;
+  padding:6px;
+}
+.baliza-pill{
+  display:inline-block;
+  margin:3px 6px 0 0;
+}
+
+.acc-img{
+  max-width: 180px;
+  max-height: 180px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px;
+  background: #fff;
+}
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    header{background:#fff;border-bottom:1px solid var(--line);padding:20px 12px}
+    header h1{margin:0;font-size:24px;font-weight:800}
+    header .sub{color:var(--muted);font-size:13px}
+    main{max-width:1200px;margin:0 auto;padding:18px 12px}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px;box-shadow:0 6px 18px rgba(0,0,0,.06)}
+    h2{margin:0 0 12px 0;font-size:18px}
+    label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+    input[type=text],input[type=number],input[type=date],select{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-size:13px}
+    input:focus,select:focus{outline:none;border-color:#9aa7b4;box-shadow:0 0 0 3px rgba(2,132,199,.15)}
+    .grid{display:grid;gap:10px}
+@media (min-width:900px){
+  .two{grid-template-columns:repeat(2,1fr)}
+  .three{grid-template-columns:repeat(3,1fr)}
+  .four{grid-template-columns:repeat(4,1fr)}
+  .five{grid-template-columns:repeat(5,1fr)}
+  .six{grid-template-columns:repeat(6,1fr)} /* 6 columnas iguales */
+  .seven{grid-template-columns:repeat(7,1fr)} /* 7 columnas iguales */
+  .eight{grid-template-columns:repeat(8,1fr)}
+}
+    .section{border:1px solid var(--line);border-radius:12px;overflow:hidden}
+    .section > header{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f1f5f9;border-bottom:1px solid var(--line)}
+    .section .body{
+      padding:10px 12px 12px 12px;
+    }    
+    .section h3{margin:0;font-size:16px}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;font-weight:600;font-size:12px}
+    .btn.primary{background:var(--brand);color:#fff;border-color:#16a34a}
+    .btn.ghost{background:#f3f4f6}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:middle;font-size:13px}
+    th{background:#f1f5f9;font-weight:700}
+    td.right{text-align:right}
+    .pill{background:#f1f5f9;border:1px solid var(--line);border-radius:20px;padding:6px 10px;font-weight:700;font-size:12px}
+    .row-actions button{padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:11px}
+    .note{color:var(--muted);font-size:12px}
+    .warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:8px 12px}
+    .params{padding:10px 12px;border-bottom:1px solid var(--line);background:#f9fafb}
+    .params-title{font-size:12px;font-weight:600;margin-bottom:6px;color:#111827}
+
+    /* Sección accesorios de puerta */
+    .acc-rows{padding:10px 12px 12px 12px}
+    .acc-row{margin-bottom:10px;border-bottom:1px dashed var(--line);padding-bottom:8px}
+    .acc-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+    .acc-row-label{font-size:13px;font-weight:600;margin-bottom:4px;color:#111827}
+
+/* Accordion para subsecciones (Accesorios de puerta) */
+details.acc-accordion{border:1px solid var(--line);border-radius:14px;background:#fff;margin:10px 0;overflow:hidden}
+details.acc-accordion > summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:700;display:flex;align-items:center;justify-content:space-between;gap:10px}
+details.acc-accordion > summary::-webkit-details-marker{display:none}
+details.acc-accordion .chev{transition:transform .18s ease}
+details.acc-accordion[open] .chev{transform:rotate(90deg)}
+.acc-accordion-inner{padding:12px 14px;border-top:1px solid var(--line);background:#fff}
+.acc-hidden-label{display:none}
+
+    .acc-row-fields{margin-left:6px}
+    .inline-pair{display:flex;gap:6px}
+    .inline-pair > div{flex:1}
+    .acc-checkboxes{display:flex;flex-wrap:wrap;gap:6px}
+    .acc-checkboxes label{display:flex;align-items:center;gap:4px;font-size:12px;margin-bottom:0}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cotización de Tablero</h1>
+    <div class="sub">INGETES S.A.S.</div>
+  </header>
+  <main>
+    <!-- Datos generales del tablero -->
+<div class="card">
+  <h2>1) Datos del tablerooo</h2>
+
+  <!-- Descripción del tablero + FS lado a lado -->
+  <div class="grid two" style="margin-top:0;align-items:flex-end">
+    <div>
+      <label>Descripción del tablero</label>
+      <input id="f_desc_tablero" type="text" placeholder="Descripción general del tablero"/>
+    </div>
+    <div style="max-width:140px">
+      <label>Nombre de la cotización</label>
+      <input id="f_nombre_cot" type="text" placeholder="Q000-AAA-00">
+    </div>
+  </div>
+
+  <!-- Factor de utilidad se mantiene como lo tenías -->
+  <div class="grid two" style="margin-top:0;align-items:flex-end">
+  <div style="margin-top:10px;max-width:260px">
+    <label>Factor de utilidad (%)</label>
+    <input id="f_util" type="number" min="0" max="100" step="1" value="0"/>
+  </div>
+    <div style="max-width:140px">
+      <label>FS (factor de seguridad)</label>
+      <input id="f_fs" type="number" min="0" step="0.1" value="1" oninput="actualizarIOAjustadas(); actualizarBornesAuto()">
+    </div>
+  </div>
+</div>
+
+<div class="card" id="card_catalogo_refs" style="display:none">
+  <h2>📁 Cargar catálogo de referencias</h2>
+  <input type="file" id="file_refs" accept=".xlsx" />
+  <p class="note">Seleccione el archivo referencias_tablero.xlsx</p>
+</div>
+
+    <!-- Capacidades IO -->
+    <div class="card">
+      <h2>2) Capacidad de entradas y salidas</h2>
+<div class="grid eight">
+  <div>
+    <label>Entradas Digitales</label>
+    <input id="io_di" type="number" min="0" step="1" value="0" oninput="actualizarIOAjustadas(); actualizarBornesAuto()"/>
+  </div>
+
+  <div>
+    <label>Salidas Digitales</label>
+    <input id="io_do" type="number" min="0" step="1" value="0" oninput="actualizarIOAjustadas(); actualizarBornesAuto()"/>
+  </div>
+
+  <div>
+    <label>Entradas Analógicas</label>
+    <input id="io_ai" type="number" min="0" step="1" value="0" oninput="actualizarIOAjustadas(); actualizarBornesAuto()"/>
+  </div>
+
+  <div>
+    <label>Salidas Analógicas</label>
+    <input id="io_ao" type="number" min="0" step="1" value="0" oninput="actualizarIOAjustadas(); actualizarBornesAuto()"/>
+  </div>
+
+  <div>
+    <label>ED ajustadas (ED × FS)</label>
+    <input id="ed_ajustadas" type="number" readonly style="background:#eee;">
+  </div>
+
+  <div>
+    <label>SD ajustadas (SD × FS)</label>
+    <input id="sd_ajustadas" type="number" readonly style="background:#eee;">
+  </div>
+
+  <div>
+    <label>EA ajustadas (EA × FS)</label>
+    <input id="ea_ajustadas" type="number" readonly style="background:#eee;">
+  </div>
+
+  <div>
+    <label>SA ajustadas (SA × FS)</label>
+    <input id="sa_ajustadas" type="number" readonly style="background:#eee;">
+  </div>
+</div>
+      <p class="note" style="margin-top:6px">Estos valores pueden ajustar automáticamente cantidades de bornes, portafusibles y fusibles en el futuro.</p>
+    </div>
+
+    <!-- SECCIONES -->
+    <div class="card">
+      <h2>3) Parámetros del tablero y componentes</h2>
+      <p class="note">Primero se definen los parámetros de diseño de cada grupo (tablero, accesorios de puerta, breakers, bornes, etc.) y luego se detallan las referencias en la tabla inferior.</p>
+
+      <!-- Plantilla de tabla de materiales -->
+      <template id="tpl-table">
+        <div class="section">
+          <header>
+            <h3></h3>
+          </header>
+          <div class="body">
+            <!-- Parámetros previos propios de cada sección (material, IP, etc.) -->
+            <div class="params grid two"></div>
+
+            <!-- Selector de ítems para que el usuario NO escriba texto -->
+            <div class="selector grid three" style="margin:12px 0;align-items:flex-end">
+              <div>
+                <label>Función / descripción</label>
+                <select class="sel-desc"></select>
+              </div>
+              <div>
+                <label>Referencia</label>
+                <select class="sel-ref"></select>
+              </div>
+              <div>
+                <label>Cantidad</label>
+                <input type="number" class="sel-qty" min="1" step="1" value="1">
+              </div>
+              <div>
+                <button class="btn primary btn-add-row" type="button">
+                  Agregar a la tabla
+                </button>
+              </div>
+            </div>
+
+            <!-- Tabla final de materiales de la sección -->
+            <table>
+                <thead>
+                  <tr>
+                    <th style="width:150px">Referencia</th>
+                    <th>Descripción</th>
+                    <th style="width:80px">Cant.</th>
+                    <th style="width:120px" class="right">V/Lista</th>
+                    <th style="width:120px" class="right">Descuento (%)</th>
+                    <th style="width:120px" class="right">Total</th>
+                    <th style="width:70px"></th>
+                  </tr>
+                </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+      <div id="wrap-sections" class="grid" style="gap:14px"></div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="card" style="display:flex;gap:8px;justify-content:flex-end;align-items:center">
+      <div class="warn" id="msg" style="display:none"></div>
+      <button class="btn ghost" id="btn-reset" type="button">Reiniciar</button>
+      <button class="btn ghost" id="btn-copy-refs" type="button"> Copiar referencias </button>    
+      <button class="btn primary" id="btn-export" type="button">Exportar Excel</button>
+    </div>
+  </main>
+  <script>
+
+document.getElementById('btn-copy-refs')?.addEventListener('click', () => {
+  const refs = [];
+
+  document.querySelectorAll('.section table tbody tr').forEach(tr => {
+    const tdRef = tr.querySelector('td:first-child input, td:first-child select');
+    const ref = tdRef?.value?.trim();
+    if (ref) refs.push(ref);
+  });
+
+  if (!refs.length) {
+    alert('No hay referencias para copiar');
+    return;
+  }
+
+  const texto = refs.join('\n');
+
+  navigator.clipboard.writeText(texto)
+    .then(() => {
+      console.log('Referencias copiadas');
+      // si quieres feedback visual rápido:
+      alert(`✔ ${refs.length} referencias copiadas al portapapeles`);
+    })
+    .catch(err => {
+      console.error(err);
+      alert('No se pudo copiar al portapapeles');
+    });
+});
+
+function actualizarIOAjustadas() {
+  const fs = parseFloat(document.getElementById("f_fs")?.value) || 1;
+
+  const ed = parseFloat(document.getElementById("io_di")?.value) || 0;
+  const sd = parseFloat(document.getElementById("io_do")?.value) || 0;
+  const ea = parseFloat(document.getElementById("io_ai")?.value) || 0;
+  const sa = parseFloat(document.getElementById("io_ao")?.value) || 0;
+
+  const setIntUp = (id, v) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // ✅ Entero hacia arriba, pero 0 se queda 0
+    el.value = v > 0 ? Math.ceil(v) : 0;
+  };
+
+  // ✅ Ajustadas enteras (si prefieres ver decimales aquí, me dices y lo dejamos solo en bornes)
+  setIntUp("ed_ajustadas", ed * fs);
+  setIntUp("sd_ajustadas", sd * fs);
+  setIntUp("ea_ajustadas", ea * fs);
+  setIntUp("sa_ajustadas", sa * fs);
+if (typeof window.syncRelQtyFromSD === 'function') window.syncRelQtyFromSD();
+if (typeof actualizarTermoencogibleAuto === 'function') actualizarTermoencogibleAuto();
+}
+
+window.syncRelQtyFromSD = function () {
+  const sd = Number(document.getElementById('sd_ajustadas')?.value || 0);
+  const qty = sd > 0 ? sd : 0;
+
+  // Relé slim y relé universal: qty = SD ajustadas
+  ['rel_bloq_qty', 'rel_univ_qty'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = qty;
+  });
+};
+
+// compatibilidad por si quedó alguna llamada vieja
+function actualizarSDAjustadas() { actualizarIOAjustadas(); }
+
+function updateBorneImage(selectId, imgId){
+  const sel = document.getElementById(selectId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '')
+    .toString()
+    .replace(/\u00A0/g,' ')   // NBSP de Excel
+    .trim();
+
+  const ref = clean(sel.value);
+
+  // 👇 OJO: si REF_BOR NO existe, esto antes te explotaba
+  if (!ref || !Array.isArray(window.REF_BOR || REF_BOR) || !(window.REF_BOR || REF_BOR).length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const BOR = (Array.isArray(REF_BOR) && REF_BOR.length) ? REF_BOR : (window.REF_BOR || []);
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = BOR.find(r => normRef(r.referencia) === normRef(ref));
+
+  let file = clean(row?.imagen);
+
+  // normaliza rutas estilo Windows
+  file = file.replace(/\\/g,'/');
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  // ✅ regla PRO: todo lo que no sea URL lo resolvemos dentro de /img/
+  if (!/^https?:\/\//i.test(file)) {
+    file = file.replace(/^\.?\//,'');     // quita ./ o /
+    if (!file.startsWith('img/')) file = 'img/' + file;  // fuerza prefijo img/
+  }
+
+  const src = /^https?:\/\//i.test(file)
+    ? file
+    : new URL(file, location.href).href;
+
+  img.onload = () => { img.style.display = 'inline-block'; };
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    console.warn('Imagen Bornes no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+}
+
+function updateRelImage(selectId, imgId){
+  const sel = document.getElementById(selectId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '').toString().trim();
+  const ref = clean(sel.value);
+
+  if (!ref || !Array.isArray(REF_REL) || !REF_REL.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = REF_REL.find(r => normRef(r.referencia) === normRef(ref));
+
+  // 👇 toma el nombre desde la columna "imagen" del Excel
+  const file = clean(row?.imagen);
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  // base = misma carpeta donde vive tu HTML en GitHub Pages
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  let src;
+  if (/^https?:\/\//i.test(file)) {
+    src = file;
+  } else if (file.startsWith('img/')) {
+    src = base + file;
+  } else if (file.includes('/')) {
+    src = base + file;
+  } else {
+    src = base + 'img/' + file;
+  }
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    console.warn('Imagen Relés no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
+}
+
+function updateAccImage(selectRefId, imgId){
+  const ref = document.getElementById(selectRefId)?.value || '';
+  const img = document.getElementById(imgId);
+  if (!img) return;
+
+  if (!ref || !Array.isArray(REF_AP) || !REF_AP.length){
+    img.style.display = 'none';
+    img.src = '';
+    return;
+  }
+
+  const row = REF_AP.find(r => (r.referencia || '').trim() === ref.trim());
+
+  if (row && row.imagen){
+    img.src = `${location.pathname.replace(/\/[^\/]*$/, '/') }img/${row.imagen}`;
+    img.style.display = 'inline-block';
+  } else {
+    img.style.display = 'none';
+    img.src = '';
+  }
+}
+
+function updateComImage(selectRefId, imgId){
+  const sel = document.getElementById(selectRefId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '').toString().replace(/\u00A0/g,' ').trim();
+  const ref = clean(sel.value);
+
+  if (!ref || !Array.isArray(REF_COM) || !REF_COM.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+  const row = REF_COM.find(r => normRef(r.referencia) === normRef(ref));
+  const file = clean(row?.imagen);
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  let src;
+  if (/^https?:\/\//i.test(file)) src = file;
+  else if (file.startsWith('img/')) src = base + file;
+  else if (file.includes('/')) src = base + file;
+  else src = base + 'img/' + file;
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    console.warn('Imagen Comunicaciones no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
+}
+
+function updateBrkImage(selectRefId, imgId){
+  const sel = document.getElementById(selectRefId);
+  const img = document.getElementById(imgId);
+  if (!sel || !img) return;
+
+  const clean = (v) => (v ?? '')
+    .toString()
+    .replace(/\u00A0/g,' ') // NBSP
+    .trim();
+
+  const ref = clean(sel.value);
+  if (!ref || !Array.isArray(REF_BRK) || !REF_BRK.length){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  // normaliza referencias para comparar (quita NBSP, espacios dobles, etc.)
+  const normRef = (v) => clean(v).toUpperCase().replace(/\s+/g,' ');
+
+  const row = REF_BRK.find(r => normRef(r.referencia) === normRef(ref));
+  const file = clean(row?.imagen);
+
+  if (!file){
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    return;
+  }
+
+  const base = `${location.origin}${location.pathname.replace(/\/[^\/]*$/, '/')}`;
+
+  // Si Excel ya trae ruta (con /) o trae "img/..." no le metemos "img/" a la fuerza
+  let src;
+  if (/^https?:\/\//i.test(file)) {
+    src = file;
+  } else if (file.startsWith('img/')) {
+    src = base + file;                 // ya viene con img/
+  } else if (file.includes('/')) {
+    src = base + file;                 // viene con carpeta tipo "interruptores/xxx.png"
+  } else {
+    src = base + 'img/' + file;        // caso normal: solo "xxx.png"
+  }
+
+  img.onerror = () => {
+    img.style.display = 'none';
+    img.removeAttribute('src');
+    // para depurar rápido en consola:
+    console.warn('Imagen no encontrada:', src, 'ref:', ref, 'file:', file);
+  };
+
+  img.src = src;
+  img.style.display = 'inline-block';
+}
+
+function actualizarTermoencogibleAuto() {
+  // ✅ Total señales = ED + SD + EA + SA (todas AJUSTADAS)
+  const ed = Number(document.getElementById("ed_ajustadas")?.value || 0);
+  const sd = Number(document.getElementById("sd_ajustadas")?.value || 0);
+  const ea = Number(document.getElementById("ea_ajustadas")?.value || 0);
+  const sa = Number(document.getElementById("sa_ajustadas")?.value || 0);
+
+  const totalSenales = ed + sd + ea + sa;
+
+  // ✅ Misma lógica que venías usando:
+  // +20% de reserva y x2 marquillas por señal (si esa era tu intención)
+  const cartuchosRaw = (totalSenales * 1.2 * 2) / 20;
+
+  const cartuchos = totalSenales > 0 ? Math.ceil(cartuchosRaw) : 0;
+
+  const el = document.getElementById("cons_termo_qty");
+  if (el) el.value = cartuchos;
+}
+
+function actualizarFusiblesAuto() {
+  const porta = Number(document.getElementById('bor_porta_qty')?.value || 0);
+  const fusibles = porta > 0 ? Math.ceil(porta * 1.2) : 0;
+
+  const el = document.getElementById('cons_fusible_qty');
+  if (el) el.value = fusibles;
+}
+
+function actualizarBornesAuto() {
+  const ia = parseFloat(document.getElementById("ea_ajustadas")?.value) || 0;
+  const oa = parseFloat(document.getElementById("sa_ajustadas")?.value) || 0;
+  const id = parseFloat(document.getElementById("ed_ajustadas")?.value) || 0;
+
+  const totalAnalog = ia + oa;
+
+  const bornesPorta  = totalAnalog > 0 ? Math.ceil(totalAnalog) : 0;
+  const bornesTierra = totalAnalog > 0 ? Math.ceil(totalAnalog) : 0;
+  const bornesPaso   = (ia + (id * 2) + oa) > 0 ? Math.ceil(ia + (id * 2) + oa) : 0;
+
+  const setVal = (inputId, v) => {
+    const el = document.getElementById(inputId);
+    if (el) el.value = v;
+  };
+
+  setVal("bor_porta_qty", bornesPorta);
+  setVal("bor_tierra_qty", bornesTierra);
+  setVal("bor_ind_qty", bornesPaso);
+
+  actualizarFusiblesAuto();
+}
+
+    const moneyFmt = new Intl.NumberFormat('es-CO',{minimumFractionDigits:0,maximumFractionDigits:0});
+    const $ = (s,sc=document)=>sc.querySelector(s);
+    const $$ = (s,sc=document)=>Array.from(sc.querySelectorAll(s));
+    const cash = n => '$ ' + moneyFmt.format(Math.round(Number(n||0)));
+
+    // Definición de secciones y parámetros previos
+    const SECTIONS = [
+      {
+        key:'tablero',
+        title:'Tablero',
+    params:[
+      {
+        id:'p_tab_fab',
+        label:'Fabricación',
+        type:'select',
+        options:['Fabricado nacional','Retail'],
+        def:'-Seleccionar-'
+      },
+      {
+        id:'p_tab_material',
+        label:'Material del cofre',
+        type:'select',
+        options:['Cold Rolled Cl. 16 (interior)','Acero inoxidable (interior/exterior)','Poliéster reforzado (interior/exterior)'],
+        def:'-Seleccionar-'
+      },
+      { id:'p_tab_cant',  label:'Cantidad de tableros', type:'number', min:1, def:1 },
+      { id:'p_tab_alto',  label:'Alto (mm)',  type:'number', min:0, placeholder:'1000' },
+      { id:'p_tab_ancho', label:'Ancho (mm)', type:'number', min:0, placeholder:'600'  },
+      { id:'p_tab_fondo', label:'Fondo (mm)', type:'number', min:0, placeholder:'400' },
+    ]
+  },
+      {
+        key:'breakers',
+        title:'Interruptores',
+        params:[]
+      },
+      {
+        key:'bornes',
+        title:'Bornes',
+        params:[]
+      },
+      {
+        key:'reles',
+        title:'Relés',
+        params:[]
+      },
+      {
+        key:'consumibles',
+        title:'Consumibles',
+        params:[]
+      },
+      {
+        key:'acc_tablero',
+        title:'Accesorios para tablero',
+        params:[]
+      },
+      {
+        key:'comunicaciones',
+        title:'Comunicaciones',
+        params:[]
+      }
+    ];
+
+    const wrap = document.getElementById('wrap-sections');
+
+    function renderAccPuertaSection() {
+      const section = document.createElement('div');
+      section.className = 'section';
+      section.dataset.key = 'acc_puerta';
+      section.innerHTML = `
+  <header>
+    <h3>Accesorios de puerta</h3>
+  </header>
+  <div class="body">
+    <details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>1. Pulsadores</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+    <!-- 1. Pulsadores -->
+  <div class="acc-row-fields grid eight">
+    <div>
+      <label>Tipo</label>
+      <select id="acc_puls_tipo">
+        <option value="">– Seleccionar –</option>
+        <option value="normal">Normal</option>
+        <option value="luminoso">Luminoso</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Material</label>
+      <select id="acc_puls_mat">
+        <option value="">– Seleccionar –</option>
+        <!-- se llena desde Excel -->
+      </select>
+    </div>
+
+    <div>
+      <label>Color</label>
+      <select id="acc_puls_color">
+        <option value="">– Seleccionar –</option>
+        <!-- se llena desde Excel -->
+      </select>
+    </div>
+
+    <div id="wrap_acc_puls_tension" style="display:none">
+      <label>Tensión</label>
+      <select id="acc_puls_tension">
+        <option value="">– Seleccionar –</option>
+        <!-- se llena desde Excel -->
+      </select>
+    </div>
+
+    <div>
+      <label>Cantidad</label>
+      <input id="acc_puls_qty" type="number" min="0" step="1" value="1">
+    </div>
+
+    <div>
+      <label>Descuento (%)</label>
+      <input id="acc_puls_desc" type="number" min="0" max="100" step="1" value="55">
+    </div>
+
+    <div>
+      <label>Referencia</label>
+      <select id="acc_puls_ref">
+        <option value="">– Seleccionar –</option>
+        <!-- se llena desde Excel -->
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button type="button" class="btn primary acc-add" data-acc="pulsadores">
+        Agregar a la tabla
+      </button>
+    </div>
+      <div class="acc-img-wrap">
+        <img id="img_acc_pulsadores" class="acc-img" style="display:none;">
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 2. Pulsador doble iluminado -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>2. Pulsador doble iluminado</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+            <div class="acc-row-fields grid four">
+              <div>
+                <label>Cantidad</label>
+                <input id="acc_pdi_qty" type="number" min="0" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="acc_pdi_desc" type="number" min="0" max="100" step="1" value="55">
+              </div>
+              <!-- NUEVO: referencia -->
+              <div>
+                <label>Referencia</label>
+                <select id="acc_pdi_ref">
+                  <option value="">– Seleccionar –</option>
+                  <!-- luego aquí cargamos desde Excel -->
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary acc-add" data-acc="pulsador_doble">
+                  Agregar a la tabla
+                </button>
+              </div>
+              <div class="acc-img-wrap">
+                <img id="img_acc_pdi" class="acc-img" style="display:none;">
+              </div>
+            </div>
+          </div>
+</details>
+
+          <!-- 3. Paro de emergencia -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>3. Paro de emergencia</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+    <!-- 3. Paro de emergencia -->
+            <div class="acc-row-fields grid six">
+              <div>
+                <label>Cantidad</label>
+                <input id="acc_pe_qty" type="number" min="0" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="acc_pe_desc" type="number" min="0" max="100" step="1" value="55">
+              </div>
+  <div>
+    <label>Referencia</label>
+    <select id="acc_pe_ref">
+      <option value="">– Seleccionar –</option>
+      <!-- luego aquí cargamos desde Excel -->
+    </select>
+  </div>
+<div>
+  <label>Collar de protección</label>
+  <select id="acc_pe_collar">
+    <option value="">– Seleccionar –</option>
+    <option value="si">Sí</option>
+    <option value="no">No</option>
+  </select>
+</div>
+
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary acc-add" data-acc="paro_emerg">
+                  Agregar a la tabla
+                </button>
+              </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pe" class="acc-img" style="display:none;">
+</div>
+            </div>
+          </div>
+<!-- Sub-sección: Collar de protección (aparte, como accesorio prolongado) -->
+<div id="wrap_acc_pe_collar" style="display:none; margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);">
+  <div class="params-title">Collar de protección</div>
+
+ <div class="acc-row-fields grid four" style="margin-top:8px">
+    <div>
+      <label>Descuento Collar (%)</label>
+      <input id="acc_pe_collar_desc" type="number" min="0" max="100" step="1" value="55">
+    </div>
+
+    <div>
+      <label>Referencia Collar de protección</label>
+      <select id="acc_pe_collar_ref">
+        <option value="">– Seleccionar –</option>
+      </select>
+    </div>
+<div>
+  <label>&nbsp;</label>
+  <button type="button" class="btn primary" id="btn_add_pe_collar">
+    Agregar a la tabla
+  </button>
+</div>
+    <div class="acc-img-wrap">
+      <img id="img_acc_pe_collar" class="acc-img" style="display:none;">
+    </div>
+  </div>
+</div>
+</details>
+
+          <!-- 4. Piloto (lámpara de señalización) -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>4. Piloto (lámpara de señalización)</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+            <div class="acc-row-fields grid seven">
+              <div>
+                <label>Material</label>
+                <select id="acc_pil_mat">
+                  <option value="">– Seleccionar –</option>
+                  <option value="plastico">Plástico</option>
+                  <option value="metalico">Metálico</option>
+                </select>
+              </div>
+              <div>
+                <label>Color</label>
+                <select id="acc_pil_color">
+                  <option value="">– Seleccionar –</option>
+                  <option value="rojo">Rojo</option>
+                  <option value="amarillo">Amarillo</option>
+                  <option value="verde">Verde</option>
+                </select>
+              </div>
+    <div>
+      <label>Tensión</label>
+      <select id="acc_pil_tension">
+        <option value="">– Seleccionar –</option>
+        <option value="24">24 V</option>
+        <option value="110">110 V</option>
+        <option value="230">230 V</option>
+      </select>
+    </div>
+              <div>
+                <label>Cantidad</label>
+                <input id="acc_pil_qty" type="number" min="0" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="acc_pil_desc" type="number" min="0" max="100" step="1" value="55">
+              </div>
+  <div>
+    <label>Referencia</label>
+    <select id="acc_pil_ref">
+      <option value="">– Seleccionar –</option>
+      <!-- luego aquí cargamos desde Excel -->
+    </select>
+  </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary acc-add" data-acc="piloto">
+                  Agregar a la tabla
+                </button>
+              </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_pil" class="acc-img" style="display:none;">
+</div>
+            </div>
+          </div>
+</details>
+
+          <!-- 5. Muletilla -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>5. Muletilla</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">          
+  <div class="acc-row-fields grid eight">
+              <div>
+                <label>Material</label>
+                <select id="acc_mul_mat">
+                  <option value="">– Seleccionar –</option>
+                  <option value="plastico">Plástico</option>
+                  <option value="metalico">Metálico</option>
+                </select>
+              </div>
+              <div>
+                <label>Posiciones</label>
+                <select id="acc_mul_pos">
+                  <option value="">– Seleccionar –</option>
+                  <option value="2p">2 posiciones</option>
+                  <option value="3p">3 posiciones</option>
+                </select>
+              </div>
+<div>
+  <label>Señalización LED</label>
+  <select id="acc_mul_led">
+    <option value="">– Seleccionar –</option>
+    <option value="no">No</option>
+    <option value="si">Sí</option>
+  </select>
+</div>
+<div>
+  <label>Llave de seguridad</label>
+  <select id="acc_mul_key">
+    <option value="">– Seleccionar –</option>
+    <option value="si">Sí</option>
+    <option value="no">No</option>
+  </select>
+</div>
+              <div>
+                <label>Cantidad</label>
+                <input id="acc_mul_qty" type="number" min="0" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="acc_mul_desc" type="number" min="0" max="100" step="1" value="55">
+              </div>
+              <div>
+                <label>Referencia</label>
+                <select id="acc_mul_ref">
+                  <option value="">– Seleccionar –</option>
+                  <!-- luego aquí cargamos desde Excel -->
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary acc-add" data-acc="muletilla">
+                  Agregar a la tabla
+                </button>
+              </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_mul" class="acc-img" style="display:none;">
+</div>
+            </div>
+          </div>
+</details>
+
+          <!-- 6. Puerto ethernet -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>6. Puerto ethernet</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+            <div class="acc-row-fields grid five">
+              <div>
+                <label>Material</label>
+                <select id="acc_eth_mat">
+                  <option value="">– Seleccionar –</option>
+                  <option value="plastico">Plástico</option>
+                  <option value="metalico">Metálico</option>
+                </select>
+              </div>
+              <div>
+                <label>Cantidad</label>
+                <input id="acc_eth_qty" type="number" min="0" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="acc_eth_desc" type="number" min="0" max="100" step="1" value="55">
+              </div>
+  <div>
+    <label>Referencia</label>
+    <select id="acc_eth_ref">
+      <option value="">– Seleccionar –</option>
+      <!-- luego aquí cargamos desde Excel -->
+    </select>
+  </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary acc-add" data-acc="eth">
+                  Agregar a la tabla
+                </button>
+              </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_eth" class="acc-img" style="display:none;">
+</div>
+            </div>
+          </div>
+</details>
+
+          <!-- 7. Seccionador de potencia -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>7. Seccionador de potencia</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+            <div class="acc-row-fields grid six">
+              <div>
+                <label>Color</label>
+                <select id="acc_3ld_color">
+                  <option value="">– Seleccionar –</option>
+                  <option value="negro">Negro</option>
+                  <option value="rojo-amarillo">Rojo-amarillo</option>
+                </select>
+              </div>
+<div>
+  <label>Corriente térmica</label>
+  <select id="acc_3ld_corriente">
+    <option value="">– Seleccionar –</option>
+    <option value="16">16 A</option>
+    <option value="25">25 A</option>
+    <option value="32">32 A</option>
+    <option value="63">63 A</option>
+    <option value="100">100 A</option>
+    <option value="125">125 A</option>
+    <option value="160">160 A</option>
+    <option value="250">250 A</option>
+  </select>
+</div>
+              <div>
+                <label>Cantidad</label>
+                <input id="acc_3ld_qty" type="number" min="0" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="acc_3ld_desc" type="number" min="0" max="100" step="1" value="50">
+              </div>
+  <div>
+    <label>Referencia</label>
+    <select id="acc_3ld_ref">
+      <option value="">– Seleccionar –</option>
+      <!-- luego aquí cargamos desde Excel -->
+    </select>
+  </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary acc-add" data-acc="3ld">
+                  Agregar a la tabla
+                </button>
+              </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_3ld" class="acc-img" style="display:none;">
+</div>
+            </div>
+          </div>
+</details>
+
+<!-- 8. Puerto usb -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>8. Puerto usb</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+  <div class="acc-row-fields grid four">
+    <div>
+      <label>Cantidad</label>
+      <input id="acc_usb_qty" type="number" min="0" step="1" value="1">
+    </div>
+
+    <div>
+      <label>Descuento (%)</label>
+      <input id="acc_usb_desc" type="number" min="0" max="100" step="1" value="55">
+    </div>
+
+    <div>
+      <label>Referencia</label>
+      <select id="acc_usb_ref">
+        <option value="">– Seleccionar –</option>
+        <!-- se llena desde Excel -->
+      </select>
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button type="button" class="btn primary acc-add" data-acc="usb">
+        Agregar a la tabla
+      </button>
+    </div>
+<div class="acc-img-wrap">
+  <img id="img_acc_usb" class="acc-img" style="display:none;">
+</div>
+  </div>
+</div>
+</details>
+
+          <!-- 9. Baliza -->
+<details class="acc-accordion">
+  <summary class="acc-accordion-summary"><span>9. Baliza</span><span class="chev">▶</span></summary>
+  <div class="acc-accordion-inner">
+            <div class="acc-row-fields grid five">
+
+  <div>
+    <label>Kit</label>
+    <select id="acc_bal_kit">
+      <option value="">– Seleccionar –</option>
+      <option value="RAV">Baliza (Rojo, Amarillo, Verde)</option>
+      <option value="RV">Baliza (Rojo, Verde)</option>
+      <option value="RAVA">Baliza (Rojo, Amarillo, Verde, Acústico)</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Tensión</label>
+    <select id="acc_bal_tension">
+      <option value="">– Seleccionar –</option>
+      <option value="24">24 V</option>
+      <option value="115">115 V</option>
+      <option value="230">230 V</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Descuento (%)</label>
+    <input id="acc_bal_desc" type="number" min="0" max="100" step="1" value="55">
+  </div>
+
+  <div>
+    <label>Referencias del kit</label>
+    <div id="acc_bal_refs" class="note">–</div>
+  </div>
+
+  <div>
+    <label>&nbsp;</label>
+    <button type="button" class="btn primary acc-add" data-acc="baliza">
+      Agregar a la tabla
+    </button>
+  </div>
+
+  <div style="grid-column: 1 / -1;">
+    <div id="acc_bal_imgs" class="acc-img-wrap"></div>
+  </div>
+
+</div>
+        </div>
+</details>
+
+          <!-- Tabla de accesorios de puerta -->
+          <div style="margin-top:12px">
+            <table>
+              <thead>
+                <tr>
+                  <th style="width:150px">Referencia</th>
+                  <th>Descripción</th>
+                  <th style="width:80px">Cant.</th>
+                  <th style="width:120px" class="right">V/Lista</th>
+                  <th style="width:100px">Descuento (%)</th>
+                  <th style="width:120px" class="right">Total</th>
+                  <th style="width:70px"></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+ `;
+  wrap.appendChild(section);
+
+  // === Helpers para la tabla de accesorios de puerta ===
+  const accTableKey = 'acc_puerta';
+
+// Mostrar/ocultar "Referencia Collar de protección"
+document.getElementById('acc_pe_collar')?.addEventListener('change', (e) => {
+  const wrap = document.getElementById('wrap_acc_pe_collar');
+  if (e.target.value === 'si') {
+    wrap.style.display = 'block'; // Mostrar
+    updateCollarRefs();           // <-- ESTA LÍNEA
+    setTimeout(() => updateAccImage('acc_pe_collar_ref', 'img_acc_pe_collar'), 0);
+  } else {
+    wrap.style.display = 'none'; // Ocultar
+  }
+});
+
+document.getElementById('acc_pe_collar_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pe_collar_ref', 'img_acc_pe_collar');
+});
+
+// Llamamos a la función para llenar las referencias cuando cargue el Excel
+if (Array.isArray(REF_AP) && REF_AP.length) {
+  updateCollarRefs();
+}
+
+  function pushAccRow(desc, qty, ref, descPct){
+    if (!qty || qty <= 0) return;
+    addRow(accTableKey,{
+      ref: ref || '',
+      desc,
+      qty,
+      descuento: Number(descPct || 0)
+    });
+  }
+
+  // Helper para comparar categoría del Excel
+function normTxt(x){
+  return (x ?? '')
+    .toString()
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g,'')   // quita acentos
+    .replace(/\s+/g,' ');            // normaliza espacios
+}
+
+function catEq(r, expected){
+  return normTxt(r?.categoria) === normTxt(expected);
+}
+
+  // Helper para llenar combos de referencia desde REF_AP
+  function fillRefsFor(selectId, filterFn){
+    const sel = document.getElementById(selectId);
+    if (!sel) return;
+    sel.innerHTML = '<option value="">– Seleccionar –</option>';
+    if (!Array.isArray(REF_AP) || !REF_AP.length) return;
+    REF_AP.filter(filterFn).forEach(r=>{
+      if (!r.referencia) return;
+      const o = document.createElement('option');
+      o.value = r.referencia;
+      o.textContent = r.referencia;
+      sel.appendChild(o);
+    });
+  }
+
+function updateCollarRefs(){
+  fillRefsFor('acc_pe_collar_ref', r => catEq(r,'Collar de protección'));
+}
+
+  // === Eventos "Agregar a la tabla" ===
+
+// 1) Pulsadores (normal / luminoso)
+section.querySelector('[data-acc="pulsadores"]')?.addEventListener('click',()=>{
+  const tipo   = document.getElementById('acc_puls_tipo')?.value || '';
+  const mat    = document.getElementById('acc_puls_mat')?.value || '';
+  const color  = document.getElementById('acc_puls_color')?.value || '';
+  const tens   = document.getElementById('acc_puls_tension')?.value || '';
+  const qty    = Number(document.getElementById('acc_puls_qty')?.value || 0);
+  const dscto  = document.getElementById('acc_puls_desc')?.value || 0;
+  const ref    = document.getElementById('acc_puls_ref')?.value || '';
+
+  const isLum = (tipo === 'luminoso');
+  const desc  = isLum
+    ? `Pulsador luminoso ${mat} ${color} ${tens ? (tens + 'V') : ''}`.trim()
+    : `Pulsadores ${mat} ${color}`.trim();
+
+  pushAccRow(desc, qty, ref, dscto);
+});
+
+// 3) Pulsador doble iluminado
+section.querySelector('[data-acc="pulsador_doble"]')?.addEventListener('click',()=>{
+  const qty   = Number(document.getElementById('acc_pdi_qty')?.value || 0);
+  const dscto = document.getElementById('acc_pdi_desc')?.value || 0;
+  const ref   = document.getElementById('acc_pdi_ref')?.value || '';
+  const desc  = 'Pulsador doble iluminado';
+  pushAccRow(desc, qty, ref, dscto);
+});
+
+document.getElementById('btn_add_pe_collar')?.addEventListener('click', () => {
+  const collarSel = document.getElementById('acc_pe_collar')?.value || '';
+  if (collarSel !== 'si') {
+    alert('⚠️ Selecciona "Sí" en Collar de protección para agregarlo.');
+    return;
+  }
+
+  const qty   = Number(document.getElementById('acc_pe_qty')?.value || 0);
+  const ref   = document.getElementById('acc_pe_collar_ref')?.value || '';
+  const dscto = Number(document.getElementById('acc_pe_collar_desc')?.value || 0);
+
+  if (!qty || qty <= 0) return;
+
+  // ✅ No permitir sin referencia (tu addRow ya lo bloquea, pero mejor UX)
+  if (!ref) {
+    alert('⚠️ Debes seleccionar la referencia del collar.');
+    return;
+  }
+
+  pushAccRow('Collar de protección', qty, ref, dscto);
+});
+      
+// Evento "Agregar a la tabla" de Paro de emergencia
+section.querySelector('[data-acc="paro_emerg"]')?.addEventListener('click', () => {
+  const qty   = Number(document.getElementById('acc_pe_qty')?.value || 0);
+  const dscto = Number(document.getElementById('acc_pe_desc')?.value || 0);
+  const ref   = document.getElementById('acc_pe_ref')?.value || '';
+
+  if (!qty || qty <= 0) return;
+
+  if (!ref) {
+    alert('⚠️ Debes seleccionar la referencia del paro de emergencia.');
+    return;
+  }
+
+  pushAccRow('Paro de emergencia', qty, ref, dscto);
+});
+
+  // 5) Piloto
+  section.querySelector('[data-acc="piloto"]')?.addEventListener('click',()=>{
+    const mat   = document.getElementById('acc_pil_mat')?.value || '';
+    const color = document.getElementById('acc_pil_color')?.value || '';
+    const qty   = Number(document.getElementById('acc_pil_qty')?.value || 0);
+    const dscto = document.getElementById('acc_pil_desc')?.value || 0;
+    const ref   = document.getElementById('acc_pil_ref')?.value || '';
+    const desc  = `Piloto ${mat} ${color}`;
+    pushAccRow(desc, qty, ref, dscto);
+  });
+
+// 6) Muletilla
+section.querySelector('[data-acc="muletilla"]')?.addEventListener('click',()=>{
+  const mat   = document.getElementById('acc_mul_mat')?.value || '';
+  const pos   = document.getElementById('acc_mul_pos')?.value || '';
+  const led   = document.getElementById('acc_mul_led')?.value || ''; // <-- NUEVO
+
+  const qty   = Number(document.getElementById('acc_mul_qty')?.value || 0);
+  const dscto = document.getElementById('acc_mul_desc')?.value || 0;
+  const ref   = document.getElementById('acc_mul_ref')?.value || '';
+  const desc  = `Muletilla ${mat} ${pos}`;
+
+  // 1) Agrega la muletilla seleccionada
+  pushAccRow(desc, qty, ref, dscto);
+
+  // 2) Si requiere LED, agrega también la referencia fija del Excel (categoría: Muletilla señalizacion led)
+  if (led === 'si' && Array.isArray(REF_AP) && REF_AP.length){
+    const ledRow = REF_AP.find(r =>
+      catEq(r, 'Muletilla señalizacion led') || catEq(r, 'Muletilla señalización led')
+    );
+
+    if (ledRow?.referencia){
+      pushAccRow('Muletilla señalización LED', qty, ledRow.referencia, dscto);
+    }
+  }
+});
+
+section.querySelector('[data-acc="eth"]')?.addEventListener('click',()=>{
+  const mat   = document.getElementById('acc_eth_mat')?.value || '';
+  const qty   = Number(document.getElementById('acc_eth_qty')?.value || 0);
+  const dscto = document.getElementById('acc_eth_desc')?.value || 0;
+  const ref   = document.getElementById('acc_eth_ref')?.value || '';
+  const desc  = `Puerto ethernet ${mat}`;
+  
+  // 1) Agrega el puerto ethernet principal
+  pushAccRow(desc, qty, ref, dscto);
+
+  // 2) Accesorio automático (solo una vez)
+  if (Array.isArray(REF_AP) && REF_AP.length){
+    const accesorio = REF_AP.find(r =>
+      (r.categoria || '').toLowerCase().includes('puerto ethernet')
+      && (r.material || '').toLowerCase() === 'accesorio'
+    );
+
+    if (accesorio && !hasAccRowWithRef(accesorio.referencia)){
+      pushAccRow('Accesorio puerto ethernet', 1, accesorio.referencia, dscto);
+    }
+  }
+});
+
+section.querySelector('[data-acc="usb"]')?.addEventListener('click',()=>{
+  const qty   = Number(document.getElementById('acc_usb_qty')?.value || 0);
+  const dscto = document.getElementById('acc_usb_desc')?.value || 0;
+  const ref   = document.getElementById('acc_usb_ref')?.value || '';
+  const desc  = `Puerto usb`;
+
+  // 1) Agrega el puerto usb principal
+  pushAccRow(desc, qty, ref, dscto);
+
+  // 2) Accesorio automático (solo una vez)
+  if (Array.isArray(REF_AP) && REF_AP.length){
+    const accesorio = REF_AP.find(r =>
+      catEq(r,'Accesorio puerto usb')
+    );
+
+    if (accesorio && !hasAccRowWithRef(accesorio.referencia)){
+      pushAccRow('Accesorio puerto usb', 1, accesorio.referencia, dscto);
+    }
+  }
+});
+
+  // 8) Seccionador de potencia
+  section.querySelector('[data-acc="3ld"]')?.addEventListener('click',()=>{
+    const color      = document.getElementById('acc_3ld_color')?.value || '';
+    const corriente  = document.getElementById('acc_3ld_corriente')?.value || '';
+    const qty        = Number(document.getElementById('acc_3ld_qty')?.value || 0);
+    const dscto      = document.getElementById('acc_3ld_desc')?.value || 0;
+    const ref        = document.getElementById('acc_3ld_ref')?.value || '';
+    const desc       = `Seccionador de potencia ${color} ${corriente ? corriente+'A' : ''}`;
+    pushAccRow(desc, qty, ref, dscto);
+  });
+
+  // --- Helper: revisar si ya existe una fila con esa referencia en la tabla de accesorios ---
+  function hasAccRowWithRef(ref){
+    if (!ref) return false;
+    const tbody = section.querySelector('tbody');
+    if (!tbody) return false;
+    return Array.from(tbody.querySelectorAll('tr')).some(tr=>{
+      const inpRef = tr.querySelector('td:first-child input, td:first-child select');
+      return inpRef && inpRef.value.trim() === ref;
+    });
+  }
+
+function balizaKitColors(kit){
+  // reglas del kit (NO referencias)
+  if (kit === 'RAV')  return ['rojo','amarillo','verde'];
+  if (kit === 'RV')   return ['rojo','verde'];
+  if (kit === 'RAVA') return ['rojo','amarillo','verde','acústico'];
+  return [];
+}
+
+// guarda el último armado para reutilizarlo al "Agregar"
+let LAST_BALIZA_ITEMS = [];
+let LAST_BALIZA_EXTRAS = []; // <-- conexión + montaje
+
+function refreshBalizaKitFromExcel(){
+  const kit  = document.getElementById('acc_bal_kit')?.value || '';
+  const tens = document.getElementById('acc_bal_tension')?.value || '';
+
+  const refsWrap = document.getElementById('acc_bal_refs');
+  const imgsWrap = document.getElementById('acc_bal_imgs');
+
+LAST_BALIZA_ITEMS = [];
+LAST_BALIZA_EXTRAS = [];
+if (refsWrap) refsWrap.innerHTML = '–';
+if (imgsWrap) imgsWrap.innerHTML = '';
+
+  if (!kit || !tens) return;
+  if (!Array.isArray(REF_AP) || !REF_AP.length) return;
+
+  const colors = balizaKitColors(kit).map(c => normTxt(c));
+  const items = REF_AP
+    .filter(r => catEq(r,'Baliza'))
+    .filter(r => colors.includes(normTxt(r.color)))
+    .filter(r => (r.tension || '').toString().includes(tens))
+    .filter(r => (r.referencia || '').toString().trim().length > 0);
+
+  // orden visual fijo (rojo, amarillo, verde, acústico)
+  const order = { rojo:1, amarillo:2, verde:3, acústico:4 };
+  items.sort((a,b)=> (order[normTxt(a.color)]||99) - (order[normTxt(b.color)]||99));
+
+  LAST_BALIZA_ITEMS = items;
+
+// ---- Extras (conexión + montaje) desde Excel (misma hoja REF_AP) ----
+// OJO: en tu Excel están dentro de categoria "Baliza" y en columna "color" vienen como texto:
+// "accesorios de conexion" y "accesorios de montaje"
+const accConexion = REF_AP.find(r =>
+  catEq(r,'Baliza') && normTxt(r.color).includes('accesorios de conexion')
+);
+
+const accMontaje = REF_AP.find(r =>
+  catEq(r,'Baliza') && normTxt(r.color).includes('accesorios de montaje')
+);
+
+LAST_BALIZA_EXTRAS = [accConexion, accMontaje].filter(x => x?.referencia);
+
+  // refs
+  if (refsWrap){
+if (!items.length){
+  refsWrap.innerHTML = '<span class="note">No hay referencias para ese kit+tensión en el Excel.</span>';
+} else {
+  const pillsItems = items.map(it =>
+    `<span class="pill baliza-pill">${it.color}: <b>${it.referencia}</b></span>`
+  ).join(' ');
+
+  const pillsExtras = (LAST_BALIZA_EXTRAS || []).map(ex => {
+    const tag = normTxt(ex.color).includes('montaje') ? 'Acc. montaje' : 'Acc. conexión';
+    return `<span class="pill baliza-pill">${tag}: <b>${ex.referencia}</b></span>`;
+  }).join(' ');
+
+  refsWrap.innerHTML = (pillsItems + (pillsExtras ? ' ' + pillsExtras : '')).trim();
+}
+  }
+
+  // imgs
+  if (imgsWrap){
+imgsWrap.innerHTML = '';
+if (!items.length){
+  return;
+}
+
+const grid = document.createElement('div');
+grid.className = 'baliza-img-grid';
+
+function appendImg(row, label){
+  const file = (row?.imagen || '').toString().trim();
+  if (!file) return;
+  const img = document.createElement('img');
+  img.src = `/img/${file}`;
+  img.alt = `${label} ${row?.referencia || ''}`.trim();
+  grid.appendChild(img);
+}
+
+// 1) imágenes de las balizas del kit
+items.forEach(it => appendImg(it, it.color));
+
+// 2) imágenes de extras (conexión + montaje) => máximo 2 más
+(LAST_BALIZA_EXTRAS || []).forEach(ex => {
+  const tag = normTxt(ex.color).includes('montaje') ? 'Accesorio montaje' : 'Accesorio conexión';
+  appendImg(ex, tag);
+});
+
+imgsWrap.appendChild(grid);
+
+  }
+}
+
+// 9) Baliza (por KIT)
+section.querySelector('[data-acc="baliza"]')?.addEventListener('click',()=>{
+  const kit  = document.getElementById('acc_bal_kit')?.value || '';
+  const tens = document.getElementById('acc_bal_tension')?.value || '';
+  const dscto = document.getElementById('acc_bal_desc')?.value || 0;
+
+  if (!kit || !tens) return;
+
+  // si no han cambiado nada desde el último refresh, usa cache
+  let items = Array.isArray(LAST_BALIZA_ITEMS) ? LAST_BALIZA_ITEMS : [];
+
+  // respaldo: si por algo está vacío, recalcula
+  if (!items.length && Array.isArray(REF_AP) && REF_AP.length){
+    const colors = balizaKitColors(kit).map(c => normTxt(c));
+    items = REF_AP
+      .filter(r => catEq(r,'Baliza'))
+      .filter(r => colors.includes(normTxt(r.color)))
+      .filter(r => (r.tension || '').toString().includes(tens))
+      .filter(r => (r.referencia || '').toString().trim().length > 0);
+  }
+
+  // 1) agrega todas las balizas del kit (qty 1 c/u)
+  items.forEach(r=>{
+    const descBaliza = `Baliza ${r.color} ${tens}V`;
+    pushAccRow(descBaliza, 1, r.referencia, dscto);
+  });
+
+// 2) Extras: conexión + montaje (solo una vez cada uno)
+let extras = Array.isArray(LAST_BALIZA_EXTRAS) ? LAST_BALIZA_EXTRAS : [];
+
+if (!extras.length && Array.isArray(REF_AP) && REF_AP.length){
+  const accConexion = REF_AP.find(r =>
+    catEq(r,'Baliza') && normTxt(r.color).includes('accesorios de conexion')
+  );
+  const accMontaje = REF_AP.find(r =>
+    catEq(r,'Baliza') && normTxt(r.color).includes('accesorios de montaje')
+  );
+  extras = [accConexion, accMontaje].filter(x => x?.referencia);
+}
+
+extras.forEach(ex => {
+  const isMont = normTxt(ex.color).includes('montaje');
+  const descEx = isMont ? 'Accesorios de montaje baliza' : 'Accesorio de conexión baliza';
+
+  if (ex?.referencia && !hasAccRowWithRef(ex.referencia)){
+    pushAccRow(descEx, 1, ex.referencia, dscto);
+  }
+});
+});
+
+// Pulsadores (tipo normal / luminoso) => filtra referencia según Excel
+function updatePulsRefs(){
+  const tipo  = document.getElementById('acc_puls_tipo')?.value || '';
+  const mat   = document.getElementById('acc_puls_mat')?.value || '';
+  const color = document.getElementById('acc_puls_color')?.value || '';
+  const tens  = document.getElementById('acc_puls_tension')?.value || '';
+
+  const isLum = (tipo === 'luminoso');
+  const cat   = isLum ? 'Pulsador luminoso' : 'Pulsadores';
+
+fillRefsFor('acc_puls_ref', r =>
+  catEq(r, cat) &&
+  (!mat   || normTxt(r.material) === normTxt(mat)) &&
+  (!color || normTxt(r.color)    === normTxt(color)) &&
+  (!isLum || !tens || normTxt(r.tension) === normTxt(tens))
+);
+}
+
+function updatePulsTensionVisibility(){
+  const tipo  = document.getElementById('acc_puls_tipo')?.value || '';
+  const wrapT = document.getElementById('wrap_acc_puls_tension');
+  const selT  = document.getElementById('acc_puls_tension');
+
+  if (!wrapT || !selT) return;
+
+  if (tipo === 'luminoso') {
+    wrapT.style.display = '';
+  } else {
+    wrapT.style.display = 'none';
+    selT.value = '';
+  }
+}
+
+['acc_puls_tipo','acc_puls_mat','acc_puls_color','acc_puls_tension'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>{
+    if (id === 'acc_puls_tipo') updatePulsTensionVisibility();
+    updatePulsRefs();
+  });
+}); // ✅ aquí se cierra y ya
+
+// ✅ Listeners de imagen (UNA sola vez)
+document.getElementById('acc_puls_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_puls_ref', 'img_acc_pulsadores');
+});
+document.getElementById('acc_pdi_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pdi_ref', 'img_acc_pdi');
+});
+document.getElementById('acc_pe_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pe_ref', 'img_acc_pe');
+});
+document.getElementById('acc_pil_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_pil_ref', 'img_acc_pil');
+});
+document.getElementById('acc_mul_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_mul_ref', 'img_acc_mul');
+});
+document.getElementById('acc_eth_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_eth_ref', 'img_acc_eth');
+});
+document.getElementById('acc_3ld_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_3ld_ref', 'img_acc_3ld');
+});
+document.getElementById('acc_usb_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_usb_ref', 'img_acc_usb');
+});
+document.getElementById('acc_bal_ref')?.addEventListener('change', () => {
+  updateAccImage('acc_bal_ref', 'img_acc_bal');
+});
+
+window.refreshAccCombosFromExcel = function(){
+
+  // --- 1) Pulsadores: combos dinámicos (material/color/tensión) ---
+  // (esto es tu lógica de combos; si ya la tienes arriba, déjala aquí integrada)
+  const selTipo = document.getElementById('acc_puls_tipo');
+  const selMat  = document.getElementById('acc_puls_mat');
+  const selCol  = document.getElementById('acc_puls_color');
+  const selTen  = document.getElementById('acc_puls_tension');
+
+  if (selTipo && selMat && selCol && Array.isArray(REF_AP)) {
+    const tipo = selTipo.value;
+
+    const rows = REF_AP.filter(r => {
+      if (tipo === 'luminoso') return catEq(r,'Pulsador luminoso');
+      if (tipo === 'normal')   return catEq(r,'Pulsadores');
+      return false;
+    });
+
+    const setOptions = (sel, values) => {
+      if (!sel) return;
+      const keep = sel.value;
+      sel.innerHTML = '<option value="">– Seleccionar –</option>';
+      values.forEach(v=>{
+        const o = document.createElement('option');
+        o.value = v; o.textContent = v;
+        sel.appendChild(o);
+      });
+      if (keep && values.includes(keep)) sel.value = keep;
+    };
+
+    const mats = [...new Set(rows.map(r => (r.material||'').trim()).filter(Boolean))].sort();
+    setOptions(selMat, mats);
+
+const matSel = selMat.value || '';
+const rowsMat = rows.filter(r => !matSel || normTxt(r.material) === normTxt(matSel));
+
+const cols = [...new Set(rowsMat.map(r => (r.color||'').trim()).filter(Boolean))].sort();
+setOptions(selCol, cols);
+
+const colSel = selCol.value || '';
+const rowsCol = rowsMat.filter(r => !colSel || normTxt(r.color) === normTxt(colSel));
+
+if (selTen){
+  if (tipo === 'luminoso'){
+    const tens = [...new Set(rowsCol.map(r => (r.tension||'').trim()).filter(Boolean))].sort();
+    setOptions(selTen, tens);
+  } else {
+    selTen.innerHTML = '<option value="">– Seleccionar –</option>';
+    selTen.value = '';
+  }
+}
+
+    // refresca referencias según selección actual
+    if (typeof updatePulsRefs === 'function') updatePulsRefs();
+    if (typeof updatePulsTensionVisibility === 'function') updatePulsTensionVisibility();
+  }
+
+  // --- 2) Pulsador doble iluminado ---
+  fillRefsFor('acc_pdi_ref', r => catEq(r,'Pulsador doble iluminado'));
+
+  // --- 3) Paro de emergencia ---
+  fillRefsFor('acc_pe_ref',  r => catEq(r,'Paro de emergencia'));
+
+  // Puerto usb
+  fillRefsFor('acc_usb_ref', r => catEq(r,'Puerto usb'));
+
+  // --- 4) Collar de protección ---
+  if (typeof updateCollarRefs === 'function') updateCollarRefs();
+// Piloto (base)
+fillRefsFor('acc_pil_ref', r => catEq(r,'Piloto'));
+
+// Muletilla (base)
+fillRefsFor('acc_mul_ref', r => catEq(r,'Muletilla'));
+
+// Ethernet (base)
+fillRefsFor('acc_eth_ref', r => catEq(r,'Puerto ethernet') || catEq(r,'ethernet'));
+
+// Seccionador (base)
+fillRefsFor('acc_3ld_ref', r => catEq(r,'Seccionador de potencia') || catEq(r,'3ld'));
+
+// Baliza (base)
+fillRefsFor('acc_bal_ref', r => catEq(r,'Baliza'));
+};
+
+document.getElementById('acc_puls_tipo')?.addEventListener('change', () => {
+  window.refreshAccCombosFromExcel();
+});
+
+document.getElementById('acc_puls_mat')?.addEventListener('change', () => window.refreshAccCombosFromExcel());
+document.getElementById('acc_puls_color')?.addEventListener('change', () => window.refreshAccCombosFromExcel());
+document.getElementById('acc_puls_tension')?.addEventListener('change', () => updatePulsRefs());
+
+  // Si el Excel ya se cargó antes de crear la sección, refrescamos de una vez
+  if (Array.isArray(REF_AP) && REF_AP.length) {
+    window.refreshAccCombosFromExcel();
+  }
+
+  // Piloto
+['acc_pil_mat','acc_pil_color','acc_pil_tension'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>{
+    const mat   = document.getElementById('acc_pil_mat').value;
+    const color = document.getElementById('acc_pil_color').value;
+    const tens  = document.getElementById('acc_pil_tension').value;
+
+    fillRefsFor('acc_pil_ref', r =>
+      catEq(r,'Piloto') &&
+      (!mat   || r.material === mat) &&
+      (!color || r.color === color) &&
+      (!tens  || (r.tension || '').includes(tens))
+    );
+  });
+});
+
+// Muletilla
+['acc_mul_mat','acc_mul_pos','acc_mul_key'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>{
+    const mat = document.getElementById('acc_mul_mat').value;
+    const pos = document.getElementById('acc_mul_pos').value;
+const key = (document.getElementById('acc_mul_key')?.value || '').toLowerCase();
+const desc  = `Muletilla ${mat} ${pos}${key ? ' llave ' + key : ''}`;
+
+    const posExcel =
+      pos === '2p' ? '2 posiciones' :
+      pos === '3p' ? '3 posiciones' :
+      pos;
+
+    fillRefsFor('acc_mul_ref', r =>
+      catEq(r,'Muletilla') &&
+      (!mat      || r.material === mat) &&
+      (!posExcel || r.posicion === posExcel) &&
+      (!key      || (r.llave_seguridad || '').toString().trim().toLowerCase() === key)
+    );
+  });
+});
+
+  // Puerto ethernet
+  document.getElementById('acc_eth_mat')?.addEventListener('change',()=>{
+    const mat = document.getElementById('acc_eth_mat').value;
+    fillRefsFor('acc_eth_ref', r =>
+      (catEq(r,'Puerto ethernet') || catEq(r,'ethernet')) &&
+      (!mat || r.material === mat)
+    );
+  });
+
+document.addEventListener("input", (e) => {
+  const id = e.target?.id;
+  if (id === "bor_ind_qty" || id === "bor_tierra_qty" || id === "bor_porta_qty") {
+    actualizarTermoencogibleAuto();
+  }
+});
+
+// 3LD
+['acc_3ld_color','acc_3ld_corriente'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>{
+    const color = document.getElementById('acc_3ld_color').value;
+    const corr  = document.getElementById('acc_3ld_corriente').value; // ej. "16", "160"
+
+    fillRefsFor('acc_3ld_ref', r => {
+      // normalizamos la categoría
+      if (!( !r.categoria || catEq(r, 'Seccionador de potencia') )) return false;
+
+      // filtramos por color si aplica
+      if (color && r.color !== color) return false;
+
+      if (corr) {
+        // tomamos solo los dígitos de la columna "corriente termica"
+        const numExcel = (r.corriente_termica || '').replace(/[^\d]/g,''); // "16A" -> "16", "160 A" -> "160"
+        if (numExcel !== corr) return false;
+      }
+
+      return true;
+    });
+  });
+});
+
+  // Baliza
+['acc_bal_kit','acc_bal_tension'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('change',()=>{
+    refreshBalizaKitFromExcel();
+  });
+});
+}
+
+// Hoja 1: Accesorios de puerta
+let REF_AP = [];
+
+// Hoja 2: Interruptores (para Breakers)
+let REF_BRK = [];
+
+// Hoja 3: Bornes
+let REF_BOR = [];
+window.REF_BOR = REF_BOR; // opcional pero recomendado para debug
+
+// Hoja 4: Relés
+let REF_REL = [];
+
+// Hoja 5: Accesorios para tablero
+let REF_ACC_TAB = [];
+
+// Hoja 6: Comunicaciones
+let REF_COM = [];
+
+let REF_CONS = [];
+
+// Helper genérico para leer columnas del Excel aunque cambien tildes / espacios / mayúsculas
+function getColFlexible(row, logicalName) {
+  const norm = (s) => s
+    ?.toString()
+    .normalize('NFD')                // quita tildes
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '')            // quita espacios
+    .toLowerCase();
+
+  const target = norm(logicalName);
+  if (!target) return '';
+
+  for (const key of Object.keys(row)) {
+    const nk = norm(key);
+    // Coincidencia flexible: igual, contiene o está contenido
+    if (nk === target || nk.includes(target) || target.includes(nk)) {
+      return row[key] ?? '';
+    }
+  }
+  return '';
+}
+
+async function cargarCatalogoDesdeArrayBuffer(arrayBuffer){
+  const workbook = XLSX.read(arrayBuffer, { type: "array" });
+
+  // 🟢 Hoja 1: "Accesorios de puerta" (o la primera hoja si no coincide el nombre)
+  const sheetAcc = workbook.Sheets["Accesorios de puerta"] || workbook.Sheets[workbook.SheetNames[0]];
+  const rowsAcc = XLSX.utils.sheet_to_json(sheetAcc);
+
+REF_AP = rowsAcc.map(r => ({
+  categoria:         (r.Categoria ?? r.categoria ?? '').toString().trim(),
+  material:          (r.material  ?? r.Material  ?? '').toString().trim(),
+  color:             (r.color     ?? r.Color     ?? '').toString().trim(),
+  tension:           (r.tension   ?? r.Tension   ?? '').toString().trim(),
+  posicion:          (r.posicion  ?? r.Posicion  ?? '').toString().trim(),
+  corriente_termica: (r['corriente termica'] ?? r.corriente_termica ?? r['Corriente termica'] ?? '').toString().trim(),
+ 
+  // ✅ NUEVO: Llave de seguridad (columna H del Excel)
+  llave_seguridad:   (r['Llave de seguridad'] ?? r['llave de seguridad'] ?? r.llave_seguridad ?? '').toString().trim(),
+  referencia:        (r.referencia ?? r.Referencia ?? '').toString().trim(),
+  imagen:            (r.Imagen ?? r.imagen ?? '').toString().trim()
+
+}));
+
+  if (typeof window.refreshAccCombosFromExcel === 'function') {
+    window.refreshAccCombosFromExcel();
+  }
+
+  // 🟠 Hoja 2: "Interruptores" (o la segunda hoja si no coincide el nombre)
+  const sheetBrk = workbook.Sheets["Interruptores"] || workbook.Sheets[workbook.SheetNames[1]];
+  if (sheetBrk) {
+    const rowsBrk = XLSX.utils.sheet_to_json(sheetBrk);
+
+    // Usamos getColFlexible para que no importe si hay tildes, espacios o mayúsculas
+REF_BRK = rowsBrk.map(r => ({
+  categoria:         getColFlexible(r, 'Categoria'),
+  capacidad_ruptura:
+    getColFlexible(r, 'Capacidad de ruptura') ||
+    getColFlexible(r, 'Capacidad ruptura')     ||
+    getColFlexible(r, 'capacidad de ruptura') ||
+    getColFlexible(r, 'capacidad ruptura'),
+  regulacion_termica:getColFlexible(r, 'Regulacion termica')
+    .replace(/[\u2026]/g, '...')   // Normaliza el carácter de puntos suspensivos
+    .replace(/\s+/g,' ')           // Limpia espacios múltiples
+    .trim(),
+  funcion:           getColFlexible(r, 'Funcion'),
+  // OJO: en tu Excel esta columna viene como "Contactos auxiliares"
+contactos_aux:     getColFlexible(r, 'Contactos auxiliares') || getColFlexible(r, 'contactos aux') || getColFlexible(r, 'contactos auxiliares'),
+  polos:             getColFlexible(r, 'Polos'),
+  tipo:              getColFlexible(r, 'Tipo'),
+  corriente_termica: getColFlexible(r, 'Corriente termica'),
+  compatibilidad:    getColFlexible(r, 'Compatibilidad'),
+  referencia:        getColFlexible(r, 'referencia'),
+  imagen:            getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
+}));
+
+  } else {
+    REF_BRK = [];
+    console.warn("No se encontró la hoja 'Interruptores' en el Excel.");
+  }
+
+  // 👉 volver a llenar combos que dependen sólo del Excel (PDI y Paro)
+  if (window.refreshAccCombosFromExcel) {
+    window.refreshAccCombosFromExcel();
+  }
+  // Primero regeneramos las opciones de regulación térmica según el Excel
+  if (window.rebuildBreakerRegOptions) {
+    window.rebuildBreakerRegOptions();
+  }
+  // 👉 y también los combos de Breakers
+  if (window.refreshBreakerRefsFromExcel) {
+    window.refreshBreakerRefsFromExcel();
+  }
+
+// ====================
+// Bornes – helpers
+// ====================
+
+// Normalizador de texto (para función)
+function borneNormTxt(v) {
+  return (v || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
+// Normalizador de calibre → solo dígitos: "28-12 AWG" → "2812"
+function borneNormCal(v) {
+  const m = (v || '').toString().match(/\d+/g);
+  return m ? m.join('') : '';
+}
+
+// Llena un <select> de bornes filtrando por función + calibre
+function fillBorneRefs(selectId, funcionFilter, calibreFilter) {
+  const sel = document.getElementById(selectId);
+  if (!sel) return;
+
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">– Seleccionar –</option>';
+
+  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
+
+  const funcTarget = borneNormTxt(funcionFilter || '');
+  const calTarget  = borneNormCal(calibreFilter || '');
+
+  const matches = REF_BOR.filter(r => {
+    const funcExcel = borneNormTxt(r.funcion);
+    if (!funcExcel || !funcTarget) return false;
+
+    // Coincidencia flexible de función
+    if (!funcExcel.includes(funcTarget) && !funcTarget.includes(funcExcel)) {
+      return false;
+    }
+
+    // Si no hay calibre seleccionado → no filtramos por calibre
+    if (!calTarget) return true;
+
+    const calExcel = borneNormCal(r.calibre);
+    if (!calExcel) return false;
+
+    // Calibre debe coincidir exactamente (2812, 2810, 248…)
+    return calExcel === calTarget;
+  });
+
+  const refs = Array.from(new Set(
+    matches
+      .map(r => r.referencia)
+      .filter(ref => ref && ref.trim() !== '')
+  ));
+
+  refs.forEach(ref => {
+    const o = document.createElement('option');
+    o.value = ref;
+    o.textContent = ref;
+    sel.appendChild(o);
+  });
+
+  if (refs.includes(prev)) sel.value = prev;
+
+  // Restaurar selección si existe
+  if (refs.includes(prev)) sel.value = prev;
+
+  // ✅ refresca imagen SOLO del select que acabas de llenar
+  const mapImg = {
+    bor_ind_ref: 'img_bor_ind',
+    bor_porta_ref: 'img_bor_porta',
+    bor_tierra_ref: 'img_bor_tierra',
+    bor_sep_ref: 'img_bor_sep',
+    bor_otros_ref: 'img_bor_otros',
+  };
+  if (mapImg[selectId]) updateBorneImage(selectId, mapImg[selectId]);
+}
+
+window.fillBorneRefs = fillBorneRefs;
+
+// Listeners: cuando cambie el calibre, actualizamos las referencias
+['bor_ind_cal','bor_tierra_cal'].forEach(id => {
+  document.getElementById(id)?.addEventListener('change', () => {
+    window.refreshBornesFromExcel();
+  });
+});
+
+  // 🟢 Hoja 3: "Bornes"
+  const sheetBornes = workbook.Sheets["Bornes"] || workbook.Sheets[workbook.SheetNames[2]];
+  if (sheetBornes) {
+    const rowsBornes = XLSX.utils.sheet_to_json(sheetBornes, { defval: '' });
+
+    // Usamos getColFlexible para que no se dañe si el encabezado tiene espacios/tildes
+    REF_BOR = rowsBornes.map(r => ({
+      categoria:  getColFlexible(r, 'Categoria'),
+      funcion:    getColFlexible(r, 'Funcion'),
+      calibre:    getColFlexible(r, 'Calibre'),
+      rango:      getColFlexible(r, 'Rango'),
+      referencia: getColFlexible(r, 'Referencia'),
+      imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
+    })).filter(row => row.referencia); // solo filas con referencia
+  window.REF_BOR = REF_BOR; // 🔥 clave: sincroniza el array nuevo para las imágenes
+
+  } else {
+    REF_BOR = [];
+    console.warn("No se encontró la hoja 'Bornes' en el Excel.");
+  }
+
+  // 👉 refrescar combos de bornes si la sección ya existe
+try {
+  window.refreshBornesFromExcel?.();
+} catch (e) {
+  console.error('Error refrescando Bornes:', e);
+}
+
+  // 🟣 Hoja 4: "Reles" / "Relés"
+  const sheetRel =
+    workbook.Sheets["Reles"] ||
+    workbook.Sheets["Relés"] ||
+    workbook.Sheets[workbook.SheetNames[3]];
+
+  if (sheetRel) {
+    const rowsRel = XLSX.utils.sheet_to_json(sheetRel, { defval: '' });
+
+    REF_REL = rowsRel
+      .map(r => ({
+        categoria:  getColFlexible(r, 'Categoria'),
+        funcion:    getColFlexible(r, 'Funcion'),
+        pines:      getColFlexible(r, 'Pines'),
+        voltaje:    getColFlexible(r, 'Voltaje de alimentacion'),
+        capacidad:  getColFlexible(r, 'Capacidad de salida max'),
+        referencia: getColFlexible(r, 'Referencia'),
+        imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
+      }))
+      .filter(r => r.referencia); // sólo filas con referencia
+  } else {
+    REF_REL = [];
+    console.warn("No se encontró la hoja 'Reles' / 'Relés' en el Excel.");
+  }
+
+  // 👉 Hoja 5: Accesorios para tablero
+  const sheetAccTab =
+    workbook.Sheets["Accesorios para tablero"] ||
+    workbook.Sheets["Accesorios tablero"] ||
+    workbook.Sheets["Accesorios Tablero"] ||
+    workbook.Sheets[workbook.SheetNames[4]];
+
+  if (sheetAccTab) {
+    const rowsAccTab = XLSX.utils.sheet_to_json(sheetAccTab, { defval: '' });
+
+    REF_ACC_TAB = rowsAccTab.map(r => ({
+      categoria:  getColFlexible(r, 'Categoria'),
+      referencia: getColFlexible(r, 'Referencia')
+    })).filter(r => r.referencia);
+  } else {
+    REF_ACC_TAB = [];
+    console.warn("No se encontró la hoja 'Accesorios para tablero' en el Excel.");
+  }
+
+// 🟠 Hoja X: "Consumibles"
+const sheetCons = workbook.Sheets["Consumibles"] || workbook.Sheets["CONSUMIBLES"];
+if (sheetCons) {
+  const rowsCons = XLSX.utils.sheet_to_json(sheetCons, { defval: '' });
+
+  REF_CONS = rowsCons.map(r => ({
+    categoria:  getColFlexible(r, 'Categoria'),
+    calibre:    getColFlexible(r, 'Calibre'),
+    color:      getColFlexible(r, 'Color'),
+    referencia: getColFlexible(r, 'Referencia')
+  })).filter(r => r.referencia);
+} else {
+  REF_CONS = [];
+  console.warn("No se encontró la hoja 'Consumibles' en el Excel.");
+}
+
+if (window.refreshConsumiblesFromExcel) {
+  window.refreshConsumiblesFromExcel();
+}
+
+  // 👉 refrescar combos de relés si la sección ya existe
+  if (window.refreshRelesFromExcel) {
+    window.refreshRelesFromExcel();
+  }
+  // 👉 refrescar combos de accesorios para tablero si ya existe la sección
+  if (window.refreshAccTabFromExcel) {
+    window.refreshAccTabFromExcel();
+  }
+
+  // 👉 Hoja 6: "Comunicaciones" (cables y conectores)
+  const sheetCom =
+    workbook.Sheets["Comunicaciones"] ||
+    workbook.Sheets["COMUNICACIONES"] ||
+    workbook.Sheets[workbook.SheetNames[5]];
+
+  if (sheetCom) {
+    const rowsCom = XLSX.utils.sheet_to_json(sheetCom, { defval: '' });
+
+    REF_COM = rowsCom
+      .map(r => ({
+        categoria:        getColFlexible(r, 'Categoria'),
+        funcion:          getColFlexible(r, 'Funcion'),
+        plug:             getColFlexible(r, 'Plug'),
+        conectorHembra:   getColFlexible(r, 'Conector hembra'), // ✅ NUEVO
+        referencia:       getColFlexible(r, 'Referencia'),
+        imagen:
+  getColFlexible(r, 'Imagen') ||
+  getColFlexible(r, 'Imagenes') ||
+  getColFlexible(r, 'imagenes') ||
+  getColFlexible(r, 'imagen')
+
+      }))
+      .filter(r => r.referencia);
+  } else {
+    REF_COM = [];
+    console.warn("No se encontró la hoja 'Comunicaciones' en el Excel.");
+  }
+
+  // 👉 refrescar combos de comunicaciones si ya existe la sección
+  if (window.refreshComFromExcel) {
+    window.refreshComFromExcel();
+  }
+}
+
+document.getElementById("file_refs").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  await cargarCatalogoDesdeArrayBuffer(await file.arrayBuffer());
+});
+
+window.addEventListener("DOMContentLoaded", async () => {
+  const card = document.getElementById("card_catalogo_refs");
+
+  try{
+    // IMPORTANTE: mismo nombre exacto y respetando mayúsculas/minúsculas
+    const res = await fetch("referencias_tablero.xlsx", { cache: "no-store" });
+    if (!res.ok) throw new Error("No se encontró referencias_tablero.xlsx");
+
+    const buf = await res.arrayBuffer();
+    await cargarCatalogoDesdeArrayBuffer(buf);
+
+    // Si cargó bien, escondemos la sección
+    if (card) card.style.display = "none";
+}catch(err){
+  console.error("Falló auto-carga referencias_tablero.xlsx:", err);
+  if (card) card.style.display = "";
+}
+});
+
+function filterRefs({categoria, material, color, tension, posicion}) {
+  return REF_AP.filter(r =>
+    (!categoria || r.categoria === categoria) &&
+    (!material  || r.material === material) &&
+    (!color     || r.color === color) &&
+    (!tension   || r.tension?.includes(tension)) &&
+    (!posicion  || r.posicion === posicion)
+  );
+}
+
+    // Render de secciones con parámetros + selector + tabla
+    SECTIONS.forEach(s => {
+try {
+    console.log('[render] sección:', s.key);
+  
+      const node = document.getElementById('tpl-table').content.cloneNode(true);
+      const root = node.querySelector('.section');
+      root.dataset.key = s.key;
+      root.querySelector('h3').textContent = s.title;
+
+      const paramsWrap = root.querySelector('.params');
+      if (s.params && s.params.length) {
+        s.params.forEach(p => {
+          const box = document.createElement('div');
+          const id = p.id;
+          box.innerHTML = `<label for="${id}">${p.label}</label>`;
+          let control;
+          if (p.type === 'select') {
+            control = document.createElement('select');
+            control.id = id;
+            (p.options || []).forEach(opt => {
+              const o = document.createElement('option');
+              o.value = opt;
+              o.textContent = opt;
+              control.appendChild(o);
+            });
+            if (p.def) control.value = p.def;
+          } else {
+            control = document.createElement('input');
+            control.id = id;
+            control.type = p.type === 'number' ? 'number' : 'text';
+            if (p.placeholder) control.placeholder = p.placeholder;
+            if (p.def !== undefined) control.value = p.def;
+            if (p.min !== undefined) control.min = p.min;
+          }
+          control.dataset.section = s.key;
+          control.dataset.role = 'param';
+          box.appendChild(control);
+          paramsWrap.appendChild(box);
+        });
+      } else {
+        paramsWrap.style.display = 'none';
+      }
+
+      // Selector de ítems basado en catálogo
+      const selector = root.querySelector('.selector');
+      let selDesc = selector.querySelector('.sel-desc');
+      let selRef  = selector.querySelector('.sel-ref');
+      const selQty  = selector.querySelector('.sel-qty');
+      selector.dataset.section = s.key;
+
+// TABLERO: solo descripción editable (sin referencia)
+if (s.key === 'tablero') {
+  const descWrapper = selDesc.parentElement;
+  descWrapper.removeChild(selDesc);
+  const descInput = document.createElement('input');
+  descInput.type = 'text';
+  descInput.className = 'sel-desc';
+  descWrapper.appendChild(descInput);
+
+  // Quitamos por completo la columna de "Referencia" en el selector
+  const refWrapper = selRef.parentElement;
+  refWrapper.removeChild(selRef);
+  refWrapper.remove(); // ya no hay campo de referencia para tablero
+
+  selDesc = selector.querySelector('.sel-desc');
+
+// BREAKERS → ahora sección de INTERRUPTORES con 3 subsecciones
+} else if (s.key === 'breakers') {
+      // Título
+      root.querySelector('h3').textContent = 'Interruptores';
+
+      // Usamos el mismo estilo de "filas" que Accesorios de puerta
+      selector.className = 'acc-rows';
+      selector.innerHTML = `
+<!-- 1. Totalizador -->
+<details class="acc-accordion">
+  <summary>
+    <span>1. Totalizador</span>
+    <span class="chev">▶</span>
+  </summary>
+
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid seven">
+      <div>
+        <label>Capacidad de ruptura</label>
+        <select id="int_tot_cap">
+          <option value="">– Seleccionar –</option>
+          <option value="baja">Baja (Clase N) (16 kA a 440V)</option>
+          <option value="media">Media (Clase S) (25 kA a 440V)</option>
+          <option value="alta">Alta (Clase M) (36 kA a 440V)</option>
+          <option value="muy alta">Muy alta (Clase H) (55 kA a 440V)</option>
+          <option value="super alta">Super alta (Clase C) (70 kA a 440V)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Regulación magnética [A]</label>
+        <select id="int_tot_reg">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad</label>
+        <input type="number" id="int_tot_qty" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input type="number" id="int_tot_desc" min="0" max="100" step="1" value="50">
+      </div>
+
+      <div>
+        <label>Referencia</label>
+        <select id="int_tot_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>Accesorio prolongado</label>
+        <select id="int_tot_acc">
+          <option value="no">No</option>
+          <option value="si">Sí</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-int="tot">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_int_tot" class="acc-img" style="display:none;">
+</div>
+    </div>
+
+    <!-- 1.1 Accesorio prolongado para Totalizador -->
+    <div class="acc-row" id="int_accprol_row" style="display:none; margin-top:12px;">
+      <div class="acc-row-label">Accesorio prolongado</div>
+
+      <div class="acc-row-fields grid seven">
+        <div>
+          <label>Compatibilidad</label>
+          <select id="int_accp_comp">
+            <option value="">– Seleccionar –</option>
+            <option value="3VA10/3VA11">3VA10/3VA11</option>
+            <option value="3VA12">3VA12</option>
+            <option value="3VA13/3VA14">3VA13/3VA14</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Descuento (%)</label>
+          <input type="number" id="int_accp_desc" min="0" max="100" step="1" value="50">
+        </div>
+
+        <div>
+          <label>Referencia</label>
+          <select id="int_accp_ref">
+            <option value="">– Seleccionar –</option>
+          </select>
+        </div>
+
+        <div>
+          <label>&nbsp;</label>
+          <button type="button" class="btn primary" data-int="accprol">Agregar a la tabla</button>
+        </div>
+<div class="acc-img-wrap">
+  <img id="img_int_accp" class="acc-img" style="display:none;">
+</div>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 2. Interruptores termomagnéticos -->
+<details class="acc-accordion">
+  <summary>
+    <span>2. Interruptores termomagnéticos (Breakers)</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid seven">
+      <div>
+        <label>Tipo</label>
+        <select id="int_tm_tipo">
+          <option value="">– Seleccionar –</option>
+          <option value="monopolar">Monopolar</option>
+          <option value="bipolar">Bipolar</option>
+          <option value="tripolar">Tripolar</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Corriente térmica [A]</label>
+        <select id="int_tm_corr">
+          <option value="">– Seleccionar –</option>
+          <option value="0.5">0.5</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="4">4</option>
+          <option value="6">6</option>
+          <option value="10">10</option>
+          <option value="16">16</option>
+          <option value="20">20</option>
+          <option value="25">25</option>
+          <option value="32">32</option>
+          <option value="40">40</option>
+          <option value="50">50</option>
+          <option value="63">63</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad</label>
+        <input type="number" id="int_tm_qty" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input type="number" id="int_tm_desc" min="0" max="100" step="1" value="50">
+      </div>
+
+      <div>
+        <label>Contactos auxiliares</label>
+        <select id="int_tm_aux">
+          <option value="no">No</option>
+          <option value="si">Sí</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Referencia</label>
+        <select id="int_tm_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-int="tm">Agregar a la tabla</button>
+      </div>
+      <div class="acc-img-wrap">
+        <img id="img_int_tm" class="acc-img" style="display:none;">
+      </div>
+    </div>
+
+    <!-- 2.1 Contactos auxiliares (solo si lo piden) -->
+    <div class="acc-row" id="int_aux_row" style="display:none;margin-top:10px;">
+      <div class="acc-row-label">Contactos auxiliares</div>
+      <div class="acc-row-fields grid seven">
+        <div>
+          <label>Cantidad</label>
+          <input type="number" id="int_aux_qty" min="1" step="1" value="1">
+        </div>
+
+        <div>
+          <label>Descuento (%)</label>
+          <input type="number" id="int_aux_desc" min="0" max="100" step="1" value="0">
+        </div>
+
+        <div>
+          <label>Referencia</label>
+          <select id="int_aux_ref">
+            <option value="">– Seleccionar –</option>
+          </select>
+        </div>
+
+        <div>
+          <label>&nbsp;</label>
+          <button type="button" class="btn primary" data-int="aux">Agregar a la tabla</button>
+        </div>
+        <div class="acc-img-wrap">
+          <img id="img_int_aux" class="acc-img" style="display:none;">
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+      `;
+  
+root.querySelector('#int_tot_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_tot_ref', 'img_int_tot');
+});
+root.querySelector('#int_accp_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_accp_ref', 'img_int_accp');
+});
+root.querySelector('#int_tm_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_tm_ref', 'img_int_tm');
+});
+root.querySelector('#int_aux_ref')?.addEventListener('change', () => {
+  updateBrkImage('int_aux_ref', 'img_int_aux');
+});
+  
+      // Helper para rellenar selects de referencias desde REF_BRK
+      function fillRefSelect(selectId, filterFn) {
+        const sel = document.getElementById(selectId);
+        if (!sel) return;
+        const prev = sel.value;
+        sel.innerHTML = '<option value="">– Seleccionar –</option>';
+        if (!Array.isArray(REF_BRK) || !REF_BRK.length) return;
+
+        const refs = Array.from(new Set(
+          REF_BRK
+            .filter(filterFn)
+            .map(r => r.referencia)
+            .filter(Boolean)
+        ));
+
+        refs.forEach(ref => {
+          const o = document.createElement('option');
+          o.value = ref;
+          o.textContent = ref;
+          sel.appendChild(o);
+        });
+
+        if (refs.includes(prev)) sel.value = prev;
+        
+// auto-imagen si el select tiene 1 sola ref
+if (sel.options.length === 2) {
+  sel.selectedIndex = 1;
+  sel.dispatchEvent(new Event('change'));
+}
+      }
+
+// Helper: normalizador de texto (sin tildes, en minúsculas, sin dobles espacios)
+function normTxt(v) {
+  return (v || '')
+    .toString()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ');
+}
+
+// Helper: fila de totalizador
+function esTotalizador(r) {
+  const cat = normTxt(r.categoria);
+  return cat.includes('totalizador');
+}
+
+// Helper: fila de accesorio prolongado
+function esAccesorioProlongado(r) {
+  const cat = normTxt(r.categoria);
+  return cat.includes('accesorio') && cat.includes('prolongado');
+}
+
+// ===== Accesorio prolongado automático según referencia del totalizador =====
+function compatFromTotRef(totRef) {
+  const r = (totRef || '').toString().trim().toUpperCase();
+  if (!r) return '';
+
+  if (r.startsWith('3VA10') || r.startsWith('3VA11')) return '3VA10/3VA11';
+  if (r.startsWith('3VA12')) return '3VA12';
+  if (r.startsWith('3VA13') || r.startsWith('3VA14')) return '3VA13/3VA14';
+
+  return ''; // no compatible (ej 3VM...)
+}
+
+function refreshAccProlRefsOnly() {
+  const accComp = document.getElementById('int_accp_comp')?.value || '';
+  const accRefSel = document.getElementById('int_accp_ref');
+  if (!accRefSel) return;
+
+  // reutiliza tu fillRefSelect + esAccesorioProlongado + normCompat
+  function normCompat(v){
+    return (v || '').toString().trim().toUpperCase().replace(/\s+/g,'');
+  }
+
+  fillRefSelect('int_accp_ref', r => {
+    if (!esAccesorioProlongado(r)) return false;
+    if (!accComp) return false; // <-- CLAVE: si no hay compat, NO muestres nada
+    return normCompat(r.compatibilidad) === normCompat(accComp);
+  });
+
+  // si queda 1 sola referencia (lo normal), selecciónala automática
+  if (accRefSel.options.length === 2) accRefSel.selectedIndex = 1;
+}
+
+function applyAccProlRules() {
+  const totRefSel  = document.getElementById('int_tot_ref');
+  const totAccSel  = document.getElementById('int_tot_acc');
+  const accRow     = document.getElementById('int_accprol_row');
+  const accCompSel = document.getElementById('int_accp_comp');
+  const accRefSel  = document.getElementById('int_accp_ref');
+
+  if (!totRefSel || !totAccSel) return;
+
+  const totRef = (totRefSel.value || '').toString().trim().toUpperCase();
+  const compat = compatFromTotRef(totRef);
+
+  // Siempre “despegamos” el select (para que no se quede gris por un estado anterior)
+  totAccSel.disabled = false;
+
+  // 1) Si NO hay referencia todavía: deja NO y NO muestres subsección (pero NO bloquees el select)
+  if (!totRef) {
+    totAccSel.value = 'no';
+    if (accRow) accRow.style.display = 'none';
+    return;
+  }
+
+  // 2) NO compatible (ej 3VM...): fuerza NO y bloquea
+  if (!compat) {
+    totAccSel.value = 'no';
+    totAccSel.disabled = true;
+    if (accRow) accRow.style.display = 'none';
+
+    if (accCompSel) { accCompSel.value = ''; accCompSel.disabled = false; }
+    if (accRefSel)  { accRefSel.innerHTML = '<option value="">– Seleccionar –</option>'; accRefSel.value = ''; }
+    return;
+  }
+
+  // 3) Compatible (3VA10/11/12/13/14): permite elegir Sí/No
+  totAccSel.disabled = false;
+
+  // fijar compatibilidad automática y bloquearla
+  if (accCompSel) {
+    accCompSel.value = compat;
+    accCompSel.disabled = true;
+  }
+
+  // mostrar/ocultar subsección según Sí/No
+  const show = (totAccSel.value === 'si');
+  if (accRow) accRow.style.display = show ? '' : 'none';
+
+  if (show) refreshAccProlRefsOnly();
+}
+
+function forceAccProlToNoOnTotChange() {
+  const totAccSel = document.getElementById('int_tot_acc');
+  const accRow    = document.getElementById('int_accprol_row');
+  if (!totAccSel) return;
+
+  // Siempre que el usuario cambie algo del totalizador:
+  // volvemos el accesorio a NO y ocultamos
+  totAccSel.disabled = false;     // OJO: no lo dejamos pegado
+  totAccSel.value = 'no';
+  if (accRow) accRow.style.display = 'none';
+
+  // Aplicamos reglas de compatibilidad (si es 3VM lo bloqueará, si es 3VA lo dejará elegir Sí)
+  applyAccProlRules();
+}
+
+// Helper: capacidad de ruptura EXACTA con la seleccionada
+function coincideCapacidad(r, capSel) {
+  if (!capSel) return true; // si aún no han elegido capacidad, no filtramos por esto
+  const capR = normTxt(r.capacidad_ruptura);
+  const capS = normTxt(capSel);
+  if (!capR) return false;
+  return capR === capS; // coincidencia estricta
+}
+
+// 🔹 Llena el combo de “Regulación Térmica [A]” según la capacidad
+window.rebuildBreakerRegOptions = function () {
+  const cap    = document.getElementById('int_tot_cap')?.value || '';
+  const selReg = document.getElementById('int_tot_reg');
+  if (!selReg) return;
+
+  const prev = selReg.value;
+  selReg.innerHTML = '<option value="">– Seleccionar –</option>';
+
+  if (!Array.isArray(REF_BRK) || !REF_BRK.length || !cap) return;
+
+  const regs = Array.from(new Set(
+    REF_BRK
+      .filter(r => esTotalizador(r) && coincideCapacidad(r, cap))
+      .map(r => r.regulacion_termica)
+      .filter(Boolean)
+  ));
+
+  regs.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = v;
+    selReg.appendChild(o);
+  });
+
+  if (regs.includes(prev)) {
+    selReg.value = prev;
+  } else {
+    selReg.value = '';
+  }
+};
+
+// 🔹 Actualiza las referencias de TODAS las subsecciones de interruptores
+window.refreshBreakerRefsFromExcel = function () {
+  if (!Array.isArray(REF_BRK) || !REF_BRK.length) return;
+
+// 1) Totalizador – filtra por capacidad de ruptura + regulación térmica
+const cap = document.getElementById('int_tot_cap')?.value || '';
+const reg = document.getElementById('int_tot_reg')?.value || '';
+
+fillRefSelect('int_tot_ref', r =>
+  esTotalizador(r) &&
+  coincideCapacidad(r, cap) &&
+  (!reg || normTxt(r.regulacion_termica) === normTxt(reg))
+);
+applyAccProlRules(); // asegura que al cambiar refs, se aplique compatibilidad/permiso
+refreshAccProlRefsOnly();
+// 1.1) Accesorio prolongado del totalizador
+const accComp = document.getElementById('int_accp_comp')?.value || '';
+
+function normCompat(v){
+  return (v || '')
+    .toString()
+    .trim()
+    .toUpperCase()
+    .replace(/\s+/g,'');   // quita espacios por si acaso
+}
+
+fillRefSelect('int_accp_ref', r => {
+  if (!esAccesorioProlongado(r)) return false;
+
+  // si no has elegido compatibilidad, muestra todos los accesorios prolongados
+  if (!accComp) return true;
+
+  // compara compatibilidad del Excel con lo que elegiste (3VA10/3VA11, 3VA12, 3VA13/3VA14)
+  return normCompat(r.compatibilidad) === normCompat(accComp);
+});
+
+// 2) Contactos auxiliares (accesorio) — referencias desde Excel
+const refreshAuxRefs = () => {
+  const tmRef = document.getElementById('int_tm_ref')?.value || '';
+
+  fillRefSelect('int_aux_ref', r => {
+    const cat = normTxt(r.categoria || '');
+
+    // Catálogo de accesorios: deja pasar “accesor…” o “contact…”
+    if (!cat.includes('accesor') && !cat.includes('contact')) return false;
+
+    // Si el Excel trae compatibilidad y ya eligieron un TM, filtramos por compatibilidad
+    const comp = normTxt(r.compatibilidad || '');
+    if (tmRef && comp && !comp.includes(normTxt(tmRef))) return false;
+
+    return true;
+  });
+};
+
+// 2.1) Contactos auxiliares (subsección)
+fillRefSelect('int_aux_ref', r => {
+  const cat = normTxt(r.categoria);
+  return cat.includes('contactos') && cat.includes('aux');
+});
+
+// 3) Interruptores termomagnéticos
+const tipo = document.getElementById('int_tm_tipo')?.value || '';
+const corr = document.getElementById('int_tm_corr')?.value || '';
+
+fillRefSelect('int_tm_ref', r => {
+  // Categoría debe ser Interruptores termomagnéticos
+  if (!normTxt(r.categoria).includes('termomagnet')) return false;
+
+  // Tipo (monopolar / bipolar / tripolar) normalizado
+  if (tipo && normTxt(r.tipo || '') !== normTxt(tipo)) return false;
+
+  // Corriente térmica: comparar el valor numérico aunque venga con coma, A, etc.
+  if (corr) {
+    const normAmp = (v) => {
+      if (v == null) return '';
+      const s = String(v).replace(',', '.');      // 0,5 → 0.5
+      const m = s.match(/[\d.]+/);               // toma solo "0.5", "16", etc.
+      return m ? m[0] : '';
+    };
+
+    const ampExcel = normAmp(r.corriente_termica);
+    const ampSel   = normAmp(corr);
+
+    if (ampExcel && ampSel && Number(ampExcel) !== Number(ampSel)) {
+      return false;
+    }
+  }
+
+  return true;
+});
+updateBrkImage('int_tot_ref', 'img_int_tot');
+updateBrkImage('int_accp_ref', 'img_int_accp');
+updateBrkImage('int_tm_ref', 'img_int_tm');
+updateBrkImage('int_aux_ref', 'img_int_aux');
+};
+
+// Mostrar / ocultar combos de contactos y polos según función
+const funcSel = selector.querySelector('#int_peq_func');
+const contSel = selector.querySelector('#int_peq_cont');
+const polSel  = selector.querySelector('#int_peq_polos');
+
+// Totalizador – selects
+const totCap = root.querySelector('#int_tot_cap');
+const totReg = root.querySelector('#int_tot_reg');
+const totAcc = root.querySelector('#int_tot_acc');
+const accProlRow = root.querySelector('#int_accprol_row');
+const accCompSel = root.querySelector('#int_accp_comp');
+
+// Mostrar / ocultar “Contactos auxiliares” según Si/No en termomagnéticos
+const auxNeedSel = selector.querySelector('#int_tm_aux_need');
+const auxSection = selector.querySelector('#int_auxacc_section');
+
+const toggleAuxSection = () => {
+  const yes = (auxNeedSel?.value === 'si');
+  if (auxSection) auxSection.style.display = yes ? 'block' : 'none';
+
+  if (yes) {
+    refreshAuxRefs();
+  } else {
+    const sel = document.getElementById('int_aux_ref');
+    if (sel) sel.value = '';
+  }
+};
+
+auxNeedSel?.addEventListener('change', toggleAuxSection);
+document.getElementById('int_tm_ref')?.addEventListener('change', () => {
+  if (auxNeedSel?.value === 'si') refreshAuxRefs();
+});
+
+// Estado inicial
+toggleAuxSection();
+
+// Termomagnéticos – selects
+const tmTipo = root.querySelector('#int_tm_tipo');
+const tmCorr = root.querySelector('#int_tm_corr');
+const tmAux  = root.querySelector('#int_tm_aux');
+const auxRow = root.querySelector('#int_aux_row');
+
+tmTipo?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+tmCorr?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+
+// Mostrar / ocultar la subsección de contactos auxiliares
+tmAux?.addEventListener('change', () => {
+  if (!auxRow) return;
+  if (tmAux.value === 'si') {
+    auxRow.style.display = '';
+    window.refreshBreakerRefsFromExcel();
+  } else {
+    auxRow.style.display = 'none';
+    const sel = root.querySelector('#int_aux_ref');
+    if (sel) sel.value = '';
+  }
+});
+
+      funcSel?.addEventListener('change', () => {
+        const v = funcSel.value;
+        // Contactos solo para Interruptores automáticos/diferenciales
+        if (v === 'Interruptores automáticos/diferenciales') {
+          contSel.disabled = false;
+        } else {
+          contSel.disabled = true;
+          contSel.value = '';
+        }
+        // Polos solo para bloques de distribución
+        if (v === 'Bloques de distribución IEC 1000/1500 V AC/DC') {
+          polSel.disabled = false;
+        } else {
+          polSel.disabled = true;
+          polSel.value = '';
+        }
+        window.refreshBreakerRefsFromExcel();
+      });
+
+      contSel?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+      polSel?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+
+// Listeners para totalizador y termomagnéticos
+totCap?.addEventListener('change', () => {
+  window.rebuildBreakerRegOptions();
+  window.refreshBreakerRefsFromExcel();
+  forceAccProlToNoOnTotChange();
+});
+
+// Mostrar / ocultar la subsección de accesorio prolongado (con regla automática)
+totAcc?.addEventListener('change', () => {
+  applyAccProlRules();
+  if (totAcc.value === 'si') refreshAccProlRefsOnly();
+});
+
+totReg?.addEventListener('change', () => {
+  window.refreshBreakerRefsFromExcel();
+  forceAccProlToNoOnTotChange();
+});
+
+tmTipo?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+tmCorr?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+accCompSel?.addEventListener('change', window.refreshBreakerRefsFromExcel);
+document.getElementById('int_tot_ref')?.addEventListener('change', () => {
+  // el setTimeout evita que el navegador aplique el value tarde
+  setTimeout(() => {
+    forceAccProlToNoOnTotChange();
+  }, 0);
+});
+
+      // Botón agregar Totalizador
+      selector.querySelector('[data-int="tot"]')?.addEventListener('click', () => {
+        const cap  = document.getElementById('int_tot_cap')?.value || '';
+        const reg  = document.getElementById('int_tot_reg')?.value || '';
+        const ref  = document.getElementById('int_tot_ref')?.value || '';
+        let   qty  = Number(document.getElementById('int_tot_qty')?.value || 1);
+        const dcto = Number(document.getElementById('int_tot_desc')?.value || 0);
+        if (qty <= 0) qty = 1;
+        if (!cap && !reg && !ref) return;
+
+        let desc = 'Breaker totalizador';
+        if (cap) desc += ` capacidad de ruptura ${cap}`;
+        if (reg) desc += `, regulación térmica ${reg} A`;
+
+        addRow('breakers', { ref, desc, qty, descuento: dcto });
+      });
+
+      // Botón agregar accesorio prolongado
+      selector.querySelector('[data-int="accprol"]')?.addEventListener('click', () => {
+        const comp = document.getElementById('int_accp_comp')?.value || '';
+        const ref  = document.getElementById('int_accp_ref')?.value || '';
+        let   qty  = 1;
+        const dcto = Number(document.getElementById('int_accp_desc')?.value || 0);
+        if (!comp && !ref) return;
+
+        let desc = 'Accesorio prolongado';
+        if (comp) desc += ` compatibilidad ${comp}`;
+
+        addRow('breakers', { ref, desc, qty, descuento: dcto });
+      });
+
+      // Botón agregar Interruptor termomagnético
+      selector.querySelector('[data-int="tm"]')?.addEventListener('click', () => {
+        const tipo = document.getElementById('int_tm_tipo')?.value || '';
+        const corr = document.getElementById('int_tm_corr')?.value || '';
+        const ref  = document.getElementById('int_tm_ref')?.value || '';
+        let   qty  = Number(document.getElementById('int_tm_qty')?.value || 1);
+        const dcto = Number(document.getElementById('int_tm_desc')?.value || 0);
+        if (qty <= 0) qty = 1;
+        if (!tipo && !corr && !ref) return;
+
+        let desc = 'Interruptor termomagnético';
+        if (tipo) desc += ` ${tipo}`;
+        if (corr) desc += ` ${corr} A`;
+
+        addRow('breakers', { ref, desc, qty, descuento: dcto });
+      });
+
+// Botón agregar Contactos auxiliares (solo si el usuario dijo "Sí")
+selector.querySelector('[data-int="aux"]')?.addEventListener('click', () => {
+  const ref  = document.getElementById('int_aux_ref')?.value || '';
+  let   qty  = Number(document.getElementById('int_aux_qty')?.value || 1);
+  const dcto = Number(document.getElementById('int_aux_desc')?.value || 0);
+  if (qty <= 0) qty = 1;
+  if (!ref) return;
+
+  addRow('breakers', { ref, desc: 'Contactos auxiliares', qty, descuento: dcto });
+});
+
+      // Si ya cargaste el Excel antes de renderizar, refrescamos combos
+      if (Array.isArray(REF_BRK) && REF_BRK.length) {
+        window.rebuildBreakerRegOptions();
+        window.refreshBreakerRefsFromExcel();
+        setTimeout(() => applyAccProlRules(), 0);
+      }
+
+      // IMPORTANTE: ya hemos configurado todo para esta sección, no seguir con la lógica genérica
+      wrap.appendChild(root);
+      return;
+
+      } else if (s.key === 'bornes') {
+        // 🔹 Sección Bornes adaptada al Excel: Categoria / Funcion / Calibre / Referencia
+        root.querySelector('h3').textContent = 'Bornes';
+
+selector.className = 'acc-rows';
+selector.innerHTML = `
+<!-- 1. Bornes de paso -->
+<details class="acc-accordion" id="bor_acc_1" >
+  <summary>
+    <span>1. Bornes de paso</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="ind">
+      <div>
+        <label>Calibre</label>
+        <select id="bor_ind_cal" class="form-select">
+          <option value="">– Seleccionar –</option>
+          <option value="2812">28-12 AWG</option>
+          <option value="2810">28-10 AWG</option>
+          <option value="248">24-8 AWG</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_ind_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_ind_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_ind_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="ind">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_ind" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+
+<!-- 2. Portafusibles -->
+<details class="acc-accordion" id="bor_acc_2">
+  <summary>
+    <span>2. Portafusibles</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four" data-bor-scope="porta">
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_porta_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_porta_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_porta_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_porta" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+
+<!-- 3. Conexión a tierra -->
+<details class="acc-accordion" id="bor_acc_3">
+  <summary>
+    <span>3. Bornes de conexión a tierra</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="tierra">
+      <div>
+        <label>Calibre</label>
+        <select id="bor_tierra_cal" class="form-select">
+          <option value="">– Seleccionar –</option>
+          <option value="2812">28-12 AWG</option>
+          <option value="2810">28-10 AWG</option>
+          <option value="248">24-8 AWG</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_tierra_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_tierra_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_tierra_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_tierra" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+
+<!-- 4. Separador para bornes -->
+<details class="acc-accordion" id="bor_acc_4">
+  <summary>
+    <span>4. Separador para bornes</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four" data-bor-scope="sep">
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_sep_qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_sep_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_sep_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_sep" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+
+<!-- 5. Accesorios para bornes -->
+<details class="acc-accordion" id="bor_acc_5">
+  <summary>
+    <span>5. Accesorios para bornes</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+<div class="acc-row-fields grid six" data-bor-scope="otros">
+  <div>
+    <label>Función</label>
+    <select id="bor_otros_tipo">
+      <option value="">– Seleccionar –</option>
+      <option value="Freno de bornes">Freno de bornes</option>
+      <option value="Marcador de grupo">Marcador de grupo</option>
+      <option value="Plaquitas para bornas">Plaquitas para bornas</option>
+    </select>
+  </div>
+
+  <!-- ✅ Rango como item del grid -->
+  <div id="bor_pla_rango_wrap" style="display:none;">
+    <label>Rango</label>
+    <select id="bor_pla_rango" class="form-select">
+      <option value="">– Seleccionar –</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Cantidad</label>
+    <input id="bor_otros_qty" type="number" min="1" step="1" value="1">
+  </div>
+
+  <div>
+    <label>Descuento (%)</label>
+    <input id="bor_otros_desc_pct" type="number" min="0" max="100" step="1" value="50">
+  </div>
+
+  <div>
+    <label>Referencia</label>
+    <select id="bor_otros_ref">
+      <option value="">– Seleccionar –</option>
+    </select>
+  </div>
+
+  <div>
+    <label>&nbsp;</label>
+    <button type="button" class="btn primary" data-bor="otros">Agregar a la tabla</button>
+  </div>
+
+<div class="acc-img-wrap">
+  <img id="img_bor_otros" class="acc-img" style="display:none;">
+</div>
+
+</div>
+  </div>
+</details>
+`;
+
+
+['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
+  root.querySelector('#' + id)?.addEventListener('change', () => {
+    const map = {
+      bor_ind_ref: 'img_bor_ind',
+      bor_porta_ref: 'img_bor_porta',
+      bor_tierra_ref: 'img_bor_tierra',
+      bor_sep_ref: 'img_bor_sep',
+      bor_otros_ref: 'img_bor_otros'
+    };
+    updateBorneImage(id, map[id]);
+  });
+});
+  
+// Helper normalizador de texto
+const n = (v) => (v || '')
+  .toString()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .trim()
+  .toLowerCase()
+  .replace(/\s+/g, ' ');
+
+// Lee "Rango" aunque el parser lo haya dejado con otra llave
+function getRangoRow(r) {
+  return (
+    r.rango ??
+    r.Rango ??
+    r.RANGO ??
+    r['Rango'] ??
+    r['RANGO'] ??
+    r['rango']
+  );
+}
+
+// Normaliza rangos: convierte guiones raros a "-" y quita espacios raros
+function normRango(v){
+  return (v ?? '')
+    .toString()
+    .replace(/\u00A0/g, ' ')                 // NBSP -> espacio normal
+    .replace(/[–—−]/g, '-')                  // en dash/em dash/minus -> "-"
+    .replace(/\s+/g,'')
+    .trim();
+}
+
+function fillPlaquitaRangos() {
+  const rangoSel = root.querySelector('#bor_pla_rango');
+  if (!rangoSel) return;
+
+  const prev = rangoSel.value;
+  rangoSel.innerHTML = '<option value="">– Seleccionar –</option>';
+  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
+
+  // Map: valor normalizado -> texto tal cual del Excel (para mostrarlo bonito)
+  const mapNormToRaw = new Map();
+
+  REF_BOR
+    .filter(r => n(r.funcion).includes('plaq'))
+    .forEach(r => {
+      const raw = (getRangoRow(r) || '').toString().trim();
+      const key = normRango(raw);
+      if (key && !mapNormToRaw.has(key)) mapNormToRaw.set(key, raw);
+    });
+
+  for (const [key, raw] of mapNormToRaw.entries()) {
+    const o = document.createElement('option');
+    o.value = key;        // ✅ valor normalizado
+    o.textContent = raw;  // ✅ se muestra EXACTO como Excel
+    rangoSel.appendChild(o);
+  }
+
+  // Restaurar selección si existe
+  if ([...mapNormToRaw.keys()].includes(prev)) rangoSel.value = prev;
+}
+
+function togglePlaquitaRangoUI() {
+  const tipoSel = root.querySelector('#bor_otros_tipo');
+  const wrap    = root.querySelector('#bor_pla_rango_wrap');
+  const rangoSel= root.querySelector('#bor_pla_rango');
+
+  if (!tipoSel || !wrap) return;
+
+  const isPlaquitas = n(tipoSel.value).includes('plaquitas');
+
+  wrap.style.display = isPlaquitas ? '' : 'none';
+
+if (isPlaquitas) {
+  fillPlaquitaRangos();
+
+  // ✅ si no hay rango seleccionado, deja el primero y filtra referencias
+  if (rangoSel && !rangoSel.value) {
+    const first = rangoSel.querySelector('option[value]:not([value=""])');
+    if (first) rangoSel.value = first.value;
+  }
+  fillPlaquitaRefsByRango(rangoSel?.value || '');
+} else {
+  if (rangoSel) rangoSel.value = '';
+}
+}
+
+// ✅ Llena referencias de plaquitas mostrando "REF — RANGO" pero guardando solo REF
+function fillPlaquitaRefsByRango(rangoKeyNorm) {
+  const sel = root.querySelector('#bor_otros_ref');
+  if (!sel) return;
+
+  sel.innerHTML = '<option value="">– Seleccionar –</option>';
+  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
+
+  const key = normRango(rangoKeyNorm);
+
+  const matches = REF_BOR.filter(r => {
+    if (!n(r.funcion).includes('plaq')) return false;
+    const rk = normRango(getRangoRow(r));
+    return key ? rk === key : true;
+  });
+
+  // ✅ como “según el rango es la referencia”, dejamos SOLO las refs del rango (normalmente 1)
+  const refs = Array.from(new Set(
+    matches.map(r => (r.referencia || '').toString().trim()).filter(Boolean)
+  ));
+
+  refs.forEach(ref => {
+    const o = document.createElement('option');
+    o.value = ref;
+    o.textContent = ref;
+    sel.appendChild(o);
+  });
+
+  // ✅ FORZAR reset / selección según cantidad
+  if (refs.length === 1) {
+    sel.value = refs[0];          // auto-selecciona la única
+  } else {
+    sel.selectedIndex = 0;        // deja "– Seleccionar –" para que el usuario elija
+  }
+
+  // ✅ dispara change para que se actualice la imagen siempre
+  sel.dispatchEvent(new Event('change'));
+}
+
+window.refreshBornesFromExcel = function () {
+  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
+
+  // 1) Bornes de paso
+  const calInd = document.getElementById('bor_ind_cal')?.value || '';
+  fillBorneRefs('bor_ind_ref', 'conexion individuales', calInd);
+
+  // 2) Portafusibles
+  fillBorneRefs('bor_porta_ref', 'portafusibles');
+
+  // 3) Tierra
+  const calTi = document.getElementById('bor_tierra_cal')?.value || '';
+  fillBorneRefs('bor_tierra_ref', 'conexion a tierra', calTi);
+
+  // 4) Separador
+  fillBorneRefs('bor_sep_ref', 'separador para bornes');
+
+  // 5) Otros
+  const tipoSel  = document.getElementById('bor_otros_tipo');
+  const refSel   = document.getElementById('bor_otros_ref');
+  const rangoSel = document.getElementById('bor_pla_rango');
+  const wrapRng  = document.getElementById('bor_pla_rango_wrap');
+
+  const tipo = (tipoSel?.value || '').trim();
+  const tipoNorm = (tipo || '').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+
+  // mostrar/ocultar rango
+  const isPla = tipoNorm.includes('plaq');
+  if (wrapRng) wrapRng.style.display = isPla ? '' : 'none';
+
+  if (!refSel) return;
+
+  if (!tipo) {
+    refSel.innerHTML = '<option value="">– Seleccionar –</option>';
+  } else if (isPla) {
+    // plaquitas: rango manda
+    fillPlaquitaRangos(); // llena el combo de rangos si aplica
+
+    const key = (rangoSel?.value || '').trim();
+    fillPlaquitaRefsByRango(key);
+  } else {
+    // freno / marcador
+    let keyword = tipo;
+    if (tipoNorm.includes('freno')) keyword = 'freno';
+    else if (tipoNorm.includes('marcador')) keyword = 'marcador';
+    fillBorneRefs('bor_otros_ref', keyword);
+  }
+
+  // ✅ refrescar imágenes (por si quedó auto-seleccionado)
+  updateBorneImage('bor_ind_ref',    'img_bor_ind');
+  updateBorneImage('bor_porta_ref',  'img_bor_porta');
+  updateBorneImage('bor_tierra_ref', 'img_bor_tierra');
+  updateBorneImage('bor_sep_ref',    'img_bor_sep');
+  updateBorneImage('bor_otros_ref',  'img_bor_otros');
+};
+
+// === Event listeners ===
+['bor_ind_cal','bor_tierra_cal'].forEach(id => {
+  root.querySelector('#' + id)?.addEventListener('change', () => {
+    window.refreshBornesFromExcel();
+  });
+});
+
+root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
+  togglePlaquitaRangoUI();              // ✅ muestra/oculta rango
+  window.refreshBornesFromExcel();      // (si quieres que refresque refs)
+});
+
+root.querySelector('#bor_pla_rango')?.addEventListener('change', () => {
+  const rango = root.querySelector('#bor_pla_rango')?.value || '';
+
+  // ✅ borrar selección anterior de referencia
+  const refSel = root.querySelector('#bor_otros_ref');
+  if (refSel) refSel.value = '';
+
+  // ✅ rellenar refs segun el rango
+  fillPlaquitaRefsByRango(rango);
+
+});
+
+        // Helper para agregar filas a la tabla de bornes
+        function pushBorneRow(desc, qty, ref, descPct){
+          if (!qty || qty <= 0) return;
+          addRow('bornes', {
+            ref: ref || '',
+            desc,
+            qty,
+            descuento: Number(descPct || 0)
+          });
+        }
+
+// 1) Bornes de paso (mismas referencias que conexión individuales)
+selector.querySelector('[data-bor="ind"]')?.addEventListener('click',()=>{
+  const cal   = document.getElementById('bor_ind_cal')?.value || '';
+  const qty   = Number(document.getElementById('bor_ind_qty')?.value || 0);
+  const dscto = document.getElementById('bor_ind_desc')?.value || 0;
+  const ref   = document.getElementById('bor_ind_ref')?.value || '';
+  let desc = 'Borne de paso';
+  if (cal) desc += ` ${cal}`;
+  pushBorneRow(desc, qty, ref, dscto);
+});
+
+        // 2) Portafusibles
+        selector.querySelector('[data-bor="porta"]')?.addEventListener('click',()=>{
+          const qty   = Number(document.getElementById('bor_porta_qty')?.value || 0);
+          const dscto = document.getElementById('bor_porta_desc')?.value || 0;
+          const ref   = document.getElementById('bor_porta_ref')?.value || '';
+          const desc  = 'Borne portafusible';
+          pushBorneRow(desc, qty, ref, dscto);
+        });
+
+        // 3) Conexión a tierra
+        selector.querySelector('[data-bor="tierra"]')?.addEventListener('click',()=>{
+          const cal   = document.getElementById('bor_tierra_cal')?.value || '';
+          const qty   = Number(document.getElementById('bor_tierra_qty')?.value || 0);
+          const dscto = document.getElementById('bor_tierra_desc')?.value || 0;
+          const ref   = document.getElementById('bor_tierra_ref')?.value || '';
+          let desc = 'Borne conexión a tierra';
+          if (cal) desc += ` ${cal}`;
+          pushBorneRow(desc, qty, ref, dscto);
+        });
+
+        // 4) Separador para bornes
+        selector.querySelector('[data-bor="sep"]')?.addEventListener('click',()=>{
+          const qty   = Number(document.getElementById('bor_sep_qty')?.value || 0);
+          const dscto = document.getElementById('bor_sep_desc')?.value || 0;
+          const ref   = document.getElementById('bor_sep_ref')?.value || '';
+          const desc  = 'Separador para bornes';
+          pushBorneRow(desc, qty, ref, dscto);
+        });
+
+        // 5) Otros
+        selector.querySelector('[data-bor="otros"]')?.addEventListener('click',()=>{
+          const tipo  = document.getElementById('bor_otros_tipo')?.value || '';
+          const desc2 = document.getElementById('bor_otros_desc')?.value || '';
+          const qty   = Number(document.getElementById('bor_otros_qty')?.value || 0);
+          const dscto = document.getElementById('bor_otros_desc_pct')?.value || 0;
+          const ref   = document.getElementById('bor_otros_ref')?.value || '';
+          if (!tipo && !ref) return;
+
+          let desc = tipo || 'Otros bornes';
+          if (desc2) desc += ` – ${desc2}`;
+          pushBorneRow(desc, qty, ref, dscto);
+        });
+
+        // Si el Excel ya estaba cargado, refrescamos de una vez
+if (Array.isArray(REF_BOR) && REF_BOR.length) {
+  togglePlaquitaRangoUI();       // 👈 asegura estado inicial
+  window.refreshBornesFromExcel();
+}
+
+wrap.appendChild(root);
+return;
+
+} else if (s.key === 'comunicaciones') {
+        // 🔹 Sección Comunicaciones
+        root.querySelector('h3').textContent = 'Comunicaciones';
+
+        // Usamos layout tipo "acc-rows"
+        const selector = root.querySelector('.selector');
+        selector.className = 'acc-rows';
+        selector.innerHTML = `
+
+        <!-- 1. Cable (PROFIBUS / PROFINET) -->
+        <details class="acc-accordion">
+          <summary>
+            <span>1. Cable (PROFIBUS / PROFINET)</span>
+            <span class="chev">▶</span>
+          </summary>
+
+          <div class="acc-accordion-inner">
+            <div class="acc-row-fields grid five">
+              <div>
+                <label>Tipo de cable</label>
+                <select id="com_cable_tipo">
+                  <option value="">– Seleccionar –</option>
+                  <option value="PROFIBUS">PROFIBUS</option>
+                  <option value="PROFINET">PROFINET</option>
+                </select>
+              </div>
+              <div>
+                <label>Cantidad (m)</label>
+                <input id="com_cable_qty" type="number" min="1" step="1" value="1">
+              </div>
+              <div>
+                <label>Descuento (%)</label>
+                <input id="com_cable_desc" type="number" min="0" max="100" step="1" value="51">
+              </div>
+              <div>
+                <label>Referencia</label>
+                <select id="com_cable_ref">
+                  <option value="">– Seleccionar –</option>
+                </select>
+              </div>
+              <div>
+                <label>&nbsp;</label>
+                <button type="button" class="btn primary" data-com="cable">
+                  Agregar a la tabla
+                </button>
+              </div>
+<div class="acc-img-wrap">
+  <img id="img_com_cable" class="acc-img" style="display:none;">
+</div>
+          </div>
+        </div>
+      </details>
+        
+ <!-- 2. Conectores -->
+<details class="acc-accordion">
+  <summary>
+    <span>2. Conectores</span>
+    <span class="chev">▶</span>
+  </summary>
+
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid six">
+      <div>
+        <label>Tipo de red</label>
+        <select id="com_con_tipo">
+          <option value="">– Seleccionar –</option>
+          <option value="PROFIBUS">PROFIBUS</option>
+          <option value="PROFINET">PROFINET</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Plug</label>
+        <select id="com_con_plug">
+          <option value="">– Seleccionar –</option>
+          <option value="90">90°</option>
+          <option value="180">180°</option>
+        </select>
+      </div>
+
+      <!-- 👇 Solo aparece si Plug=90 -->
+      <div id="com_con_hembra_wrap" style="display:none;">
+        <label>Conector hembra</label>
+        <select id="com_con_hembra">
+          <option value="">– Seleccionar –</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad</label>
+        <input id="com_con_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="com_con_desc" type="number" min="0" max="100" step="1" value="51">
+      </div>
+
+      <div>
+        <label>Referencia</label>
+        <select id="com_con_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-com="conector">
+          Agregar a la tabla
+        </button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_com_con" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+        `;
+
+        // Metemos la sección al DOM
+        wrap.appendChild(root);
+        // ===== Helpers para Comunicaciones =====
+        function comNorm(v) {
+          return (v || '')
+            .toString()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, ' ');
+        }
+
+        function fillComRefs(selectId, filterFn) {
+          const sel = document.getElementById(selectId);
+          if (!sel) return;
+
+          const prev = sel.value;
+          sel.innerHTML = '<option value="">– Seleccionar –</option>';
+
+          if (!Array.isArray(REF_COM) || !REF_COM.length) return;
+
+          const refs = Array.from(new Set(
+            REF_COM
+              .filter(filterFn)
+              .map(r => r.referencia)
+              .filter(Boolean)
+          ));
+
+          refs.forEach(ref => {
+            const o = document.createElement('option');
+            o.value = ref;
+            o.textContent = ref;
+            sel.appendChild(o);
+          });
+
+          if (refs.includes(prev)) sel.value = prev;
+        }
+
+        // 🔹 Cables: un solo combo, cambia según PROFIBUS / PROFINET
+        function refreshCableRefs() {
+          const tipo = document.getElementById('com_cable_tipo')?.value || '';
+
+          fillComRefs('com_cable_ref', r => {
+            // Categoria = Cable, y la función dice si es PROFIBUS o PROFINET
+            if (!comNorm(r.categoria).includes('cable')) return false;
+            if (!tipo) return true;
+            const f = comNorm(r.funcion);
+            if (tipo === 'PROFIBUS' && !f.includes('profibus')) return false;
+            if (tipo === 'PROFINET' && !f.includes('profinet')) return false;
+            return true;
+          });
+        }
+
+function syncHembraUI() {
+  const tipo = document.getElementById('com_con_tipo')?.value || '';
+  const plug = document.getElementById('com_con_plug')?.value || '';
+  const wrap = document.getElementById('com_con_hembra_wrap');
+  const hem  = document.getElementById('com_con_hembra');
+
+  if (!wrap || !hem) return;
+
+  const show = (tipo === 'PROFIBUS' && plug === '90');
+
+  if (show) {
+    wrap.style.display = '';
+  } else {
+    wrap.style.display = 'none';
+    hem.value = '';
+  }
+}
+
+        // 🔹 Conectores: ya estaban así, solo los mantenemos
+function refreshConnectorRefs() {
+  const tipo  = document.getElementById('com_con_tipo')?.value || '';
+  const plug  = document.getElementById('com_con_plug')?.value || '';
+  const hemUI = document.getElementById('com_con_hembra')?.value || ''; // si/no
+
+  const needsHembra = (tipo === 'PROFIBUS' && plug === '90');
+
+  fillComRefs('com_con_ref', r => {
+    if (comNorm(r.categoria) !== 'conectores') return false;
+
+    // Tipo de red (desde "funcion")
+    if (tipo) {
+      const f = comNorm(r.funcion);
+      if (tipo === 'PROFIBUS' && !f.includes('profibus')) return false;
+      if (tipo === 'PROFINET' && !f.includes('profinet')) return false;
+    }
+
+    // Plug exacto
+    if (plug) {
+      const p = String(r.plug ?? '').trim();
+      if (p !== String(plug)) return false;
+    }
+
+    // SOLO PROFIBUS + 90 filtra por hembra
+    if (needsHembra) {
+      if (!hemUI) return false; // si no eligió si/no, no hay referencia
+      const hExcel = comNorm(r.conectorHembra ?? '');   // ✅ AQUÍ ESTABA EL ERROR
+      if (hExcel !== comNorm(hemUI)) return false;
+    }
+
+    return true;
+  });
+}
+
+        // Exponer para cuando se cargue el Excel
+window.refreshComFromExcel = function () {
+  if (!Array.isArray(REF_COM) || !REF_COM.length) return;
+  refreshCableRefs();
+  syncHembraUI();
+  refreshConnectorRefs();
+
+updateComImage('com_cable_ref', 'img_com_cable');
+updateComImage('com_con_ref',   'img_com_con');
+
+};
+
+        // Listeners
+        document.getElementById('com_cable_tipo')?.addEventListener('change', () => {
+          refreshCableRefs();
+        });
+
+document.getElementById('com_con_tipo')?.addEventListener('change', () => {
+  document.getElementById('com_con_plug').value = '';
+  document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
+  syncHembraUI();
+  refreshConnectorRefs();
+});
+
+document.getElementById('com_con_plug')?.addEventListener('change', () => {
+  syncHembraUI();
+  refreshConnectorRefs();
+  updateComImage('com_con_ref', 'img_com_con');
+});
+
+document.getElementById('com_con_hembra')?.addEventListener('change', () => {
+  refreshConnectorRefs();
+  updateComImage('com_con_ref', 'img_com_con');
+});
+  
+document.getElementById('com_cable_tipo')?.addEventListener('change', () => {
+  refreshCableRefs();
+  updateComImage('com_cable_ref', 'img_com_cable');
+});
+
+        // Helper para agregar filas a la tabla de comunicaciones
+        function pushComRow(desc, qty, ref, descPct) {
+          if (!qty || qty <= 0) return;
+          addRow('comunicaciones', {
+            ref: ref || '',
+            desc,
+            qty,
+            descuento: Number(descPct || 0)
+          });
+        }
+
+        // Botón: Cable (PROFIBUS / PROFINET)
+        root.querySelector('[data-com="cable"]')?.addEventListener('click', () => {
+          const tipo = document.getElementById('com_cable_tipo')?.value || '';
+          const qty  = Number(document.getElementById('com_cable_qty')?.value || 0);
+          const dcto = document.getElementById('com_cable_desc')?.value || 0;
+          const ref  = document.getElementById('com_cable_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+
+          let desc = 'Cable';
+          if (tipo) desc += ` ${tipo}`;
+          desc += ' (m)';
+
+          pushComRow(desc, qty, ref, dcto);
+        });
+
+        // Botón: Conectores
+        root.querySelector('[data-com="conector"]')?.addEventListener('click', () => {
+          const tipo = document.getElementById('com_con_tipo')?.value || '';
+          const plug = document.getElementById('com_con_plug')?.value || '';
+          const qty  = Number(document.getElementById('com_con_qty')?.value || 0);
+          const dcto = document.getElementById('com_con_desc')?.value || 0;
+          const ref  = document.getElementById('com_con_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+
+          let desc = 'Conector';
+          if (tipo) desc += ` ${tipo}`;
+          if (plug) desc += ` ${plug}°`;
+  
+const hem = document.getElementById('com_con_hembra')?.value || '';
+if (tipo === 'PROFIBUS' && plug === '90' && hem) {
+  desc += ` hembra ${hem.toUpperCase()}`;
+}
+
+          pushComRow(desc, qty, ref, dcto);
+        });
+
+        // Si el Excel ya estaba cargado antes de crear la sección
+        if (Array.isArray(REF_COM) && REF_COM.length) {
+          window.refreshComFromExcel();
+        }
+
+        // Ya manejamos toda la sección Comunicaciones
+        return;
+      }
+
+      // Catálogo para cada sección
+      const catalog = []; // ✅ ya no usamos catálogo quemado
+
+      // BREAKERS: referencias dependen de tipo + tensión + kA
+      if (s.key === 'breakers') {
+
+        function refreshBreakerRefs() {
+          const tipo    = document.getElementById('p_brk_tipo')?.value || '';
+          const tension = document.getElementById('p_brk_tension')?.value || '';
+          const cc      = document.getElementById('p_brk_cc')?.value || '';
+
+          const matches = BREAKER_CATALOG.filter(b =>
+            (!tipo    || b.tipo    === tipo) &&
+            (!tension || b.tension === tension) &&
+            (!cc      || b.cc      === cc)
+          );
+
+          selRef.innerHTML = '';
+          if (!matches.length) {
+            const o = document.createElement('option');
+            o.value = '';
+            o.textContent = 'Sin referencia sugerida';
+            selRef.appendChild(o);
+          } else {
+            matches.forEach(b => {
+              const o = document.createElement('option');
+              o.value = b.ref;
+              o.textContent = b.ref;
+              selRef.appendChild(o);
+            });
+          }
+        }
+
+        ['p_brk_tipo','p_brk_tension','p_brk_cc'].forEach(id=>{
+          const el = document.getElementById(id);
+          if (el) el.addEventListener('change', refreshBreakerRefs);
+        });
+
+        setTimeout(refreshBreakerRefs, 0);
+
+      } else if (s.key === 'bornes') {
+
+        function refreshBornesRefs() {
+          const tipo   = root.querySelector('#p_bor_tipo')?.value || '';
+          const opcion = root.querySelector('#p_bor_sec')?.value || '';
+
+          const matches = (typeof BORNE_CATALOG !== 'undefined' ? BORNE_CATALOG : []).filter(b =>
+            (!tipo   || b.tipo   === tipo) &&
+            (!opcion || b.opcion === opcion)
+          );
+
+          selRef.innerHTML = '';
+          if (!matches.length) {
+            const o = document.createElement('option');
+            o.value = '';
+            o.textContent = 'Sin referencia sugerida';
+            selRef.appendChild(o);
+          } else {
+            matches.forEach(b => {
+              const o = document.createElement('option');
+              o.value = b.ref;
+              o.textContent = b.ref;
+              selRef.appendChild(o);
+            });
+          }
+        }
+
+        const tipoEl = root.querySelector('#p_bor_tipo');
+        const optEl  = root.querySelector('#p_bor_sec');
+        if (tipoEl) tipoEl.addEventListener('change', refreshBornesRefs);
+        if (optEl)  optEl.addEventListener('change', refreshBornesRefs);
+
+        setTimeout(refreshBornesRefs, 0);
+
+      } else if (s.key === 'reles') {
+        // 🔹 Sección Relés basada en Excel (Bloque de relé / Accesorio peine / Relés enchufables tipo universal)
+        root.querySelector('h3').textContent = 'Relés';
+
+        // usamos layout tipo "acc-rows"
+selector.className = 'acc-rows';
+selector.innerHTML = `
+  <!-- 1. Bloque de relé -->
+  <details class="acc-accordion" id="rel_acc_1">
+    <summary>
+      <span>1. Bloque de relé tipo slim</span>
+      <span class="chev">▶</span>
+    </summary>
+    <div class="acc-accordion-inner">
+      <div class="acc-row-fields grid six">
+        <div>
+          <label>Voltaje de alimentación</label>
+          <select id="rel_bloq_volt">
+            <option value="">– Seleccionar –</option>
+            <option value="24 Vdc">24 Vdc</option>
+          </select>
+        </div>
+        <div>
+          <label>Cantidad</label>
+          <input id="rel_bloq_qty" type="number" min="0" step="1" value="0">
+        </div>
+        <div>
+          <label>Descuento (%)</label>
+          <input id="rel_bloq_desc" type="number" min="0" max="100" step="1" value="55">
+        </div>
+        <div>
+          <label>Referencia</label>
+          <select id="rel_bloq_ref">
+            <option value="">– Seleccionar –</option>
+          </select>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button type="button" class="btn primary" data-rel="bloque">Agregar a la tabla</button>
+        </div>
+        <div class="acc-img-wrap">
+          <img id="img_rel_bloq" class="acc-img" style="display:none;">
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 2. Accesorio peine -->
+  <details class="acc-accordion" id="rel_acc_2">
+    <summary>
+      <span>2. Accesorio peine para tipo slim</span>
+      <span class="chev">▶</span>
+    </summary>
+    <div class="acc-accordion-inner">
+      <div class="acc-row-fields grid six">
+        <div>
+          <label>Voltaje / tipo</label>
+          <select id="rel_peine_tipo">
+            <option value="">– Seleccionar –</option>
+            <option value="Puente fijo 16 polos">Puente fijo 16 polos</option>
+          </select>
+        </div>
+        <div>
+          <label>Cantidad (paquete x 10 unidades)</label>
+          <input id="rel_peine_qty" type="number" min="1" step="1" value="1">
+        </div>
+        <div>
+          <label>Descuento (%)</label>
+          <input id="rel_peine_desc" type="number" min="0" max="100" step="1" value="55">
+        </div>
+        <div>
+          <label>Referencia</label>
+          <select id="rel_peine_ref">
+            <option value="">– Seleccionar –</option>
+          </select>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button type="button" class="btn primary" data-rel="peine">Agregar a la tabla</button>
+        </div>
+        <div class="acc-img-wrap">
+          <img id="img_rel_peine" class="acc-img" style="display:none;">
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <!-- 3. Relés enchufables tipo universal -->
+  <details class="acc-accordion" id="rel_acc_3">
+    <summary>
+      <span>3. Relés enchufables tipo universal</span>
+      <span class="chev">▶</span>
+    </summary>
+    <div class="acc-accordion-inner">
+      <div class="acc-row-fields grid six">
+        <div>
+          <label>Pines</label>
+          <select id="rel_univ_pines">
+            <option value="">– Seleccionar –</option>
+            <option value="8">8</option>
+            <option value="11">11</option>
+            <option value="14">14</option>
+          </select>
+        </div>
+        <div>
+          <label>Voltaje de alimentación</label>
+          <select id="rel_univ_volt">
+            <option value="">– Seleccionar –</option>
+            <option value="24 Vdc">24 Vdc</option>
+            <option value="115Vdc">115Vdc</option>
+            <option value="230 Vdc">230 Vdc</option>
+          </select>
+        </div>
+        <div>
+          <label>Cantidad</label>
+          <input id="rel_univ_qty" type="number" min="0" step="1" value="0">
+        </div>
+        <div>
+          <label>Descuento (%)</label>
+          <input id="rel_univ_desc" type="number" min="0" max="100" step="1" value="55">
+        </div>
+        <div>
+          <label>Referencia</label>
+          <select id="rel_univ_ref">
+            <option value="">– Seleccionar –</option>
+          </select>
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button type="button" class="btn primary" data-rel="univ">Agregar a la tabla</button>
+        </div>
+        <div class="acc-img-wrap">
+          <img id="img_rel_univ" class="acc-img" style="display:none;">
+        </div>
+      </div>
+    </div>
+  </details>
+`;
+
+// 👉 Insertamos la sección en el DOM
+wrap.appendChild(root);
+window.syncRelQtyFromSD?.();
+
+  // ✅ Listeners de imagen (usar root.querySelector, como bornes)
+  root.querySelector('#rel_bloq_ref')?.addEventListener('change', () => {
+    updateRelImage('rel_bloq_ref', 'img_rel_bloq');
+  });
+  root.querySelector('#rel_peine_ref')?.addEventListener('change', () => {
+    updateRelImage('rel_peine_ref', 'img_rel_peine');
+  });
+  root.querySelector('#rel_univ_ref')?.addEventListener('change', () => {
+    updateRelImage('rel_univ_ref', 'img_rel_univ');
+  });
+
+        // ====================
+        // Helpers de Relés
+        // ====================
+        function relayNormTxt(v) {
+          return (v || '')
+            .toString()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, ' ');
+        }
+
+        function fillRelayRefs(selectId, filterFn) {
+          const sel = document.getElementById(selectId);
+          if (!sel) return;
+
+          const prev = sel.value;
+          sel.innerHTML = '<option value="">– Seleccionar –</option>';
+
+          if (!Array.isArray(REF_REL) || !REF_REL.length) return;
+
+          const refs = Array.from(new Set(
+            REF_REL
+              .filter(filterFn)
+              .map(r => r.referencia)
+              .filter(Boolean)
+          ));
+
+          refs.forEach(ref => {
+            const o = document.createElement('option');
+            o.value = ref;
+            o.textContent = ref;
+            sel.appendChild(o);
+          });
+
+          if (refs.includes(prev)) sel.value = prev;
+        }
+
+        // Refrescar combos de Relés según filtros + Excel
+        window.refreshRelesFromExcel = function () {
+          if (!Array.isArray(REF_REL) || !REF_REL.length) return;
+
+          // 1) Bloque de relé
+          const bloqVolt = document.getElementById('rel_bloq_volt')?.value || '';
+          fillRelayRefs('rel_bloq_ref', r => {
+            if (relayNormTxt(r.funcion) !== relayNormTxt('Bloque de rele')) return false;
+            if (!bloqVolt) return true;
+            return relayNormTxt(r.voltaje) === relayNormTxt(bloqVolt);
+          });
+
+          // 2) Accesorio peine
+          const peineTipo = document.getElementById('rel_peine_tipo')?.value || '';
+          fillRelayRefs('rel_peine_ref', r => {
+            if (relayNormTxt(r.funcion) !== relayNormTxt('Accesorio peine')) return false;
+            if (!peineTipo) return true;
+            return relayNormTxt(r.voltaje) === relayNormTxt(peineTipo);
+          });
+
+          // 3) Relés enchufables tipo universal
+          const unPines = document.getElementById('rel_univ_pines')?.value || '';
+          const unVolt  = document.getElementById('rel_univ_volt')?.value || '';
+          fillRelayRefs('rel_univ_ref', r => {
+            if (relayNormTxt(r.funcion) !== relayNormTxt('Relés enchufables tipo universal')) return false;
+            if (unPines && relayNormTxt(r.pines)   !== relayNormTxt(unPines)) return false;
+            if (unVolt  && relayNormTxt(r.voltaje) !== relayNormTxt(unVolt))  return false;
+            return true;
+          });
+    // ✅ refrescar imágenes después de llenar refs
+    updateRelImage('rel_bloq_ref', 'img_rel_bloq');
+    updateRelImage('rel_peine_ref', 'img_rel_peine');
+    updateRelImage('rel_univ_ref', 'img_rel_univ');
+        };
+
+        // Listeners para que al cambiar filtros se refresquen las referencias
+        [
+          'rel_bloq_volt',
+          'rel_peine_tipo',
+          'rel_univ_pines',
+          'rel_univ_volt'
+        ].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener('change', () => {
+              window.refreshRelesFromExcel();
+            });
+          }
+        });
+
+        // Helper para meter filas en la tabla de Relés
+        function pushRelRow(desc, qty, ref, descPct) {
+          if (!qty || qty <= 0) return;
+          addRow('reles', {
+            ref: ref || '',
+            desc,
+            qty,
+            descuento: Number(descPct || 0)
+          });
+        }
+
+selector.addEventListener('click', (e) => {
+  const btn = e.target.closest('button[data-rel]');
+  if (!btn) return;
+
+  const k = btn.dataset.rel;
+
+  if (k === 'bloque') {
+    const volt = document.getElementById('rel_bloq_volt')?.value || '';
+    const qty  = Number(document.getElementById('rel_bloq_qty')?.value || 0);
+    const dsct = document.getElementById('rel_bloq_desc')?.value || 0;
+    const ref  = document.getElementById('rel_bloq_ref')?.value || '';
+    if (!volt && !ref) return;
+
+    let desc = 'Bloque de relé';
+    if (volt) desc += ` ${volt}`;
+    pushRelRow(desc, qty, ref, dsct);
+    return;
+  }
+
+  if (k === 'peine') {
+    const tipo = document.getElementById('rel_peine_tipo')?.value || '';
+    const qty  = Number(document.getElementById('rel_peine_qty')?.value || 0);
+    const dsct = document.getElementById('rel_peine_desc')?.value || 0;
+    const ref  = document.getElementById('rel_peine_ref')?.value || '';
+    if (!tipo && !ref) return;
+
+    let desc = 'Accesorio peine';
+    if (tipo) desc += ` ${tipo}`;
+    pushRelRow(desc, qty, ref, dsct);
+    return;
+  }
+
+  if (k === 'univ') {
+    const pines = document.getElementById('rel_univ_pines')?.value || '';
+    const volt  = document.getElementById('rel_univ_volt')?.value || '';
+    const qty   = Number(document.getElementById('rel_univ_qty')?.value || 0);
+    const dsct  = document.getElementById('rel_univ_desc')?.value || 0;
+    const ref   = document.getElementById('rel_univ_ref')?.value || '';
+    if (!pines && !volt && !ref) return;
+
+    let desc = 'Relé enchufable tipo universal';
+    if (pines) desc += ` ${pines} pines`;
+    if (volt)  desc += ` ${volt}`;
+    pushRelRow(desc, qty, ref, dsct);
+    return;
+  }
+});
+
+        // Si el Excel ya estaba cargado antes de crear la sección, refrescamos
+        if (Array.isArray(REF_REL) && REF_REL.length) {
+          window.refreshRelesFromExcel();
+        }
+
+        return;
+
+      } else if (s.key === 'acc_tablero') {
+        // 🔹 Sección Accesorios para tablero (Tomacorriente / Lámpara / Microswitch)
+        root.querySelector('h3').textContent = 'Accesorios para tablero';
+
+selector.className = 'acc-rows';
+selector.innerHTML = `
+
+<!-- 1. Tomacorriente -->
+<details class="acc-accordion">
+  <summary>
+    <span>1. Tomacorriente</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four">
+      <div>
+        <label>Cantidad</label>
+        <input id="acc_tab_toma_qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="acc_tab_toma_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="acc_tab_toma_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-acctab="toma">
+          Agregar a la tabla
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 2. Lámpara LED -->
+<details class="acc-accordion">
+  <summary>
+    <span>2. Lámpara LED</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four">
+      <div>
+        <label>Cantidad</label>
+        <input id="acc_tab_lam_qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="acc_tab_lam_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="acc_tab_lam_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-acctab="lampara">
+          Agregar a la tabla
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 3. Microswitch -->
+<details class="acc-accordion">
+  <summary>
+    <span>3. Microswitch</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four">
+      <div>
+        <label>Cantidad</label>
+        <input id="acc_tab_micro_qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="acc_tab_micro_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="acc_tab_micro_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-acctab="micro">
+          Agregar a la tabla
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 4. Transformador -->
+<details class="acc-accordion">
+  <summary>
+    <span>4. Transformador</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four">
+      <div>
+        <label>Cantidad</label>
+        <input id="acc_tab_transf_qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="acc_tab_transf_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="acc_tab_transf_ref">
+          <option value="">– Seleccionar –</option>
+          <option value="WT 50">WT 50</option>
+          <option value="WT 100">WT 100</option>
+          <option value="WT 150">WT 150</option>
+          <option value="WT 250">WT 250</option>
+          <option value="WT 350">WT 350</option>
+          <option value="WT 500">WT 500</option>
+          <option value="WT 750">WT 750</option>
+          <option value="WT 1000">WT 1000</option>
+          <option value="WT 1500">WT 1500</option>
+          <option value="WT 2000">WT 2000</option>
+          <option value="WT 2500">WT 2500</option>
+          <option value="WT 3000">WT 3000</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-acctab="transf">
+          Agregar a la tabla
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+`;
+
+        // Lo pegamos al DOM
+        wrap.appendChild(root);
+
+function consNorm(v){
+  return (v||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .trim().toLowerCase().replace(/\s+/g,' ');
+}
+
+function fillSelectOptions(sel, values){
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">– Seleccionar –</option>';
+  values.forEach(v=>{
+    const o=document.createElement('option');
+    o.value=v; o.textContent=v;
+    sel.appendChild(o);
+  });
+  if (values.includes(prev)) sel.value = prev;
+}
+
+function fillRefs(sel, refs){
+  if (!sel) return;
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">– Seleccionar –</option>';
+  refs.forEach(ref=>{
+    const o=document.createElement('option');
+    o.value=ref; o.textContent=ref;
+    sel.appendChild(o);
+  });
+  if (refs.includes(prev)) sel.value = prev;
+}
+
+window.refreshConsumiblesFromExcel = function(){
+  if (!Array.isArray(REF_CONS) || !REF_CONS.length) return;
+
+  // ✅ Bases adhesivas: categoría = "Bases adhesivas"
+  const baseColorSel = document.getElementById('cons_base_color');
+  const baseRefSel   = document.getElementById('cons_base_ref');
+
+  if (baseColorSel && baseRefSel) {
+    const bases = REF_CONS.filter(r => consNorm(r.categoria) === consNorm('Bases adhesivas'));
+
+    const colors = Array.from(new Set(bases.map(r => (r.color||'').toString().trim()).filter(Boolean)));
+    fillSelectOptions(baseColorSel, colors);
+
+    const chosenColor = baseColorSel.value || '';
+    const refs = Array.from(new Set(
+      bases
+        .filter(r => !chosenColor || consNorm(r.color) === consNorm(chosenColor))
+        .map(r => (r.referencia||'').toString().trim())
+        .filter(Boolean)
+    ));
+    fillRefs(baseRefSel, refs);
+  }
+
+  // (opcional) acá después hacemos lo mismo para Cable (calibre+color→ref)
+};
+
+        // ===== Helpers de accesorios para tablero =====
+        function accTabNorm(v) {
+          return (v || '')
+            .toString()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim()
+            .replace(/\s+/g, ' ');
+        }
+
+        function fillAccTabRefs(selectId, categoriaBuscada) {
+          const sel = document.getElementById(selectId);
+          if (!sel) return;
+
+          const prev = sel.value;
+          sel.innerHTML = '<option value="">– Seleccionar –</option>';
+
+          if (!Array.isArray(REF_ACC_TAB) || !REF_ACC_TAB.length) return;
+
+          const catTarget = accTabNorm(categoriaBuscada);
+
+          const refs = Array.from(new Set(
+            REF_ACC_TAB
+              .filter(r => accTabNorm(r.categoria).includes(catTarget))
+              .map(r => r.referencia)
+              .filter(Boolean)
+          ));
+
+          refs.forEach(ref => {
+            const o = document.createElement('option');
+            o.value = ref;
+            o.textContent = ref;
+            sel.appendChild(o);
+          });
+
+          if (refs.includes(prev)) sel.value = prev;
+        }
+
+        // Exponer para cuando se cargue el Excel
+window.refreshAccTabFromExcel = function () {
+  // Categorías esperadas:
+  // Tomacorriente / Lampara led / microswitch / Transformador
+  fillAccTabRefs('acc_tab_toma_ref',   'Tomacorriente');
+  fillAccTabRefs('acc_tab_lam_ref',    'Lampara led');
+  fillAccTabRefs('acc_tab_micro_ref',  'microswitch');
+};
+
+        // Si el Excel ya estaba cargado, refrescar de una
+        if (Array.isArray(REF_ACC_TAB) && REF_ACC_TAB.length) {
+          window.refreshAccTabFromExcel();
+        }
+
+        // Helper para agregar filas a la tabla de esta sección
+        function pushAccTabRow(desc, qty, ref, descPct) {
+          if (!qty || qty <= 0) return;
+          addRow('acc_tablero', {
+            ref: ref || '',
+            desc,
+            qty,
+            descuento: Number(descPct || 0)
+          });
+        }
+
+        // Botones "Agregar a la tabla"
+        root.querySelector('[data-acctab="toma"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('acc_tab_toma_qty')?.value || 0);
+          const dsct = document.getElementById('acc_tab_toma_desc')?.value || 0;
+          const ref  = document.getElementById('acc_tab_toma_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
+          pushAccTabRow('Tomacorriente', qty, ref, dsct);
+        });
+
+        root.querySelector('[data-acctab="lampara"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('acc_tab_lam_qty')?.value || 0);
+          const dsct = document.getElementById('acc_tab_lam_desc')?.value || 0;
+          const ref  = document.getElementById('acc_tab_lam_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
+          pushAccTabRow('Lámpara LED', qty, ref, dsct);
+        });
+
+        root.querySelector('[data-acctab="micro"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('acc_tab_micro_qty')?.value || 0);
+          const dsct = document.getElementById('acc_tab_micro_desc')?.value || 0;
+          const ref  = document.getElementById('acc_tab_micro_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
+          pushAccTabRow('Microswitch', qty, ref, dsct);
+        });
+
+        root.querySelector('[data-acctab="transf"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('acc_tab_transf_qty')?.value || 0);
+          const dsct = document.getElementById('acc_tab_transf_desc')?.value || 0;
+          const ref  = document.getElementById('acc_tab_transf_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+if (!ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
+          pushAccTabRow('Transformador', qty, ref, dsct);
+        });
+
+        // Importante: ya tratamos esta sección, no continuar con lógica genérica
+        return;
+
+} else if (s.key === 'consumibles') {
+        // 🔹 Nueva sección Consumibles
+        root.querySelector('h3').textContent = 'Consumibles';
+
+        // Usamos layout tipo "acc-rows" como en relés y accesorios
+        const selector = root.querySelector('.selector');
+selector.className = 'acc-rows';
+selector.innerHTML = `
+
+<!-- 1. Cable de control -->
+<details class="acc-accordion">
+  <summary>
+    <span>1. Cable de control</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid six">
+      <div>
+        <label>Calibre</label>
+        <select id="cons_cable_cal">
+          <option value="">– Seleccionar –</option>
+          <option value="18 AWG">18 AWG</option>
+          <option value="20 AWG">20 AWG</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Color</label>
+        <select id="cons_cable_color">
+          <option value="">– Seleccionar –</option>
+          <option value="Negro">Negro</option>
+          <option value="Rojo">Rojo</option>
+          <option value="Café">Café</option>
+          <option value="Azul">Azul</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad (rollo 100m)</label>
+        <input id="cons_cable_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_cable_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="cable">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 2. Terminales tubulares -->
+<details class="acc-accordion">
+  <summary>
+    <span>2. Terminales tubulares</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Tipo</label>
+        <select id="cons_term_cal">
+          <option value="">– Seleccionar –</option>
+          <option value="Simples">Simples</option>
+          <option value="Dobles">Dobles</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad (bolsas)</label>
+        <input id="cons_term_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_term_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="term">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 3. Amarres Fast Tie -->
+<details class="acc-accordion">
+  <summary>
+    <span>3. Amarres Fast Tie</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Cantidad (bolsas)</label>
+        <input id="cons_amarre_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_amarre_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="amarre">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- ✅ 4. Bases adhesivas -->
+<details class="acc-accordion">
+  <summary>
+    <span>4. Bases adhesivas</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Color</label>
+        <select id="cons_base_color">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad (bolsa x100)</label>
+        <input id="cons_base_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_base_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>Referencia</label>
+        <select id="cons_base_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="base">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 5. Canaleta -->
+<details class="acc-accordion">
+  <summary>
+    <span>5. Canaleta</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid six">
+      <div>
+        <label>Tamaño</label>
+        <select id="cons_canaleta_tam">
+          <option value="">– Seleccionar –</option>
+          <option value="100 x 100 mm">100 x 100 mm</option>
+          <option value="25 x 25 mm">25 x 25 mm</option>
+          <option value="40 x 40 mm">40 x 40 mm</option>
+          <option value="60 x 40 mm">60 x 40 mm</option>
+          <option value="60 x 60 mm">60 x 60 mm</option>
+          <option value="25 x 40 mm">25 x 40 mm</option>
+          <option value="60 x 80 mm">60 x 80 mm</option>
+          <option value="80 x 80 mm">80 x 80 mm</option>
+          <option value="80 x 60 mm">60 x 80 mm</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Longitud</label>
+        <select id="cons_canaleta_len">
+          <option value="">– Seleccionar –</option>
+          <option value="2 m">2 m</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad</label>
+        <input id="cons_canaleta_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_canaleta_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="canaleta">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 6. Riel omega -->
+<details class="acc-accordion">
+  <summary>
+    <span>6. Riel omega</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Longitud</label>
+        <select id="cons_riel_len">
+          <option value="">– Seleccionar –</option>
+          <option value="2 m">2 m</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Cantidad</label>
+        <input id="cons_riel_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_riel_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="riel">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 7. Tornillos autorroscantes -->
+<details class="acc-accordion">
+  <summary>
+    <span>7. Tornillos autorroscantes</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Cantidad (bolsa x100)</label>
+        <input id="cons_tornillo_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_tornillo_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="tornillo">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 8. Termoencogible -->
+<details class="acc-accordion">
+  <summary>
+    <span>8. Termoencogible</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Cantidad cartuchos (20 marquillas/cartucho)</label>
+        <input id="cons_termo_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_termo_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="termo">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 9. Fusibles -->
+<details class="acc-accordion">
+  <summary>
+    <span>9. Fusibles 5×20 mm 500mA</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five">
+      <div>
+        <label>Cantidad</label>
+        <input id="cons_fusible_qty" type="number" min="1" step="1" value="1">
+      </div>
+
+      <div>
+        <label>Descuento (%)</label>
+        <input id="cons_fusible_desc" type="number" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-cons="fusible">Agregar a la tabla</button>
+      </div>
+    </div>
+  </div>
+</details>
+`;
+
+// Lo añadimos al DOM
+wrap.appendChild(root);
+// ✅ si ya hay bornes calculados, precarga cartuchos en termoencogible
+actualizarTermoencogibleAuto();
+actualizarFusiblesAuto();
+
+// ✅ Bases adhesivas: cuando cambie el color, refrescar referencias
+document.getElementById('cons_base_color')?.addEventListener('change', () => {
+  // opcional: limpiar selección de referencia para evitar arrastrar una vieja
+  const refSel = document.getElementById('cons_base_ref');
+  if (refSel) refSel.value = '';
+  window.refreshConsumiblesFromExcel?.();
+});
+
+        // Helper para agregar filas a la tabla de consumibles
+        function pushConsRow(desc, qty, ref, descPct){
+          if (!qty || qty <= 0) return;
+          addRow('consumibles', {
+            ref: ref || '',
+            desc,
+            qty,
+            descuento: Number(descPct || 0)
+          });
+        }
+
+root.querySelector('[data-cons="base"]')?.addEventListener('click', () => {
+  const color = document.getElementById('cons_base_color')?.value || '';
+  const qty   = Number(document.getElementById('cons_base_qty')?.value || 0);
+  const dcto  = Number(document.getElementById('cons_base_desc')?.value || 0);
+  const ref   = document.getElementById('cons_base_ref')?.value || '';
+  if (!qty || qty <= 0) return;
+
+  let desc = 'Bases adhesivas';
+  if (color) desc += ` ${color}`;
+
+  pushConsRow(desc, qty, ref, dcto);
+});
+
+root.querySelector('[data-cons="cable"]')?.addEventListener('click', () => {
+  const cal   = document.getElementById('cons_cable_cal')?.value || '';
+  const color = document.getElementById('cons_cable_color')?.value || '';
+  const qty   = Number(document.getElementById('cons_cable_qty')?.value || 0);
+  const dcto  = Number(document.getElementById('cons_cable_desc')?.value || 0);
+  const ref   = document.getElementById('cons_cable_ref')?.value || '';
+
+  if (!qty || qty <= 0) return;
+
+  let desc = 'Cable de control';
+  if (cal)   desc += ` ${cal}`;
+  if (color) desc += ` ${color}`;
+
+  pushConsRow(desc, qty, ref, dcto);
+});
+
+root.querySelector('[data-cons="term"]')?.addEventListener('click', () => {
+  const cal  = document.getElementById('cons_term_cal')?.value || '';
+  const qty  = Number(document.getElementById('cons_term_qty')?.value || 0);
+  const dcto = document.getElementById('cons_term_desc')?.value || 0;
+  const ref  = document.getElementById('cons_term_ref')?.value || '';
+  if (!qty || qty <= 0) return;
+
+  let desc = 'Terminales tubulares';
+  if (cal) desc += ` Tipo ${cal}`;
+
+  pushConsRow(desc, qty, ref, dcto);
+});
+
+        root.querySelector('[data-cons="amarre"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('cons_amarre_qty')?.value || 0);
+          const dcto = document.getElementById('cons_amarre_desc')?.value || 0;
+          const ref  = document.getElementById('cons_amarre_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+          pushConsRow('Amarres Fast Tie', qty, ref, dcto);
+        });
+
+root.querySelector('[data-cons="canaleta"]')?.addEventListener('click', () => {
+  const tam  = document.getElementById('cons_canaleta_tam')?.value || '';
+  const len  = document.getElementById('cons_canaleta_len')?.value || '';
+  const qty  = Number(document.getElementById('cons_canaleta_qty')?.value || 0);
+  const dcto = document.getElementById('cons_canaleta_desc')?.value || 0;
+  const ref  = document.getElementById('cons_canaleta_ref')?.value || '';
+  if (!qty || qty <= 0) return;
+
+  let desc = 'Canaleta';
+  if (tam) desc += ` ${tam}`;
+  if (len) desc += ` ${len}`;
+
+  pushConsRow(desc, qty, ref, dcto);
+});
+
+root.querySelector('[data-cons="riel"]')?.addEventListener('click', () => {
+  const len  = document.getElementById('cons_riel_len')?.value || '';
+  const qty  = Number(document.getElementById('cons_riel_qty')?.value || 0);
+  const dcto = document.getElementById('cons_riel_desc')?.value || 0;
+  const ref  = document.getElementById('cons_riel_ref')?.value || '';
+  if (!qty || qty <= 0) return;
+
+  let desc = 'Riel omega';
+  if (len) desc += ` ${len}`;
+
+  pushConsRow(desc, qty, ref, dcto);
+});
+
+        root.querySelector('[data-cons="tornillo"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('cons_tornillo_qty')?.value || 0);
+          const dcto = document.getElementById('cons_tornillo_desc')?.value || 0;
+          const ref  = document.getElementById('cons_tornillo_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+          pushConsRow('Tornillos autorroscantes', qty, ref, dcto);
+        });
+
+        root.querySelector('[data-cons="termo"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('cons_termo_qty')?.value || 0);
+          const dcto = document.getElementById('cons_termo_desc')?.value || 0;
+          const ref  = document.getElementById('cons_termo_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+          pushConsRow('Termoencogible', qty, ref, dcto);
+        });
+
+        root.querySelector('[data-cons="fusible"]')?.addEventListener('click', () => {
+          const qty  = Number(document.getElementById('cons_fusible_qty')?.value || 0);
+          const dcto = document.getElementById('cons_fusible_desc')?.value || 0;
+          const ref  = document.getElementById('cons_fusible_ref')?.value || '';
+          if (!qty || qty <= 0) return;
+          pushConsRow('Fusibles 5×20 mm 500mA', qty, ref, dcto);
+        });
+
+        // Importante: ya tratamos esta sección, no seguir con la lógica genérica
+        return;
+      }
+
+      else if (s.key !== 'tablero') {
+        catalog.forEach((group, idx) => {
+          const opt = document.createElement('option');
+          opt.value = String(idx);
+          opt.textContent = group.group;
+          selDesc.appendChild(opt);
+        });
+
+        function refreshRefs() {
+          selRef.innerHTML = '';
+          const idx = Number(selDesc.value || 0);
+          const group = catalog[idx];
+          if (!group) return;
+          group.items.forEach((item, j) => {
+            const o = document.createElement('option');
+            o.value = String(j);
+            o.textContent = item.ref;
+            selRef.appendChild(o);
+          });
+        }
+        selDesc.addEventListener('change', refreshRefs);
+        refreshRefs();
+      }
+
+// Botón "Agregar a la tabla"
+selector.querySelector('.btn-add-row').addEventListener('click', () => {
+  if (s.key === 'tablero') {
+    const descText = selector.querySelector('.sel-desc')?.value || '';
+
+    let qty = Number(document.getElementById('p_tab_cant')?.value || 1);
+    if (qty <= 0) qty = 1;
+
+    const descPct = Number(document.getElementById('p_tab_desc')?.value || 0);
+
+    const item = {
+      ref: '',          // tablero sin referencia
+      desc: descText,
+      qty,
+      descuento: descPct
+    };
+    addRow(s.key, item);
+    return;
+  }
+
+  // ... resto de secciones (breakers, bornes, etc.) se queda igual
+
+        if (s.key === 'breakers') {
+          const cap   = document.getElementById('brk_cap')?.value || '';
+          const reg   = document.getElementById('brk_reg')?.value || '';
+          const ref   = document.getElementById('brk_ref')?.value || '';
+          let   qty   = Number(document.getElementById('brk_qty')?.value || 1);
+          const dcto  = Number(document.getElementById('brk_desc')?.value || 0);
+
+          if (qty <= 0) qty = 1;
+          if (!cap && !reg && !ref) return; // nada seleccionado
+
+  // 🔹 Nueva forma de armar la descripción
+  let desc = 'Breaker';
+  if (cap) desc += ` capacidad de ruptura ${cap}`;
+  if (reg) desc += `, regulación térmica ${reg} A`;
+
+          const item = {
+            ref,
+            desc,
+            qty,
+            descuento: dcto
+          };
+          addRow(s.key, item);
+          return;
+        }
+
+        if (s.key === 'bornes') {
+          const tipo      = document.getElementById('p_bor_tipo')?.value || '';
+          const descInput = selector.querySelector('.sel-desc');
+          const descText  = descInput?.value || tipo;
+          const refText   = selector.querySelector('.sel-ref')?.value || '';
+
+          let qty = Number(selector.querySelector('.sel-qty')?.value || 1);
+          if (qty <= 0) qty = 1;
+
+          const item = {
+            ref: refText,
+            desc: descText,
+            qty,
+            u: 'und',
+            vu: 0
+          };
+          addRow(s.key, item);
+          return;
+        }
+
+        const gIdx = Number(selDesc.value || 0);
+        const rIdx = Number(selRef.value || 0);
+        const group = catalog[gIdx];
+        if (!group) return;
+        const item = group.items[rIdx];
+        if (!item) return;
+
+        const qty = Number(selQty.value || 0);
+        if (qty <= 0) return;
+
+        const newItem = Object.assign({}, item, { qty });
+        addRow(s.key, newItem);
+      });
+
+      wrap.appendChild(root);
+
+      if (s.key === 'tablero') {
+        // Justo después de tablero: accesorios de puerta
+        renderAccPuertaSection();
+      }
+  } catch (err) {
+    console.error('💥 Error renderizando sección:', s.key, err);
+    // Opcional: deja una “tapa” visible para que no se pierda el layout
+    // const fallback = document.createElement('div');
+    // fallback.className = 'section';
+    // fallback.innerHTML = `<header><h3>${s.title}</h3></header><div class="body">Error en esta sección. Revisa consola.</div>`;
+    // wrap.appendChild(fallback);
+  }
+});
+    
+function initAccesoriosPuerta(){
+  // NO renderizar aquí (ya se renderiza después de 'tablero')
+  if (REF_AP.length) refreshAccCombosFromExcel();
+}
+
+function addRow(key, item={ref:'',desc:'',qty:1,u:'und',vu:0,descuento:0,vlista:''}) {
+const sect = document.querySelector(`.section[data-key="${key}"]`);
+const tbody = sect.querySelector('tbody');
+
+// ❌ No permitir agregar sin referencia (excepto tablero)
+if (key !== 'tablero' && !item.ref) {
+  alert('⚠️ Debes seleccionar una referencia antes de agregar.');
+  return;
+}
+
+// 🚫 Evitar referencias duplicadas
+if (item.ref) {
+  const exists = [...tbody.querySelectorAll('tr')].some(tr => {
+    const refInput = tr.querySelector('td input');
+    return refInput && refInput.value === item.ref;
+  });
+
+  if (exists) {
+    alert('ℹ️ Esta referencia ya fue agregada a la tabla.');
+    return;
+  }
+}
+  const tr = document.createElement('tr');
+
+  if (key === 'acc_puerta') {
+    // Tabla de accesorios de puerta (se queda igual)
+    tr.innerHTML = `
+      <td><input type="text" value="${item.ref || ''}"></td>
+      <td><input type="text" value="${item.desc || ''}"></td>
+      <td><input type="number" min="0" step="1" value="${item.qty || 0}"></td>
+<td><input type="number" min="0" step="1" value="${item.vlista ?? ''}" placeholder="V/Lista"></td>
+<td><input type="number" min="0" max="100" step="1" value="${item.descuento || 0}"></td>
+<td class="right total-cell"></td>
+<td class="row-actions"><button class="btn-del" type="button">Eliminar</button></td>`;
+  } else {
+    // NUEVO layout estándar: Descripción, Cantidad, Descuento, Eliminar
+tr.innerHTML = `
+  <td><input type="text" value="${item.ref || ''}"></td>
+  <td><input type="text" value="${item.desc || ''}"></td>
+  <td><input type="number" min="0" step="1" value="${item.qty || 0}"></td>
+<td><input type="number" min="0" step="1" value="${item.vlista ?? ''}" placeholder="V/Lista"></td>
+<td><input type="number" min="0" max="100" step="1" value="${item.descuento || 0}"></td>
+<td class="right total-cell"></td>
+<td class="row-actions"><button class="btn-del" type="button">Eliminar</button></td>`;
+  }
+  if (item.ref) {
+    tr.dataset.ref = item.ref; // para tener la referencia guardada aunque no se muestre
+  }
+
+  if (item.key) tr.dataset.key = item.key;
+  tbody.appendChild(tr);
+
+  $$("input", tr).forEach(inp => inp.addEventListener('input', () => {
+    recalcRow(tr);
+    recalcTotals();
+  }));
+  tr.querySelector('.btn-del').addEventListener('click', () => {
+    tr.remove();
+    recalcTotals();
+  });
+  recalcRow(tr);
+  recalcTotals();
+}
+
+function recalcRow(tr){
+  const tds = $$('td', tr);
+  if (tds.length < 7) return;
+
+  const qty    = Number(tds[2].querySelector('input').value || 0);
+  const vlista = Number(tds[3].querySelector('input').value || 0);   // ✅ V/Lista
+  const descP  = Number(tds[4].querySelector('input').value || 0);   // ✅ Descuento %
+
+  const factor = Math.max(0, 1 - (descP / 100));   // precio neto = V/Lista*(1-desc)
+  const total  = qty * vlista * factor;
+
+  tds[5].textContent = cash(total);
+}
+
+function recalcTotals(){
+  let subtotal = 0;
+
+  $$('#wrap-sections tbody tr').forEach(tr=>{
+    const tds = $$('td', tr);
+    if (tds.length < 7) return;
+
+    const qty    = Number(tds[2].querySelector('input').value || 0);
+    const vlista = Number(tds[3].querySelector('input').value || 0); // ✅ V/Lista
+    const descP  = Number(tds[4].querySelector('input').value || 0); // ✅ Descuento %
+
+    const factor = Math.max(0, 1 - (descP/100));
+    const total  = qty * vlista * factor;
+
+    tds[5].textContent = cash(total);
+    subtotal += total;
+  });
+
+  const util = Math.max(0, Number($('#f_util')?.value || 0));
+  const totalFinal = subtotal * (1 + util/100);
+
+  // Si luego quieres mostrar totalFinal en algún lado, lo dejamos listo.
+}
+
+    function syncFromParams(){
+      const profinet = Number($('#p_com_profinet')?.value || 0);
+      const profibus = Number($('#p_com_profibus')?.value || 0);
+
+      const activeId = document.activeElement?.id || '';
+      if (activeId === 'p_com_profinet' || activeId === 'p_com_profibus') {
+        if(!isNaN(profinet)){
+          const row = ensureRowByKey('comunicaciones','cable_profinet',{ref:'6XV1840-2AH10',desc:'Cable PROFINET (m)',qty:0,u:'m',vu:0});
+          row.children[2].querySelector('input').value = profinet;
+          recalcRow(row);
+        }
+        if(!isNaN(profibus)){
+          const row = ensureRowByKey('comunicaciones','cable_profibus',{ref:'6XV1830-0EH10',desc:'Cable PROFIBUS (m)',qty:0,u:'m',vu:0});
+          row.children[2].querySelector('input').value = profibus;
+          recalcRow(row);
+        }
+      }
+
+      const calCtrl = $('#p_con_cable_ctrl')?.value;
+      if (activeId === 'p_con_cable_ctrl' && calCtrl){
+        const sect = document.querySelector('.section[data-key="consumibles"]');
+        const row = sect.querySelector('tr[data-key="cable_ctrl"]') 
+          || ensureRowByKey('consumibles','cable_ctrl',{
+               ref:'consumibles',
+               desc:'Cable de control',
+               qty:1,
+               u:'rollo',
+               vu:0
+             });
+        const descCell = row.children[1].querySelector('input');
+        descCell.value = `Cable de control calibre ${calCtrl} (100m)`;
+        recalcRow(row);
+      }
+
+      const fab   = $('#p_tab_fab')?.value || '';
+      const mat   = $('#p_tab_material')?.value || '';
+      const alto  = $('#p_tab_alto')?.value || '';
+      const ancho = $('#p_tab_ancho')?.value || '';
+      const fondo = $('#p_tab_fondo')?.value || '';
+
+      let dimText = '';
+      if (alto || ancho || fondo) {
+        const a = alto  || '?';
+        const an = ancho || '?';
+        const f = fondo || '?';
+        dimText = `${a} × ${an} × ${f} mm`;
+      }
+
+      let baseDesc = mat || '';
+      if (dimText) {
+        baseDesc = baseDesc ? `${baseDesc} (${dimText})` : dimText;
+      }
+      if (fab) {
+        baseDesc = baseDesc ? `${fab} - ${baseDesc}` : fab;
+      }
+
+      const fnDescInput = document.querySelector('.section[data-key="tablero"] .selector .sel-desc');
+      if (fnDescInput && document.activeElement !== fnDescInput) {
+        fnDescInput.value = baseDesc;
+      }
+
+      const tipoBrk = $('#p_brk_tipo')?.value || '';
+      const fnBrkInput = document.querySelector('.section[data-key="breakers"] .selector .sel-desc');
+      if (fnBrkInput && document.activeElement !== fnBrkInput) {
+        fnBrkInput.value = tipoBrk;
+      }
+
+      const tipoBornes   = $('#p_bor_tipo')?.value || '';
+      const opcionBornes = $('#p_bor_sec')?.value || '';
+      const fnBornesInput = document.querySelector('.section[data-key="bornes"] .selector .sel-desc');
+      if (fnBornesInput && document.activeElement !== fnBornesInput) {
+        fnBornesInput.value = opcionBornes
+          ? `${tipoBornes} ${opcionBornes}`
+          : tipoBornes;
+      }
+
+      recalcTotals();
+    }
+
+['io_di','io_do','io_ai','io_ao','f_util'].forEach(id=>{
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('input', ()=>{ recalcTotals(); });
+});
+
+
+    document.addEventListener('input', e =>{
+      if(e.target.dataset.role === 'param'){
+        syncFromParams();
+      }
+    });
+
+    document.getElementById('btn-reset').addEventListener('click',()=>{
+      location.reload();
+    });
+
+function collectAllTableRows() {
+  const out = [];
+
+  // Cada sección tiene su tabla con <tbody> donde agregas filas con addRow()
+document.querySelectorAll('.section table tbody').forEach(tbody => {
+    tbody.querySelectorAll('tr').forEach(tr => {
+      const tds = tr.querySelectorAll('td');
+if (tds.length < 5) return;
+
+const ref       = tds[0].querySelector('input,select')?.value || '';
+const desc      = tds[1].querySelector('input,select')?.value || '';
+const qty       = Number(tds[2].querySelector('input,select')?.value || 0);
+const vlista    = Number(tds[3].querySelector('input,select')?.value || 0);
+const descuento = Number(tds[4].querySelector('input,select')?.value || 0);
+
+// Solo exporta líneas con algo útil
+if (!ref && !desc) return;
+if (!qty || qty <= 0) return;
+
+out.push({ ref, desc, qty, descuento, vlista });
+    });
+  });
+
+  return out;
+}
+
+/* ========= Descarga con File System Access API ========= */
+async function downloadExcelWithFilePicker(blob, fileName) {
+  try {
+    if ('showSaveFilePicker' in window) {
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{
+            description: 'Archivo Excel',
+            accept: {
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx']
+            }
+          }]
+        });
+
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        return true;
+      } catch (err) {
+        if (err && err.name !== 'AbortError') console.error('Error al guardar el archivo:', err);
+        return false;
+      }
+    }
+    return false;
+  } catch (error) {
+    console.error('Error en File System API:', error);
+    return false;
+  }
+}
+
+function downloadExcelWithFallback(blob, fileName) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+document.getElementById('btn-export').addEventListener('click', async () => {
+
+  // 1) Tomar parámetros (los ids ya existen en tu HTML)
+  const descuento = 0; // ← lo quieres en el Excel (editable allá). Si luego haces input en UI lo conectamos aquí.
+  const fUtil = Number(document.getElementById('f_util')?.value || 1) || 1;
+  const fSeg = Number(document.getElementById('f_fs')?.value || 1);
+const descTablero = (document.getElementById('f_desc_tablero')?.value || '').trim();
+
+  const di = Number(document.getElementById('io_di')?.value || 0);
+  const sd = Number(document.getElementById('io_do')?.value || 0);
+  const ai = Number(document.getElementById('io_ai')?.value || 0);
+  const ao = Number(document.getElementById('io_ao')?.value || 0);
+
+  // 2) Sacar items de TODAS las tablas (recorre todas las secciones)
+  const items = collectAllTableRows(); // [{ref, desc, qty}, ...]
+
+// 3) Construir Excel (CON ESTILOS) usando ExcelJS, como en GeneradorCotizacionEXCEL-inv
+const wb = new ExcelJS.Workbook();
+const ws = wb.addWorksheet('COTIZACION');
+
+// Bordes tipo “cuadrícula”
+const thin = { style: 'thin', color: { argb: 'FF000000' } };
+const box  = { top: thin, left: thin, bottom: thin, right: thin };
+
+// Color amarillo totales / encabezados (tipo Cotización Excel)
+const fillYellow = {
+  type: 'pattern',
+  pattern: 'solid',
+  fgColor: { argb: 'FFFFE699' } // amarillo claro
+};
+
+// Anchos (equivalentes a tus !cols)
+ws.columns = [
+  { width: 6 },   // A ITEM
+  { width: 24 },  // B REFERENCIA
+  { width: 65 },  // C DESCRIPCIÓN
+  { width: 10 },  // D CANTIDAD
+  { width: 12 },  // E V/LISTA
+  { width: 16 },  // F DESCUENTO (%)
+  { width: 12 },  // G V/COSTO
+  { width: 12 },  // H V/UNIT
+  { width: 12 },  // I V/TOTAL
+  { width: 18 },  // J V/COSTO TOTAL
+];
+
+// ----- Encabezado superior (sin cotización/cliente)
+// Filas:
+// 1 Descuento
+// 2 Factor utilidad
+// 3 Factor seguridad
+// 4 Entradas digitales
+// 5 Salidas digitales
+// 6 Salidas digitales (TOTAL) = B3*B5
+// 7 Entradas análogas
+// 8 Salidas análogas
+// 9 Descripción del tablero
+// 10 (vacía)
+const headerRows = [
+['', descuento],
+  ['Factor de utilidad', fUtil],
+  ['Factor de seguridad', fSeg],
+
+  // Valores base
+  ['Entradas digitales', di],
+  ['Entradas digitales (TOTAL)', null],   // fórmula
+  ['Salidas digitales', sd],
+  ['Salidas digitales (TOTAL)', null],    // fórmula
+  ['Entradas análogas', ai],
+  ['Entradas análogas (TOTAL)', null],    // fórmula
+  ['Salidas análogas', ao],
+  ['Salidas análogas (TOTAL)', null],     // fórmula
+
+  ['Descripción del tablero', descTablero],
+  ['', ''],                                // fila vacía
+];
+
+// Pintar header en B1:C10 (dejando A vacía)
+for (let i = 0; i < headerRows.length; i++) {
+  const r = 1 + i;
+
+  // B = títulos
+  ws.getCell(r, 2).value = headerRows[i][0];
+  ws.getCell(r, 2).font  = { bold: true };
+  ws.getCell(r, 2).border = box;
+
+  // C = valores
+  ws.getCell(r, 3).value  = headerRows[i][1];
+  ws.getCell(r, 3).border = box;
+}
+
+['C5','C7','C9','C11'].forEach(addr => {
+  ws.getCell(addr).numFmt = '#,##0';
+});
+
+// Fórmulas IO TOTAL (multiplicadas por FS)  ✅ ExcelJS
+ws.getCell('C5').value  = { formula: 'ROUNDUP(C3*C4,0)',  result: Math.ceil(fSeg * di) };
+ws.getCell('C7').value  = { formula: 'ROUNDUP(C3*C6,0)',  result: Math.ceil(fSeg * sd) };
+ws.getCell('C9').value  = { formula: 'ROUNDUP(C3*C8,0)',  result: Math.ceil(fSeg * ai) };
+ws.getCell('C11').value = { formula: 'ROUNDUP(C3*C10,0)', result: Math.ceil(fSeg * ao) };
+
+// ----- Tabla (empieza después del header + fila vacía)
+// Header en fila 11
+const tableStartRow = headerRows.length + 1;
+const HDR = ['ITEM','REFERENCIA','DESCRIPCIÓN','CANTIDAD','V/LISTA','DESCUENTO (%)','V/COSTO','V/UNIT','V/TOTAL','V/COSTO TOTAL'];
+
+for (let c = 0; c < HDR.length; c++) {
+  const cell = ws.getCell(tableStartRow, 1 + c);
+  cell.value = HDR[c];
+  cell.font = { bold: true };
+  cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+  cell.border = box;
+  cell.fill = fillYellow;
+}
+
+// Filas con fórmulas (desde fila 12)
+items.forEach((it, idx) => {
+  const r = tableStartRow + 1 + idx;
+
+  ws.getCell(r, 1).value = idx + 1;              // ITEM
+  ws.getCell(r, 2).value = it.ref || '';         // REFERENCIA
+  ws.getCell(r, 3).value = it.desc || '';        // DESCRIPCIÓN
+  ws.getCell(r, 4).value = Number(it.qty || 0);  // CANTIDAD
+
+// V/LISTA (E) (manual en app → lo mandamos)
+ws.getCell(r, 5).value = (it.vlista ? Number(it.vlista) : 0);
+
+// DESCUENTO (%) (F)
+ws.getCell(r, 6).value = Number(it.descuento || 0);
+
+// V/COSTO (G) = V/LISTA * (1 - DESCUENTO/100)
+ws.getCell(r, 7).value = { formula: `ROUNDUP(E${r}*IF(F${r}=0,1,F${r}/100),-2)` };
+
+// V/UNIT (H) = V/COSTO * factor utilidad
+ws.getCell(r, 8).value = { formula: `ROUNDUP(G${r}*$C$2,-2)` };
+
+// V/TOTAL (I) = Cantidad * V/UNIT
+ws.getCell(r, 9).value = { formula: `ROUNDUP(D${r}*H${r},-2)` };
+
+// V/COSTO TOTAL (J) = Cantidad * V/COSTO
+ws.getCell(r,10).value = { formula: `ROUNDUP(D${r}*G${r},-2)` };
+
+// Bordes (cuadrícula) en toda la fila A..J
+for (let col = 1; col <= 10; col++) {
+  ws.getCell(r, col).border = box;
+  ws.getCell(r, col).alignment = ws.getCell(r, col).alignment || { vertical: 'middle' };
+}
+});
+
+const firstDataRow = tableStartRow + 1;
+const lastDataRow  = tableStartRow + items.length;
+
+const rParcial = lastDataRow + 1;
+const rImp     = rParcial + 1;
+const rTotal   = rImp + 1;
+
+// ====== FORMATO CONTABLE ($) Y % ======
+const fmtMoney = '"$"#,##0;[Red]-"$"#,##0'; // contabilidad simple
+const fmtPct   = '0"%"';                    // 55 -> 55%
+
+// Columnas dinero: E,G,H,I,J  |  Descuento: F
+for (let r = firstDataRow; r <= lastDataRow; r++) {
+  [5,7,8,9,10].forEach(col => ws.getCell(r, col).numFmt = fmtMoney);
+  ws.getCell(r, 6).numFmt = fmtPct;
+}
+
+// Totales (dinero)
+[rParcial, rImp, rTotal].forEach(rr => {
+  [9,10].forEach(col => ws.getCell(rr, col).numFmt = fmtMoney);
+});
+
+// TOTAL PARCIAL (A..H merge, I suma V/TOTAL, J suma V/COSTO TOTAL)
+ws.mergeCells(rParcial, 1, rParcial, 8);
+ws.getCell(rParcial, 1).value = 'TOTAL PARCIAL';
+ws.getCell(rParcial, 1).font = { bold: true };
+ws.getCell(rParcial, 1).alignment = { horizontal: 'right', vertical: 'middle' };
+
+ws.getCell(rParcial, 9).value  = { formula: `SUM(I${firstDataRow}:I${lastDataRow})` };
+ws.getCell(rParcial, 10).value = { formula: `SUM(J${firstDataRow}:J${lastDataRow})` };
+
+// IMPREVISTOS (10%) (A..H merge, J = V/COSTO TOTAL * 10%)
+ws.mergeCells(rImp, 1, rImp, 8);
+ws.getCell(rImp, 1).value = 'IMPREVISTOS (10%)';
+ws.getCell(rImp, 1).font = { bold: true };
+ws.getCell(rImp, 1).alignment = { horizontal: 'right', vertical: 'middle' };
+
+ws.getCell(rImp, 10).value = { formula: `ROUNDUP(J${rParcial}*0.10,-2)` };
+
+// TOTAL (A..H merge, I = V/TOTAL + IMPREVISTOS)
+ws.mergeCells(rTotal, 1, rTotal, 8);
+ws.getCell(rTotal, 1).value = 'TOTAL';
+ws.getCell(rTotal, 1).font = { bold: true };
+ws.getCell(rTotal, 1).alignment = { horizontal: 'right', vertical: 'middle' };
+
+ws.getCell(rTotal, 9).value = { formula: `ROUNDUP(I${rParcial}+J${rImp},-2)` };
+
+// Bordes en A..J para estas 3 filas
+[rParcial, rImp, rTotal].forEach(rr => {
+  for (let col = 1; col <= 10; col++) {
+    ws.getCell(rr, col).border = box;
+    ws.getCell(rr, col).alignment = ws.getCell(rr, col).alignment || { vertical: 'middle' };
+    ws.getCell(rr, col).fill = fillYellow;
+  }
+});
+
+const nombreCot = (document.getElementById('f_nombre_cot')?.value || '').trim();
+
+// limpia caracteres raros para nombre de archivo
+const safeName = nombreCot
+  .replace(/[\\/:*?"<>|]/g, '-')  // inválidos Windows
+  .replace(/\s+/g, ' ')
+  .trim();
+
+const fileName = (safeName ? `${safeName}-Tablero` : 'Cotizacion-Tablero') + '.xlsx';
+
+// ----- Descargar (ExcelJS)
+const buf = await wb.xlsx.writeBuffer();
+const blob = new Blob([buf], {
+  type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+});
+
+const finalName = fileName;
+
+// 1) Intento con File System Access API (Chrome/Edge)
+const saved = await downloadExcelWithFilePicker(blob, finalName);
+
+// 2) Fallback para navegadores sin la API (Firefox/Safari)
+if (!saved) {
+  downloadExcelWithFallback(blob, finalName);
+}
+});
+
+  </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.3.0/dist/exceljs.min.js"></script>
+</body>
+</html>
