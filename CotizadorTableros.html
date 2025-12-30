@@ -289,7 +289,19 @@ function actualizarIOAjustadas() {
   setIntUp("sd_ajustadas", sd * fs);
   setIntUp("ea_ajustadas", ea * fs);
   setIntUp("sa_ajustadas", sa * fs);
+if (typeof window.syncRelQtyFromSD === 'function') window.syncRelQtyFromSD();
 }
+
+window.syncRelQtyFromSD = function () {
+  const sd = Number(document.getElementById('sd_ajustadas')?.value || 0);
+  const qty = sd > 0 ? sd : 0;
+
+  // Relé slim y relé universal: qty = SD ajustadas
+  ['rel_bloq_qty', 'rel_univ_qty'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = qty;
+  });
+};
 
 // compatibilidad por si quedó alguna llamada vieja
 function actualizarSDAjustadas() { actualizarIOAjustadas(); }
@@ -3737,7 +3749,7 @@ selector.innerHTML = `
         </div>
         <div>
           <label>Cantidad</label>
-          <input id="rel_bloq_qty" type="number" min="1" step="1" value="1">
+          <input id="rel_bloq_qty" type="number" min="0" step="1" value="0" readonly style="background:#eee;">
         </div>
         <div>
           <label>Descuento (%)</label>
@@ -3828,7 +3840,7 @@ selector.innerHTML = `
         </div>
         <div>
           <label>Cantidad</label>
-          <input id="rel_univ_qty" type="number" min="1" step="1" value="1">
+          <input id="rel_univ_qty" type="number" min="0" step="1" value="0" readonly style="background:#eee;">
         </div>
         <div>
           <label>Descuento (%)</label>
@@ -3852,8 +3864,9 @@ selector.innerHTML = `
   </details>
 `;
 
-        // 👉 Insertamos la sección en el DOM
-        wrap.appendChild(root);
+// 👉 Insertamos la sección en el DOM
+wrap.appendChild(root);
+window.syncRelQtyFromSD?.();
 
   // ✅ Listeners de imagen (usar root.querySelector, como bornes)
   root.querySelector('#rel_bloq_ref')?.addEventListener('change', () => {
