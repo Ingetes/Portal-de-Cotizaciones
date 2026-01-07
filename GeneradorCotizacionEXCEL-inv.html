@@ -1355,6 +1355,38 @@ const refNorm = normRef(refTxt);
   };
 }).filter(x=>x.referencia);
 
+// ===== Unificar ítems repetidos por referencia (sumar cantidades) =====
+function unifyItems(items){
+  const map = new Map(); // key -> item acumulado
+
+  for (const it of itemsUnificados){
+    const key = normRef(it.referencia); // normaliza y unifica
+    if(!map.has(key)){
+      // clonar base
+      map.set(key, { ...it, referencia: key });
+    } else {
+      const acc = map.get(key);
+
+      // sumar cantidades
+      acc.cant += (Number(it.cant) || 0);
+
+      // si quieres, acumula total para recalcular unitario/total
+      // (mantengo vUnitVenta del primero; total se recalcula abajo)
+    }
+  }
+
+  // recalcular item consecutivo y vTotal
+  const out = Array.from(map.values());
+  out.forEach((x, i)=>{
+    x.item = i + 1;
+    x.vTotal = (Number(x.vUnitVenta) || 0) * (Number(x.cant) || 0);
+  });
+  return out;
+}
+
+// Reemplaza items por su versión unificada
+const itemsUnificados = unifyItems(items);
+
   const meta = {
     cliente: ($('#cliente').value||'').toUpperCase(),
     fechaElab: $('#fechaElab').value||''
@@ -1593,7 +1625,7 @@ wrapAll(ws);
 
   // Datos de venta referenciando lo de LOCATIVO (mismos vínculos de siempre)
   let rr=5;
-  for(let i=0;i<items.length;i++){
+  for(let i=0;i<itemsUnificados.length;i++){
 const loc = 10 + i; // fila en LOCATIVO (empieza en 10)
 
 // ITEM, CANT, V/UNIT y V/TOTAL siguen con fórmulas a LOCATIVO
@@ -1603,7 +1635,7 @@ wv.getCell(rr,7).value = { formula: `LOCATIVO!N${loc}` };
 wv.getCell(rr,8).value = { formula: `LOCATIVO!O${loc}` };
 
 // DESCRIPCIÓN con richText: negrilla SOLO en "Ref:" y "Disponibilidad:"
-const it = items[i];
+const it = itemsUnificados[i];
 // DESCRIPCIÓN por fórmula, referenciando LOCATIVO (auto-actualiza)
 // loc = 10 + i  → misma fila en LOCATIVO
 const descFormula = showRef
