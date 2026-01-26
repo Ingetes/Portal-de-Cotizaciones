@@ -605,40 +605,16 @@ function actualizarBornesAuto() {
 
   const bornesPorta  = totalAnalog > 0 ? Math.ceil(totalAnalog) : 0;
   const bornesTierra = totalAnalog > 0 ? Math.ceil(totalAnalog) : 0;
-
-  // Bornes de paso (tu lógica actual)
-  const bornesPaso = (ia + (id * 2) + oa) > 0 ? Math.ceil(ia + (id * 2) + oa) : 0;
+  const bornesPaso   = (ia + (id * 2) + oa) > 0 ? Math.ceil(ia + (id * 2) + oa) : 0;
 
   const setVal = (inputId, v) => {
     const el = document.getElementById(inputId);
     if (el) el.value = v;
   };
 
-  // ✅ Cache para restaurar Tierra cuando vuelva de "2 pisos" a "normal"
-  if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
-
-  // 1) Portafusibles (igual que antes)
   setVal("bor_porta_qty", bornesPorta);
-
-  // 2) Bornes de paso (igual que antes)
-  setVal("bor_ind_qty", bornesPaso);
-
-  // ✅ 3) Conexión de tornillo = bornesPaso
-  setVal("bor_torn_qty", bornesPaso);
-
-// ✅ 4) Bornes de conexión a tierra
-// - Normal: mismo cálculo (bornesTierra)
-// - 2 pisos: se queda en 0 (y el change listener se encarga de restaurar)
-if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
-
-const tipoTierra = document.getElementById('bor_tierra_tipo')?.value || 'normal';
-
-if (tipoTierra !== '2pisos') {
   setVal("bor_tierra_qty", bornesTierra);
-  // guardamos el último valor “normal” para poder restaurarlo cuando vuelvan de 2 pisos
-  window._borTierraNormalQty = bornesTierra;
-}
-  }
+  setVal("bor_ind_qty", bornesPaso);
 
   actualizarFusiblesAuto();
 }
@@ -1851,16 +1827,6 @@ const desc  = `Muletilla ${mat} ${pos}${key ? ' llave ' + key : ''}`;
 
 document.addEventListener("input", (e) => {
   const id = e.target?.id;
-
-  // ✅ si editan Tierra manualmente en "normal", guardar para restaurar luego
-  if (id === "bor_tierra_qty") {
-    if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
-    const tipo = document.getElementById("bor_tierra_tipo")?.value || "normal";
-    if (tipo !== "2pisos") {
-      window._borTierraNormalQty = Number(e.target.value || 0);
-    }
-  }
-
   if (id === "bor_ind_qty" || id === "bor_tierra_qty" || id === "bor_porta_qty") {
     actualizarTermoencogibleAuto();
   }
@@ -3803,29 +3769,8 @@ root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
 root.querySelector('#bor_porta_tipo')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
   setTierraCalibreOptions();       // ✅ cambia 2812/2810/248 ↔ 2612/2610
-
-  // ✅ lógica de cantidad: 2 pisos => 0, normal => restaurar
-  if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
-
-  const tipo = root.querySelector('#bor_tierra_tipo')?.value || 'normal';
-  const elQty = document.getElementById('bor_tierra_qty');
-
-  if (elQty) {
-    if (tipo === '2pisos') {
-      if (window._borTierraNormalQty === null) {
-        window._borTierraNormalQty = Number(elQty.value || 0);
-      }
-      elQty.value = 0;
-    } else {
-      if (window._borTierraNormalQty !== null) {
-        elQty.value = window._borTierraNormalQty;
-      }
-    }
-  }
-
   window.refreshBornesFromExcel(); // ✅ refresca referencias
 });
-
 root.querySelector('#bor_puente_ancho')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_torn_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_2p_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
