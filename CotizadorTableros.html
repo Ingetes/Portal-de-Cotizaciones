@@ -3395,26 +3395,20 @@ function getRangoRow(r) {
 }
 
 function getAnchoRow(r) {
-  // 1) intentos directos
-  const direct =
-    r['Ancho'] ??
-    r['ancho'] ??
-    r['ANCHO'] ??
-    r.ancho ??
-    r.Ancho ??
-    r.ANCHO;
-
-  if (direct != null && `${direct}`.trim() !== '') return direct;
-
-  // 2) búsqueda inteligente por nombre de columna (sirve para "Ancho", "Ancho ", "ANCHO\r", etc.)
+  // Busca una propiedad cuyo nombre (normalizado) sea "ancho" o contenga "ancho"
   const keys = Object.keys(r || {});
   const keyFound = keys.find(k => {
-    // normaliza: quita tildes, espacios, paréntesis, \r, etc.
     const kk = n(k).replace(/[^a-z0-9]/g, ''); // deja solo letras/números
+    // sirve para: "Ancho", "Ancho (mm)", "Ancho_mm", "ANCHO", etc.
     return kk === 'ancho' || kk.startsWith('ancho');
   });
 
-  return keyFound ? r[keyFound] : '';
+  // Si la encontró, úsala; si no, intenta los accesos directos por si acaso
+  const val = keyFound ? r[keyFound] : (
+    r['Ancho'] ?? r['ancho'] ?? r['ANCHO'] ?? r.ancho ?? r.Ancho ?? r.ANCHO
+  );
+
+  return (val ?? '');
 }
 
 // Normaliza rangos: convierte guiones raros a "-" y quita espacios raros
@@ -3550,12 +3544,14 @@ function fillPuenteAnchos(){
     if (key && !anchos.has(key)) anchos.set(key, raw);
   });
 
-  for (const [key, raw] of anchos.entries()) {
-    const o = document.createElement('option');
-    o.value = key;       // normalizado
-    o.textContent = raw; // como venga del excel
-    sel.appendChild(o);
-  }
+for (const [key, raw] of anchos.entries()) {
+  const o = document.createElement('option');
+  o.value = key; // normalizado (ej "5.2")
+  // ✅ mostrar "5,2 mm" o "5.2 mm" pero bonito
+  const shown = (raw ?? '').toString().trim();
+  o.textContent = shown ? `${shown} mm` : key ? `${key} mm` : '';
+  sel.appendChild(o);
+}
 
   // auto elegir el primero si hay
   const first = sel.querySelector('option[value]:not([value=""])');
