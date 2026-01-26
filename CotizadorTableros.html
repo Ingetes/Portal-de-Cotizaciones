@@ -3051,172 +3051,10 @@ selector.innerHTML = `
   </div>
 </details>
 
-<!-- 2. Portafusibles -->
-<details class="acc-accordion" id="bor_acc_2">
-  <summary>
-    <span>2. Portafusibles</span>
-    <span class="chev">▶</span>
-  </summary>
-  <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid five" data-bor-scope="porta">
-<div>
-  <label>Tipo</label>
-  <select id="bor_porta_tipo" class="form-select">
-    <option value="normal">Normal</option>
-    <option value="tornillo">Tornillo</option>
-  </select>
-</div>
-      <div>
-        <label>Cantidad</label>
-        <input id="bor_porta_qty" type="number" min="1" step="1" value="0">
-      </div>
-      <div>
-        <label>Descuento (%)</label>
-        <input id="bor_porta_desc" type="number" min="0" max="100" step="1" value="50">
-      </div>
-      <div>
-        <label>Referencia</label>
-        <select id="bor_porta_ref">
-          <option value="">– Seleccionar –</option>
-        </select>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
-      </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_porta" class="acc-img" style="display:none;">
-</div>
-    </div>
-  </div>
-</details>
-
-<!-- 3. Conexión a tierra -->
-<details class="acc-accordion" id="bor_acc_3">
-  <summary>
-    <span>3. Bornes de conexión a tierra</span>
-    <span class="chev">▶</span>
-  </summary>
-  <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid six" data-bor-scope="tierra">
-      <div>
-        <label>Calibre</label>
-        <select id="bor_tierra_cal" class="form-select">
-          <option value="">– Seleccionar –</option>
-          <option value="2812">28-12 AWG</option>
-          <option value="2810">28-10 AWG</option>
-          <option value="248">24-8 AWG</option>
-        </select>
-      </div>
-<div>
-  <label>Tipo</label>
-  <select id="bor_tierra_tipo" class="form-select">
-    <option value="normal">Normal</option>
-    <option value="2pisos">2 Pisos</option>
-  </select>
-</div>
-      <div>
-        <label>Cantidad</label>
-        <input id="bor_tierra_qty" type="number" min="1" step="1" value="0">
-      </div>
-      <div>
-        <label>Descuento (%)</label>
-        <input id="bor_tierra_desc" type="number" min="0" max="100" step="1" value="50">
-      </div>
-      <div>
-        <label>Referencia</label>
-        <select id="bor_tierra_ref">
-          <option value="">– Seleccionar –</option>
-        </select>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
-      </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_tierra" class="acc-img" style="display:none;">
-</div>
-    </div>
-  </div>
-</details>
-
-<!-- 4. Separador para bornes -->
-<details class="acc-accordion" id="bor_acc_4">
-  <summary>
-    <span>4. Separador para bornes</span>
-    <span class="chev">▶</span>
-  </summary>
-  <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid four" data-bor-scope="sep">
-      <div>
-        <label>Cantidad</label>
-        <input id="bor_sep_qty" type="number" min="1" step="1" value="1">
-      </div>
-      <div>
-        <label>Descuento (%)</label>
-        <input id="bor_sep_desc" type="number" min="0" max="100" step="1" value="50">
-      </div>
-      <div>
-        <label>Referencia</label>
-        <select id="bor_sep_ref">
-          <option value="">– Seleccionar –</option>
-        </select>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
-      </div>
-<div class="acc-img-wrap">
-  <img id="img_bor_sep" class="acc-img" style="display:none;">
-</div>
-    </div>
-  </div>
-</details>
-
-<!-- 4.1 Puente para bornas -->
-<details class="acc-accordion" id="bor_acc_41">
-  <summary>
-    <span>4.1 Puente para bornas</span>
-    <span class="chev">▶</span>
-  </summary>
-  <div class="acc-accordion-inner">
-    <div class="acc-row-fields grid five" data-bor-scope="puente">
-      <div>
-        <label>Ancho (mm)</label>
-        <select id="bor_puente_ancho" class="form-select">
-          <option value="">– Seleccionar –</option>
-        </select>
-      </div>
-      <div>
-        <label>Cantidad</label>
-        <input id="bor_puente_qty" type="number" min="1" step="1" value="0">
-      </div>
-      <div>
-        <label>Descuento (%)</label>
-        <input id="bor_puente_desc" type="number" min="0" max="100" step="1" value="50">
-      </div>
-      <div>
-        <label>Referencia</label>
-        <select id="bor_puente_ref">
-          <option value="">– Seleccionar –</option>
-        </select>
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <button type="button" class="btn primary" data-bor="puente">Agregar a la tabla</button>
-      </div>
-
-      <div class="acc-img-wrap">
-        <img id="img_bor_puente" class="acc-img" style="display:none;">
-      </div>
-    </div>
-  </div>
-</details>
-
-<!-- 4.2 Conexión de tornillo -->
+<!-- 2 Conexión de tornillo -->
 <details class="acc-accordion" id="bor_acc_42">
   <summary>
-    <span>4.2 Conexión de tornillo</span>
+    <span>2 Conexión de tornillo</span>
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
@@ -3255,11 +3093,172 @@ selector.innerHTML = `
     </div>
   </div>
 </details>
+<!-- 3. Portafusibles -->
+<details class="acc-accordion" id="bor_acc_2">
+  <summary>
+    <span>3. Portafusibles</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="porta">
+<div>
+  <label>Tipo</label>
+  <select id="bor_porta_tipo" class="form-select">
+    <option value="normal">Normal</option>
+    <option value="tornillo">Tornillo</option>
+  </select>
+</div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_porta_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_porta_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_porta_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="porta">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_porta" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
 
-<!-- 4.3 Bornes 2 Pisos (Tornillo) -->
+<!-- 4. Conexión a tierra -->
+<details class="acc-accordion" id="bor_acc_3">
+  <summary>
+    <span>4. Bornes de conexión a tierra</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid six" data-bor-scope="tierra">
+<div>
+  <label>Tipo</label>
+  <select id="bor_tierra_tipo" class="form-select">
+    <option value="normal">Normal</option>
+    <option value="2pisos">2 Pisos</option>
+  </select>
+</div>
+      <div>
+        <label>Calibre</label>
+        <select id="bor_tierra_cal" class="form-select">
+          <option value="">– Seleccionar –</option>
+          <option value="2812">28-12 AWG</option>
+          <option value="2810">28-10 AWG</option>
+          <option value="248">24-8 AWG</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_tierra_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_tierra_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_tierra_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="tierra">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_tierra" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+
+<!-- 5. Separador para bornes -->
+<details class="acc-accordion" id="bor_acc_4">
+  <summary>
+    <span>5. Separador para bornes</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid four" data-bor-scope="sep">
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_sep_qty" type="number" min="1" step="1" value="1">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_sep_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_sep_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="sep">Agregar a la tabla</button>
+      </div>
+<div class="acc-img-wrap">
+  <img id="img_bor_sep" class="acc-img" style="display:none;">
+</div>
+    </div>
+  </div>
+</details>
+
+<!-- 6 Puente para bornas -->
+<details class="acc-accordion" id="bor_acc_41">
+  <summary>
+    <span>6 Puente para bornas</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="puente">
+      <div>
+        <label>Ancho (mm)</label>
+        <select id="bor_puente_ancho" class="form-select">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_puente_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_puente_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_puente_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="puente">Agregar a la tabla</button>
+      </div>
+
+      <div class="acc-img-wrap">
+        <img id="img_bor_puente" class="acc-img" style="display:none;">
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 7 Bornes 2 Pisos (Tornillo) -->
 <details class="acc-accordion" id="bor_acc_43">
   <summary>
-    <span>4.3 Bornes 2 Pisos (Tornillo)</span>
+    <span>7 Bornes 2 Pisos (Tornillo)</span>
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
@@ -3298,10 +3297,10 @@ selector.innerHTML = `
   </div>
 </details>
 
-<!-- 5. Accesorios para bornes -->
+<!-- 8. Accesorios para bornes -->
 <details class="acc-accordion" id="bor_acc_5">
   <summary>
-    <span>5. Accesorios para bornes</span>
+    <span>8. Accesorios para bornes</span>
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
@@ -3396,7 +3395,8 @@ function getRangoRow(r) {
 }
 
 function getAnchoRow(r) {
-  return (
+  // 1) intentos directos (por si alguna pega)
+  const direct =
     r['Ancho (mm)'] ??
     r['ancho (mm)'] ??
     r['ANCHO (mm)'] ??
@@ -3404,8 +3404,18 @@ function getAnchoRow(r) {
     r['ANCHO(mm)'] ??
     r.ancho ??
     r.Ancho ??
-    r.ANCHO
-  );
+    r.ANCHO;
+
+  if (direct != null && `${direct}`.trim() !== '') return direct;
+
+  // 2) búsqueda inteligente por nombre de columna (ignora espacios, \r, etc.)
+  const keys = Object.keys(r || {});
+  const keyFound = keys.find(k => {
+    const kk = n(k).replace(/\s+/g,''); // normaliza
+    return kk.includes('ancho') && kk.includes('(mm)');
+  });
+
+  return keyFound ? r[keyFound] : '';
 }
 
 // Normaliza rangos: convierte guiones raros a "-" y quita espacios raros
@@ -3425,6 +3435,44 @@ function normNum(v){
     .trim()
     .replace(',', '.')
     .replace(/\s+/g,'');
+}
+
+function setTierraCalibreOptions() {
+  const tipoSel = root.querySelector('#bor_tierra_tipo');
+  const calSel  = root.querySelector('#bor_tierra_cal');
+  if (!tipoSel || !calSel) return;
+
+  const tipo = (tipoSel.value || 'normal');
+
+  // Guardamos el valor actual por si existe en la nueva lista
+  const prev = calSel.value;
+
+  // Limpia opciones
+  calSel.innerHTML = '<option value="">– Seleccionar –</option>';
+
+  // Normal -> 2812, 2810, 248
+  // 2pisos -> 2612, 2610
+  const opts = (tipo === '2pisos')
+    ? [
+        ['2612','26-12 AWG'],
+        ['2610','26-10 AWG'],
+      ]
+    : [
+        ['2812','28-12 AWG'],
+        ['2810','28-10 AWG'],
+        ['248','24-8 AWG'],
+      ];
+
+  opts.forEach(([v, t]) => {
+    const o = document.createElement('option');
+    o.value = v;
+    o.textContent = t;
+    calSel.appendChild(o);
+  });
+
+  // Restaurar si aplica, si no, dejar en vacío
+  if ([...calSel.options].some(o => o.value === prev)) calSel.value = prev;
+  else calSel.value = '';
 }
 
 // Llena un select de referencias filtrando por funcion + (calibre o ancho)
@@ -3630,7 +3678,8 @@ if (portaTipo === 'tornillo') {
   // Portafusibles normal (excluir tornillo)
   fillBorneRefsAdv('bor_porta_ref', 'portafusibles', { excludeFunc: ['tornillo'] });
 }
-
+  
+setTierraCalibreOptions();
 // 3) Tierra (Normal / 2 pisos)
 const calTi = document.getElementById('bor_tierra_cal')?.value || '';
 const tiTipo = root.querySelector('#bor_tierra_tipo')?.value || 'normal';
@@ -3716,8 +3765,10 @@ root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
 });
 
 root.querySelector('#bor_porta_tipo')?.addEventListener('change', () => window.refreshBornesFromExcel());
-root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => window.refreshBornesFromExcel());
-
+root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
+  setTierraCalibreOptions();       // ✅ cambia 2812/2810/248 ↔ 2612/2610
+  window.refreshBornesFromExcel(); // ✅ refresca referencias
+});
 root.querySelector('#bor_puente_ancho')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_torn_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_2p_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
