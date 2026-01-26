@@ -5499,11 +5499,14 @@ function addRow(key, item={ref:'',desc:'',qty:1,u:'und',vu:0,descuento:0,vlista:
 const sect = document.querySelector(`.section[data-key="${key}"]`);
 const tbody = sect.querySelector('tbody');
 
-// ❌ No permitir agregar sin referencia (excepto tablero)
-if (key !== 'tablero' && !item.ref) {
+// ❌ No permitir agregar sin referencia (excepto tablero y consumibles)
+const SECCIONES_SIN_REF = new Set(['tablero', 'consumibles']);
+
+if (!SECCIONES_SIN_REF.has(key) && !item.ref) {
   alert('⚠️ Debes seleccionar una referencia antes de agregar.');
   return;
 }
+
 
 // 🚫 Evitar referencias duplicadas
 if (item.ref) {
