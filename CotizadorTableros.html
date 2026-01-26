@@ -229,10 +229,6 @@ details.acc-accordion[open] .chev{transform:rotate(90deg)}
                 <select class="sel-ref"></select>
               </div>
               <div>
-                <label>Cantidad</label>
-                <input type="number" class="sel-qty" min="1" step="1" value="1">
-              </div>
-              <div>
                 <button class="btn primary btn-add-row" type="button">
                   Agregar a la tabla
                 </button>
@@ -1134,9 +1130,9 @@ function actualizarBornesAuto() {
     <label>Kit</label>
     <select id="acc_bal_kit">
       <option value="">– Seleccionar –</option>
-      <option value="RAV">Baliza (Rojo, Amarillo, Verde)</option>
-      <option value="RV">Baliza (Rojo, Verde)</option>
-      <option value="RAVA">Baliza (Rojo, Amarillo, Verde, Acústico)</option>
+      <option value="RAV">Rojo, Amarillo, Verde</option>
+      <option value="RV">Rojo, Verde</option>
+      <option value="RAVA">Rojo, Amarillo, Verde, Acústico</option>
     </select>
   </div>
 
@@ -2383,7 +2379,7 @@ if (s.key === 'tablero') {
 
     <!-- 1.1 Accesorio prolongado para Totalizador -->
     <div class="acc-row" id="int_accprol_row" style="display:none; margin-top:12px;">
-      <div class="acc-row-label">Accesorio prolongado</div>
+      <div class="acc-row-label">Accesorio prolongado (Para 3VA)</div>
 
       <div class="acc-row-fields grid seven">
         <div>
