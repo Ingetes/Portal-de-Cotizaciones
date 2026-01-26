@@ -3535,45 +3535,51 @@ function fillPuenteAnchos(){
   const sel = root.querySelector('#bor_puente_ancho');
   if (!sel) return;
 
-  const prev = sel.value; // 👈 guarda selección actual
+  const prev = sel.value; 
   sel.innerHTML = '<option value="">– Seleccionar –</option>';
   if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
 
-  const anchos = new Map(); // norm -> label visible
+  // vamos a guardar: keyNormalizada ("5.2") -> labelVisible ("5.2")
+  const anchos = new Map();
 
   REF_BOR.forEach(r => {
     const cat = n(r.categoria || r.Categoria || '');
     const fn  = n(r.funcion || r.Funcion || '');
 
+    // ✅ bornes + puente para bornas (más estricto para no fallar)
     if (!cat.includes('born')) return;
     if (!fn.includes('puente')) return;
 
-    const raw = (getAnchoRow(r) ?? '').toString().trim(); // viene "52"
-    const key = normNum(raw);                              // queda "5.2"
+    // ✅ lee ancho (sea cual sea la llave real que llegue del Excel)
+    const raw = (getAnchoRow(r) ?? '').toString().trim();
+    const key = normNum(raw);          // "52" -> "5.2"
     if (!key) return;
 
-    // ✅ Label bonito: "52" => "5,2"
-    let label = raw;
-    if (/^\d+$/.test(raw) && raw.length >= 2) {
-      label = raw.slice(0, -1) + ',' + raw.slice(-1);
-    } else {
-      label = label.replace('.', ',');
-    }
+    // ✅ mostrar con punto (como pides): 5.2 / 6.2 / 8.2
+    const label = key;
 
     if (!anchos.has(key)) anchos.set(key, label);
   });
 
-  for (const [key, label] of anchos.entries()) {
+  // ✅ si no encontró nada, deja un aviso en consola (debug rápido)
+  if (!anchos.size) {
+    console.warn('Puente: no se detectaron anchos. Revisa cómo llega el Excel en REF_BOR (keys/valores).');
+  }
+
+  // ✅ ordena numéricamente para que salga 5.2, 6.2, 8.2
+  const ordered = [...anchos.entries()].sort((a,b)=> parseFloat(a[0]) - parseFloat(b[0]));
+
+  for (const [key, label] of ordered) {
     const o = document.createElement('option');
     o.value = key;        // "5.2" (para filtrar)
-    o.textContent = label; // "5,2" (para mostrar)
+    o.textContent = label; // "5.2" (para mostrar)
     sel.appendChild(o);
   }
 
-  // ✅ restaurar selección si existe
+  // restaurar selección si existe
   if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
 
-  // ✅ si quedó vacío, auto escoger el primero real
+  // si quedó vacío, auto escoger el primero real
   if (!sel.value) {
     const first = sel.querySelector('option[value]:not([value=""])');
     if (first) sel.value = first.value;
