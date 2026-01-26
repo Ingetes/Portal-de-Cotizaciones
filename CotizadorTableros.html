@@ -3395,12 +3395,10 @@ function getRangoRow(r) {
 }
 
 function getAnchoRow(r) {
-  // 1) intentos directos (por si alguna pega)
+  // 1) intentos directos
   const direct =
     r['Ancho'] ??
     r['ancho'] ??
-    r['ANCHO'] ??
-    r['Ancho'] ??
     r['ANCHO'] ??
     r.ancho ??
     r.Ancho ??
@@ -3408,11 +3406,12 @@ function getAnchoRow(r) {
 
   if (direct != null && `${direct}`.trim() !== '') return direct;
 
-  // 2) búsqueda inteligente por nombre de columna (ignora espacios, \r, etc.)
+  // 2) búsqueda inteligente por nombre de columna (sirve para "Ancho", "Ancho ", "ANCHO\r", etc.)
   const keys = Object.keys(r || {});
   const keyFound = keys.find(k => {
-    const kk = n(k).replace(/\s+/g,''); // normaliza
-    return kk.includes('ancho') && kk.includes('(mm)');
+    // normaliza: quita tildes, espacios, paréntesis, \r, etc.
+    const kk = n(k).replace(/[^a-z0-9]/g, ''); // deja solo letras/números
+    return kk === 'ancho' || kk.startsWith('ancho');
   });
 
   return keyFound ? r[keyFound] : '';
