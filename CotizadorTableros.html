@@ -1857,6 +1857,7 @@ const desc  = `Muletilla ${mat} ${pos}${key ? ' llave ' + key : ''}`;
       (catEq(r,'Puerto ethernet') || catEq(r,'ethernet')) &&
       (!mat || r.material === mat)
     );
+  });
 
 document.addEventListener("input", (e) => {
   const id = e.target?.id;
@@ -3270,7 +3271,7 @@ selector.innerHTML = `
         </select>
       </div>
       <div>
-        <label>Cantidad (múltiplo de 10)</label>
+        <label>Cantidad</label>
         <input id="bor_puente_qty" type="number" min="1" step="1" value="0">
       </div>
       <div>
@@ -3834,7 +3835,7 @@ root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
 
   window.refreshBornesFromExcel(); // ✅ refresca referencias
 });
-  
+
 root.querySelector('#bor_puente_ancho')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_torn_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_2p_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
