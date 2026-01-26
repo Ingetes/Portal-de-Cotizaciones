@@ -2080,14 +2080,15 @@ window.fillBorneRefs = fillBorneRefs;
     const rowsBornes = XLSX.utils.sheet_to_json(sheetBornes, { defval: '' });
 
     // Usamos getColFlexible para que no se dañe si el encabezado tiene espacios/tildes
-    REF_BOR = rowsBornes.map(r => ({
-      categoria:  getColFlexible(r, 'Categoria'),
-      funcion:    getColFlexible(r, 'Funcion'),
-      calibre:    getColFlexible(r, 'Calibre'),
-      rango:      getColFlexible(r, 'Rango'),
-      referencia: getColFlexible(r, 'Referencia'),
-      imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
-    })).filter(row => row.referencia); // solo filas con referencia
+REF_BOR = rowsBornes.map(r => ({
+  categoria:  getColFlexible(r, 'Categoria'),
+  funcion:    getColFlexible(r, 'Funcion'),
+  calibre:    getColFlexible(r, 'Calibre'),
+  rango:      getColFlexible(r, 'Rango'),
+  ancho:      getColFlexible(r, 'Ancho'),          // ✅ AÑADIR ESTA LÍNEA
+  referencia: getColFlexible(r, 'Referencia'),
+  imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
+})).filter(row => row.referencia);
   window.REF_BOR = REF_BOR; // 🔥 clave: sincroniza el array nuevo para las imágenes
 
   } else {
@@ -3532,59 +3533,41 @@ function fillBorneRefsAdv(selectId, funcionKeyword, opts = {}) {
 
 // Llena combo de anchos para "Puente para bornas"
 function fillPuenteAnchos(){
-  const sel = root.querySelector('#bor_puente_ancho');
+  const sel = document.getElementById('bor_puente_ancho');
   if (!sel) return;
 
-  const prev = sel.value; 
+  const prev = sel.value;
   sel.innerHTML = '<option value="">– Seleccionar –</option>';
-  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
 
-  // vamos a guardar: keyNormalizada ("5.2") -> labelVisible ("5.2")
-  const anchos = new Map();
+  const BOR = Array.isArray(window.REF_BOR) && window.REF_BOR.length
+    ? window.REF_BOR
+    : (Array.isArray(REF_BOR) ? REF_BOR : []);
 
-  REF_BOR.forEach(r => {
-    const cat = n(r.categoria || r.Categoria || '');
-    const fn  = n(r.funcion || r.Funcion || '');
+  // solo filas de "Puente para bornas"
+  const anchos = Array.from(new Set(
+    BOR
+      .filter(r => (r.funcion || '').toString().toLowerCase().includes('puente para bornas'))
+      .map(r => (r.ancho ?? '').toString().replace(',', '.').trim())
+      .filter(Boolean)
+  ));
 
-    // ✅ bornes + puente para bornas (más estricto para no fallar)
-    if (!cat.includes('born')) return;
-    if (!fn.includes('puente')) return;
+  // orden numérico
+  anchos.sort((a,b) => Number(a) - Number(b));
 
-    // ✅ lee ancho (sea cual sea la llave real que llegue del Excel)
-    const raw = (getAnchoRow(r) ?? '').toString().trim();
-    const key = normNum(raw);          // "52" -> "5.2"
-    if (!key) return;
+  anchos.forEach(a => {
+    const raw = a; // "52"
+    const n = Number(raw);
+    const label = Number.isFinite(n) ? (n/10).toFixed(1) : raw;
 
-    // ✅ mostrar con punto (como pides): 5.2 / 6.2 / 8.2
-    const label = key;
-
-    if (!anchos.has(key)) anchos.set(key, label);
+    const o = document.createElement('option');
+    o.value = raw;        // ✅ 52/62/82
+    o.textContent = label; // ✅ 5.2/6.2/8.2
+    sel.appendChild(o);
   });
 
-  // ✅ si no encontró nada, deja un aviso en consola (debug rápido)
-  if (!anchos.size) {
-    console.warn('Puente: no se detectaron anchos. Revisa cómo llega el Excel en REF_BOR (keys/valores).');
-  }
-
-  // ✅ ordena numéricamente para que salga 5.2, 6.2, 8.2
-  const ordered = [...anchos.entries()].sort((a,b)=> parseFloat(a[0]) - parseFloat(b[0]));
-
-  for (const [key, label] of ordered) {
-    const o = document.createElement('option');
-    o.value = key;        // "5.2" (para filtrar)
-    o.textContent = label; // "5.2" (para mostrar)
-    sel.appendChild(o);
-  }
-
-  // restaurar selección si existe
-  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
-
-  // si quedó vacío, auto escoger el primero real
-  if (!sel.value) {
-    const first = sel.querySelector('option[value]:not([value=""])');
-    if (first) sel.value = first.value;
-  }
+  if (anchos.includes(prev)) sel.value = prev;
 }
+
 
 function fillPlaquitaRangos() {
   const rangoSel = root.querySelector('#bor_pla_rango');
