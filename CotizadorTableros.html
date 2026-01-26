@@ -613,7 +613,8 @@ function actualizarBornesAuto() {
   };
 
   setVal("bor_porta_qty", bornesPorta);
-  setVal("bor_tierra_qty", bornesTierra);
+const tiTipo = document.getElementById("bor_tierra_tipo")?.value || "normal";
+setVal("bor_tierra_qty", tiTipo === "2pisos" ? 0 : bornesTierra);
   setVal("bor_ind_qty", bornesPaso);
   setVal("bor_torn_qty", bornesPaso);
 
@@ -3777,7 +3778,6 @@ root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
 
   // ✅ Si pasa a 2 pisos: guarda la cantidad "normal" y pone 0
   if (tipo === '2pisos') {
-    // guarda SOLO si venimos de normal (o sea, si aún no está guardada para esta vuelta)
     qtyInp.dataset.qtyNormal = String(qtyInp.value ?? '0');
     qtyInp.value = '0';
   } else {
@@ -3788,8 +3788,8 @@ root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
   }
 
   // Lo que ya tenías:
-  setTierraCalibreOptions();       // ✅ cambia 2812/2810/248 ↔ 2612/2610
-  window.refreshBornesFromExcel(); // ✅ refresca referencias
+  setTierraCalibreOptions();
+  window.refreshBornesFromExcel();
 });
 root.querySelector('#bor_puente_ancho')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_torn_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
