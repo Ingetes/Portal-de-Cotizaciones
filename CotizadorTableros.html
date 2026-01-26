@@ -3228,7 +3228,7 @@ selector.innerHTML = `
         </select>
       </div>
       <div>
-        <label>Cantidad</label>
+        <label>Cantidad (múltiplo de 10)</label>
         <input id="bor_puente_qty" type="number" min="1" step="1" value="0">
       </div>
       <div>
@@ -3769,6 +3769,25 @@ root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
 
 root.querySelector('#bor_porta_tipo')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
+  const tipoSel = root.querySelector('#bor_tierra_tipo');
+  const qtyInp  = root.querySelector('#bor_tierra_qty');
+  if (!tipoSel || !qtyInp) return;
+
+  const tipo = (tipoSel.value || 'normal');
+
+  // ✅ Si pasa a 2 pisos: guarda la cantidad "normal" y pone 0
+  if (tipo === '2pisos') {
+    // guarda SOLO si venimos de normal (o sea, si aún no está guardada para esta vuelta)
+    qtyInp.dataset.qtyNormal = String(qtyInp.value ?? '0');
+    qtyInp.value = '0';
+  } else {
+    // ✅ Si vuelve a normal: restaura la cantidad que tenía antes (si existe)
+    if (qtyInp.dataset.qtyNormal != null) {
+      qtyInp.value = qtyInp.dataset.qtyNormal;
+    }
+  }
+
+  // Lo que ya tenías:
   setTierraCalibreOptions();       // ✅ cambia 2812/2810/248 ↔ 2612/2610
   window.refreshBornesFromExcel(); // ✅ refresca referencias
 });
