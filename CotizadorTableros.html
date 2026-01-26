@@ -1407,7 +1407,7 @@ section.querySelector('[data-acc="eth"]')?.addEventListener('click',()=>{
     );
 
 if (accesorio?.referencia){
-  pushAccRow('Accesorio puerto ethernet', 1, accesorio.referencia, dscto);
+  pushAccRow('Accesorio puerto', 1, accesorio.referencia, dscto);
 }
   }
 });
@@ -3185,10 +3185,10 @@ selector.innerHTML = `
     </select>
   </div>
 
-  <div>
-    <label>Cantidad</label>
-    <input id="bor_otros_qty" type="number" min="1" step="1" value="1">
-  </div>
+<div>
+  <label id="bor_otros_qty_lbl">Cantidad</label>
+  <input id="bor_otros_qty" type="number" min="1" step="1" value="1">
+</div>
 
   <div>
     <label>Descuento (%)</label>
@@ -3298,9 +3298,13 @@ function togglePlaquitaRangoUI() {
 
   if (!tipoSel || !wrap) return;
 
-  const isPlaquitas = n(tipoSel.value).includes('plaquitas');
+const isPlaquitas = n(tipoSel.value).includes('plaquitas');
 
-  wrap.style.display = isPlaquitas ? '' : 'none';
+// ✅ Cambiar SOLO el label de cantidad cuando sea plaquitas
+const qtyLbl = root.querySelector('#bor_otros_qty_lbl');
+if (qtyLbl) qtyLbl.textContent = isPlaquitas ? 'Cantidad (bolsa x10)' : 'Cantidad';
+
+wrap.style.display = isPlaquitas ? '' : 'none';
 
 if (isPlaquitas) {
   fillPlaquitaRangos();
@@ -3383,6 +3387,9 @@ window.refreshBornesFromExcel = function () {
 
   // mostrar/ocultar rango
   const isPla = tipoNorm.includes('plaq');
+  const qtyLbl = document.getElementById('bor_otros_qty_lbl');
+  if (qtyLbl) qtyLbl.textContent = isPla ? 'Cantidad (bolsa x10)' : 'Cantidad';
+  
   if (wrapRng) wrapRng.style.display = isPla ? '' : 'none';
 
   if (!refSel) return;
