@@ -626,28 +626,18 @@ function actualizarBornesAuto() {
   // ✅ 3) Conexión de tornillo = bornesPaso
   setVal("bor_torn_qty", bornesPaso);
 
-  // ✅ 4) Tierra: normal = queda como está / 2 pisos = 0 (sin perder el valor anterior)
-  const tierraTipo = document.getElementById("bor_tierra_tipo")?.value || "normal";
-  const tierraQtyEl = document.getElementById("bor_tierra_qty");
+// ✅ 4) Bornes de conexión a tierra
+// - Normal: mismo cálculo (bornesTierra)
+// - 2 pisos: se queda en 0 (y el change listener se encarga de restaurar)
+if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
 
-  if (tierraQtyEl) {
-    if (tierraTipo === "2pisos") {
-      // guarda el valor actual (normal) solo la primera vez que entra a 2 pisos
-      if (window._borTierraNormalQty === null) {
-        window._borTierraNormalQty = Number(tierraQtyEl.value || bornesTierra || 0);
-      }
-      tierraQtyEl.value = 0;
-    } else {
-      // normal: restaura lo guardado si existe; si no, usa el auto
-      const v = (window._borTierraNormalQty !== null)
-        ? window._borTierraNormalQty
-        : bornesTierra;
+const tipoTierra = document.getElementById('bor_tierra_tipo')?.value || 'normal';
 
-      tierraQtyEl.value = v;
-
-      // mantiene actualizado el cache en normal
-      window._borTierraNormalQty = Number(v || 0);
-    }
+if (tipoTierra !== '2pisos') {
+  setVal("bor_tierra_qty", bornesTierra);
+  // guardamos el último valor “normal” para poder restaurarlo cuando vuelvan de 2 pisos
+  window._borTierraNormalQty = bornesTierra;
+}
   }
 
   actualizarFusiblesAuto();
