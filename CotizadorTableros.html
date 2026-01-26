@@ -605,16 +605,50 @@ function actualizarBornesAuto() {
 
   const bornesPorta  = totalAnalog > 0 ? Math.ceil(totalAnalog) : 0;
   const bornesTierra = totalAnalog > 0 ? Math.ceil(totalAnalog) : 0;
-  const bornesPaso   = (ia + (id * 2) + oa) > 0 ? Math.ceil(ia + (id * 2) + oa) : 0;
+
+  // Bornes de paso (tu lógica actual)
+  const bornesPaso = (ia + (id * 2) + oa) > 0 ? Math.ceil(ia + (id * 2) + oa) : 0;
 
   const setVal = (inputId, v) => {
     const el = document.getElementById(inputId);
     if (el) el.value = v;
   };
 
+  // ✅ Cache para restaurar Tierra cuando vuelva de "2 pisos" a "normal"
+  if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
+
+  // 1) Portafusibles (igual que antes)
   setVal("bor_porta_qty", bornesPorta);
-  setVal("bor_tierra_qty", bornesTierra);
+
+  // 2) Bornes de paso (igual que antes)
   setVal("bor_ind_qty", bornesPaso);
+
+  // ✅ 3) Conexión de tornillo = bornesPaso
+  setVal("bor_torn_qty", bornesPaso);
+
+  // ✅ 4) Tierra: normal = queda como está / 2 pisos = 0 (sin perder el valor anterior)
+  const tierraTipo = document.getElementById("bor_tierra_tipo")?.value || "normal";
+  const tierraQtyEl = document.getElementById("bor_tierra_qty");
+
+  if (tierraQtyEl) {
+    if (tierraTipo === "2pisos") {
+      // guarda el valor actual (normal) solo la primera vez que entra a 2 pisos
+      if (window._borTierraNormalQty === null) {
+        window._borTierraNormalQty = Number(tierraQtyEl.value || bornesTierra || 0);
+      }
+      tierraQtyEl.value = 0;
+    } else {
+      // normal: restaura lo guardado si existe; si no, usa el auto
+      const v = (window._borTierraNormalQty !== null)
+        ? window._borTierraNormalQty
+        : bornesTierra;
+
+      tierraQtyEl.value = v;
+
+      // mantiene actualizado el cache en normal
+      window._borTierraNormalQty = Number(v || 0);
+    }
+  }
 
   actualizarFusiblesAuto();
 }
@@ -1823,10 +1857,19 @@ const desc  = `Muletilla ${mat} ${pos}${key ? ' llave ' + key : ''}`;
       (catEq(r,'Puerto ethernet') || catEq(r,'ethernet')) &&
       (!mat || r.material === mat)
     );
-  });
 
 document.addEventListener("input", (e) => {
   const id = e.target?.id;
+
+  // ✅ si editan Tierra manualmente en "normal", guardar para restaurar luego
+  if (id === "bor_tierra_qty") {
+    if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
+    const tipo = document.getElementById("bor_tierra_tipo")?.value || "normal";
+    if (tipo !== "2pisos") {
+      window._borTierraNormalQty = Number(e.target.value || 0);
+    }
+  }
+
   if (id === "bor_ind_qty" || id === "bor_tierra_qty" || id === "bor_porta_qty") {
     actualizarTermoencogibleAuto();
   }
@@ -3227,7 +3270,7 @@ selector.innerHTML = `
         </select>
       </div>
       <div>
-        <label>Cantidad</label>
+        <label>Cantidad (múltiplo de 10)</label>
         <input id="bor_puente_qty" type="number" min="1" step="1" value="0">
       </div>
       <div>
@@ -3769,8 +3812,29 @@ root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
 root.querySelector('#bor_porta_tipo')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_tierra_tipo')?.addEventListener('change', () => {
   setTierraCalibreOptions();       // ✅ cambia 2812/2810/248 ↔ 2612/2610
+
+  // ✅ lógica de cantidad: 2 pisos => 0, normal => restaurar
+  if (window._borTierraNormalQty === undefined) window._borTierraNormalQty = null;
+
+  const tipo = root.querySelector('#bor_tierra_tipo')?.value || 'normal';
+  const elQty = document.getElementById('bor_tierra_qty');
+
+  if (elQty) {
+    if (tipo === '2pisos') {
+      if (window._borTierraNormalQty === null) {
+        window._borTierraNormalQty = Number(elQty.value || 0);
+      }
+      elQty.value = 0;
+    } else {
+      if (window._borTierraNormalQty !== null) {
+        elQty.value = window._borTierraNormalQty;
+      }
+    }
+  }
+
   window.refreshBornesFromExcel(); // ✅ refresca referencias
 });
+  
 root.querySelector('#bor_puente_ancho')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_torn_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
 root.querySelector('#bor_2p_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
