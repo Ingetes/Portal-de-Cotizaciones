@@ -3421,7 +3421,7 @@ function normRango(v){
     .trim();
 }
 
-// Normaliza números tipo "5,2" / "5.2" / 5.2 a string comparable "5.2"
+// Normaliza números tipo "5,2" / "5.2" / 5.2 / "52" -> string comparable "5.2"
 function normNum(v){
   let s = (v ?? '')
     .toString()
@@ -3535,32 +3535,49 @@ function fillPuenteAnchos(){
   const sel = root.querySelector('#bor_puente_ancho');
   if (!sel) return;
 
+  const prev = sel.value; // 👈 guarda selección actual
   sel.innerHTML = '<option value="">– Seleccionar –</option>';
   if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
 
-  const anchos = new Map(); // norm -> raw
+  const anchos = new Map(); // norm -> label visible
 
   REF_BOR.forEach(r => {
     const cat = n(r.categoria || r.Categoria || '');
     const fn  = n(r.funcion || r.Funcion || '');
+
     if (!cat.includes('born')) return;
     if (!fn.includes('puente')) return;
 
-    const raw = (getAnchoRow(r) ?? '').toString().trim();
-    const key = normNum(raw);
-    if (key && !anchos.has(key)) anchos.set(key, raw);
+    const raw = (getAnchoRow(r) ?? '').toString().trim(); // viene "52"
+    const key = normNum(raw);                              // queda "5.2"
+    if (!key) return;
+
+    // ✅ Label bonito: "52" => "5,2"
+    let label = raw;
+    if (/^\d+$/.test(raw) && raw.length >= 2) {
+      label = raw.slice(0, -1) + ',' + raw.slice(-1);
+    } else {
+      label = label.replace('.', ',');
+    }
+
+    if (!anchos.has(key)) anchos.set(key, label);
   });
 
-for (const [key, raw] of anchos.entries()) {
-  const o = document.createElement('option');
-  o.value = key;                    // "5.2"
-  o.textContent = key.replace('.', ','); // "5,2"
-  sel.appendChild(o);
-}
+  for (const [key, label] of anchos.entries()) {
+    const o = document.createElement('option');
+    o.value = key;        // "5.2" (para filtrar)
+    o.textContent = label; // "5,2" (para mostrar)
+    sel.appendChild(o);
+  }
 
-  // auto elegir el primero si hay
-  const first = sel.querySelector('option[value]:not([value=""])');
-  if (first && !sel.value) sel.value = first.value;
+  // ✅ restaurar selección si existe
+  if ([...sel.options].some(o => o.value === prev)) sel.value = prev;
+
+  // ✅ si quedó vacío, auto escoger el primero real
+  if (!sel.value) {
+    const first = sel.querySelector('option[value]:not([value=""])');
+    if (first) sel.value = first.value;
+  }
 }
 
 function fillPlaquitaRangos() {
