@@ -3423,11 +3423,18 @@ function normRango(v){
 
 // Normaliza números tipo "5,2" / "5.2" / 5.2 a string comparable "5.2"
 function normNum(v){
-  return (v ?? '')
+  let s = (v ?? '')
     .toString()
     .trim()
     .replace(',', '.')
     .replace(/\s+/g,'');
+
+  // ✅ Si viene tipo "52" "62" "82" => "5.2" "6.2" "8.2"
+  if (/^\d+$/.test(s) && s.length >= 2) {
+    s = s.slice(0, -1) + '.' + s.slice(-1);
+  }
+
+  return s;
 }
 
 function setTierraCalibreOptions() {
@@ -3546,10 +3553,8 @@ function fillPuenteAnchos(){
 
 for (const [key, raw] of anchos.entries()) {
   const o = document.createElement('option');
-  o.value = key; // normalizado (ej "5.2")
-  // ✅ mostrar "5,2 mm" o "5.2 mm" pero bonito
-  const shown = (raw ?? '').toString().trim();
-  o.textContent = shown ? `${shown} mm` : key ? `${key} mm` : '';
+  o.value = key;                    // "5.2"
+  o.textContent = key.replace('.', ','); // "5,2"
   sel.appendChild(o);
 }
 
