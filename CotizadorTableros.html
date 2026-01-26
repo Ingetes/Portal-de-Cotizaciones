@@ -3159,6 +3159,173 @@ selector.innerHTML = `
   </div>
 </details>
 
+<!-- 4.1 Puente para bornas -->
+<details class="acc-accordion" id="bor_acc_41">
+  <summary>
+    <span>4.1 Puente para bornas</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="puente">
+      <div>
+        <label>Ancho (mm)</label>
+        <select id="bor_puente_ancho" class="form-select">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_puente_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_puente_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_puente_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="puente">Agregar a la tabla</button>
+      </div>
+
+      <div class="acc-img-wrap">
+        <img id="img_bor_puente" class="acc-img" style="display:none;">
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 4.2 Conexión de tornillo -->
+<details class="acc-accordion" id="bor_acc_42">
+  <summary>
+    <span>4.2 Conexión de tornillo</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="tornillo">
+      <div>
+        <label>Calibre</label>
+        <select id="bor_torn_cal" class="form-select">
+          <option value="">– Seleccionar –</option>
+          <option value="248">24-8 AWG</option>
+          <option value="2612">26-12 AWG</option>
+          <option value="2610">26-10 AWG</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_torn_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_torn_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_torn_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="tornillo">Agregar a la tabla</button>
+      </div>
+
+      <div class="acc-img-wrap">
+        <img id="img_bor_torn" class="acc-img" style="display:none;">
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 4.3 Bornes 2 Pisos (Tornillo) -->
+<details class="acc-accordion" id="bor_acc_43">
+  <summary>
+    <span>4.3 Bornes 2 Pisos (Tornillo)</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="2pisos">
+      <div>
+        <label>Calibre</label>
+        <select id="bor_2p_cal" class="form-select">
+          <option value="">– Seleccionar –</option>
+          <option value="2612">26-12 AWG</option>
+          <option value="2610">26-10 AWG</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_2p_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_2p_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_2p_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="2pisos">Agregar a la tabla</button>
+      </div>
+
+      <div class="acc-img-wrap">
+        <img id="img_bor_2p" class="acc-img" style="display:none;">
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- 4.4 Bornes 2 Pisos de conexión a tierra -->
+<details class="acc-accordion" id="bor_acc_44">
+  <summary>
+    <span>4.4 Bornes 2 Pisos conexión a tierra</span>
+    <span class="chev">▶</span>
+  </summary>
+  <div class="acc-accordion-inner">
+    <div class="acc-row-fields grid five" data-bor-scope="2p_tierra">
+      <div>
+        <label>Calibre</label>
+        <select id="bor_2pt_cal" class="form-select">
+          <option value="">– Seleccionar –</option>
+          <option value="2612">26-12 AWG</option>
+          <option value="2610">26-10 AWG</option>
+        </select>
+      </div>
+      <div>
+        <label>Cantidad</label>
+        <input id="bor_2pt_qty" type="number" min="1" step="1" value="0">
+      </div>
+      <div>
+        <label>Descuento (%)</label>
+        <input id="bor_2pt_desc" type="number" min="0" max="100" step="1" value="50">
+      </div>
+      <div>
+        <label>Referencia</label>
+        <select id="bor_2pt_ref">
+          <option value="">– Seleccionar –</option>
+        </select>
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <button type="button" class="btn primary" data-bor="2p_tierra">Agregar a la tabla</button>
+      </div>
+
+      <div class="acc-img-wrap">
+        <img id="img_bor_2pt" class="acc-img" style="display:none;">
+      </div>
+    </div>
+  </div>
+</details>
+
 <!-- 5. Accesorios para bornes -->
 <details class="acc-accordion" id="bor_acc_5">
   <summary>
@@ -3216,15 +3383,21 @@ selector.innerHTML = `
 </details>
 `;
 
-
-['bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref'].forEach(id=>{
+[
+  'bor_ind_ref','bor_porta_ref','bor_tierra_ref','bor_sep_ref','bor_otros_ref',
+  'bor_puente_ref','bor_torn_ref','bor_2p_ref','bor_2pt_ref'
+].forEach(id=>{
   root.querySelector('#' + id)?.addEventListener('change', () => {
     const map = {
       bor_ind_ref: 'img_bor_ind',
       bor_porta_ref: 'img_bor_porta',
       bor_tierra_ref: 'img_bor_tierra',
       bor_sep_ref: 'img_bor_sep',
-      bor_otros_ref: 'img_bor_otros'
+      bor_otros_ref: 'img_bor_otros',
+      bor_puente_ref: 'img_bor_puente',
+      bor_torn_ref: 'img_bor_torn',
+      bor_2p_ref: 'img_bor_2p',
+      bor_2pt_ref: 'img_bor_2pt'
     };
     updateBorneImage(id, map[id]);
   });
@@ -3259,6 +3432,99 @@ function normRango(v){
     .replace(/[–—−]/g, '-')                  // en dash/em dash/minus -> "-"
     .replace(/\s+/g,'')
     .trim();
+}
+
+// Normaliza números tipo "5,2" / "5.2" / 5.2 a string comparable "5.2"
+function normNum(v){
+  return (v ?? '')
+    .toString()
+    .trim()
+    .replace(',', '.')
+    .replace(/\s+/g,'');
+}
+
+// Llena un select de referencias filtrando por funcion + (calibre o ancho)
+function fillBorneRefsAdv(selectId, funcionKeyword, opts = {}) {
+  const sel = root.querySelector('#' + selectId);
+  if (!sel) return;
+
+  sel.innerHTML = '<option value="">– Seleccionar –</option>';
+  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
+
+  const funcKey = n(funcionKeyword);
+  const calKey  = (opts.calibre || '').toString().trim();
+  const anchoKey= normNum(opts.ancho);
+
+  const matches = REF_BOR.filter(r => {
+    // categoría bornes
+    const cat = n(r.categoria || r.Categoria || '');
+    if (!cat.includes('born')) return false;
+
+    // función
+    const fn = n(r.funcion || r.Funcion || '');
+    if (!fn.includes(funcKey)) return false;
+
+    // calibre (si aplica)
+    if (calKey) {
+      const rc = (r.calibre ?? r.Calibre ?? '').toString().trim();
+      if (rc !== calKey) return false;
+    }
+
+    // ancho (si aplica)
+    if (anchoKey) {
+      const ra = normNum(r['Ancho (mm)'] ?? r.ancho ?? r.Ancho ?? '');
+      if (ra !== anchoKey) return false;
+    }
+
+    return true;
+  });
+
+  const refs = Array.from(new Set(
+    matches.map(r => (r.referencia || r.Referencia || '').toString().trim()).filter(Boolean)
+  ));
+
+  refs.forEach(ref => {
+    const o = document.createElement('option');
+    o.value = ref;
+    o.textContent = ref;
+    sel.appendChild(o);
+  });
+
+  if (refs.length === 1) sel.value = refs[0];
+  sel.dispatchEvent(new Event('change'));
+}
+
+// Llena combo de anchos para "Puente para bornas"
+function fillPuenteAnchos(){
+  const sel = root.querySelector('#bor_puente_ancho');
+  if (!sel) return;
+
+  sel.innerHTML = '<option value="">– Seleccionar –</option>';
+  if (!Array.isArray(REF_BOR) || !REF_BOR.length) return;
+
+  const anchos = new Map(); // norm -> raw
+
+  REF_BOR.forEach(r => {
+    const cat = n(r.categoria || r.Categoria || '');
+    const fn  = n(r.funcion || r.Funcion || '');
+    if (!cat.includes('born')) return;
+    if (!fn.includes('puente')) return;
+
+    const raw = (r['Ancho (mm)'] ?? r.ancho ?? r.Ancho ?? '').toString().trim();
+    const key = normNum(raw);
+    if (key && !anchos.has(key)) anchos.set(key, raw);
+  });
+
+  for (const [key, raw] of anchos.entries()) {
+    const o = document.createElement('option');
+    o.value = key;       // normalizado
+    o.textContent = raw; // como venga del excel
+    sel.appendChild(o);
+  }
+
+  // auto elegir el primero si hay
+  const first = sel.querySelector('option[value]:not([value=""])');
+  if (first && !sel.value) sel.value = first.value;
 }
 
 function fillPlaquitaRangos() {
@@ -3376,6 +3642,23 @@ window.refreshBornesFromExcel = function () {
   // 4) Separador
   fillBorneRefs('bor_sep_ref', 'separador para bornes');
 
+  // 4.1 Puente para bornas (por ancho)
+  fillPuenteAnchos();
+  const anchoP = root.querySelector('#bor_puente_ancho')?.value || '';
+  fillBorneRefsAdv('bor_puente_ref', 'puente para bornas', { ancho: anchoP });
+
+  // 4.2 Conexión de tornillo (por calibre)
+  const calTor = root.querySelector('#bor_torn_cal')?.value || '';
+  fillBorneRefsAdv('bor_torn_ref', 'conexion de tornillo', { calibre: calTor });
+
+  // 4.3 2 Pisos (Tornillo) (por calibre)
+  const cal2p = root.querySelector('#bor_2p_cal')?.value || '';
+  fillBorneRefsAdv('bor_2p_ref', '2 pisos (tornillo)', { calibre: cal2p });
+
+  // 4.4 2 Pisos tierra (por calibre)
+  const cal2pt = root.querySelector('#bor_2pt_cal')?.value || '';
+  fillBorneRefsAdv('bor_2pt_ref', '2 pisos de conexion a tierra', { calibre: cal2pt });
+
   // 5) Otros
   const tipoSel  = document.getElementById('bor_otros_tipo');
   const refSel   = document.getElementById('bor_otros_ref');
@@ -3416,6 +3699,11 @@ window.refreshBornesFromExcel = function () {
   updateBorneImage('bor_tierra_ref', 'img_bor_tierra');
   updateBorneImage('bor_sep_ref',    'img_bor_sep');
   updateBorneImage('bor_otros_ref',  'img_bor_otros');
+  updateBorneImage('bor_puente_ref', 'img_bor_puente');
+  updateBorneImage('bor_torn_ref',   'img_bor_torn');
+  updateBorneImage('bor_2p_ref',     'img_bor_2p');
+  updateBorneImage('bor_2pt_ref',    'img_bor_2pt');
+
 };
 
 // === Event listeners ===
@@ -3429,6 +3717,11 @@ root.querySelector('#bor_otros_tipo')?.addEventListener('change', () => {
   togglePlaquitaRangoUI();              // ✅ muestra/oculta rango
   window.refreshBornesFromExcel();      // (si quieres que refresque refs)
 });
+
+root.querySelector('#bor_puente_ancho')?.addEventListener('change', () => window.refreshBornesFromExcel());
+root.querySelector('#bor_torn_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
+root.querySelector('#bor_2p_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
+root.querySelector('#bor_2pt_cal')?.addEventListener('change', () => window.refreshBornesFromExcel());
 
 root.querySelector('#bor_pla_rango')?.addEventListener('change', () => {
   const rango = root.querySelector('#bor_pla_rango')?.value || '';
@@ -3493,6 +3786,49 @@ selector.querySelector('[data-bor="ind"]')?.addEventListener('click',()=>{
           pushBorneRow(desc, qty, ref, dscto);
         });
 
+// 4.1 Puente para bornas
+selector.querySelector('[data-bor="puente"]')?.addEventListener('click',()=>{
+  const qty   = Number(root.querySelector('#bor_puente_qty')?.value || 0);
+  const dscto = root.querySelector('#bor_puente_desc')?.value || 0;
+  const ref   = root.querySelector('#bor_puente_ref')?.value || '';
+  const ancho = root.querySelector('#bor_puente_ancho')?.selectedOptions?.[0]?.textContent || '';
+  const desc  = ancho ? `Puente para bornas ${ancho} mm` : 'Puente para bornas';
+  pushBorneRow(desc, qty, ref, dscto);
+});
+
+// 4.2 Conexión de tornillo
+selector.querySelector('[data-bor="tornillo"]')?.addEventListener('click',()=>{
+  const cal   = root.querySelector('#bor_torn_cal')?.value || '';
+  const qty   = Number(root.querySelector('#bor_torn_qty')?.value || 0);
+  const dscto = root.querySelector('#bor_torn_desc')?.value || 0;
+  const ref   = root.querySelector('#bor_torn_ref')?.value || '';
+  let desc = 'Borne conexión de tornillo';
+  if (cal) desc += ` ${cal}`;
+  pushBorneRow(desc, qty, ref, dscto);
+});
+
+// 4.3 2 Pisos (Tornillo)
+selector.querySelector('[data-bor="2pisos"]')?.addEventListener('click',()=>{
+  const cal   = root.querySelector('#bor_2p_cal')?.value || '';
+  const qty   = Number(root.querySelector('#bor_2p_qty')?.value || 0);
+  const dscto = root.querySelector('#bor_2p_desc')?.value || 0;
+  const ref   = root.querySelector('#bor_2p_ref')?.value || '';
+  let desc = 'Borne 2 pisos (tornillo)';
+  if (cal) desc += ` ${cal}`;
+  pushBorneRow(desc, qty, ref, dscto);
+});
+
+// 4.4 2 Pisos tierra
+selector.querySelector('[data-bor="2p_tierra"]')?.addEventListener('click',()=>{
+  const cal   = root.querySelector('#bor_2pt_cal')?.value || '';
+  const qty   = Number(root.querySelector('#bor_2pt_qty')?.value || 0);
+  const dscto = root.querySelector('#bor_2pt_desc')?.value || 0;
+  const ref   = root.querySelector('#bor_2pt_ref')?.value || '';
+  let desc = 'Borne 2 pisos conexión a tierra';
+  if (cal) desc += ` ${cal}`;
+  pushBorneRow(desc, qty, ref, dscto);
+});
+  
         // 5) Otros
         selector.querySelector('[data-bor="otros"]')?.addEventListener('click',()=>{
           const tipo  = document.getElementById('bor_otros_tipo')?.value || '';
