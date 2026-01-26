@@ -3215,10 +3215,10 @@ selector.innerHTML = `
   </div>
 </details>
 
-<!-- 6 Puente para bornas -->
+<!-- 6. Puente para bornas -->
 <details class="acc-accordion" id="bor_acc_41">
   <summary>
-    <span>6 Puente para bornas</span>
+    <span>6. Puente para bornas</span>
     <span class="chev">▶</span>
   </summary>
   <div class="acc-accordion-inner">
@@ -3397,11 +3397,11 @@ function getRangoRow(r) {
 function getAnchoRow(r) {
   // 1) intentos directos (por si alguna pega)
   const direct =
-    r['Ancho (mm)'] ??
-    r['ancho (mm)'] ??
-    r['ANCHO (mm)'] ??
-    r['Ancho(mm)'] ??
-    r['ANCHO(mm)'] ??
+    r['Ancho'] ??
+    r['ancho'] ??
+    r['ANCHO'] ??
+    r['Ancho'] ??
+    r['ANCHO'] ??
     r.ancho ??
     r.Ancho ??
     r.ANCHO;
