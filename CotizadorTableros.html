@@ -1219,15 +1219,37 @@ if (Array.isArray(REF_AP) && REF_AP.length) {
   updateCollarRefs();
 }
 
-  function pushAccRow(desc, qty, ref, descPct){
-    if (!qty || qty <= 0) return;
-    addRow(accTableKey,{
-      ref: ref || '',
-      desc,
-      qty,
-      descuento: Number(descPct || 0)
+function pushAccRow(desc, qty, ref, descPct){
+  if (!qty || qty <= 0) return;
+
+  // ✅ Si ya existe la referencia en la tabla de accesorios de puerta, sumamos cantidad
+  const tbody = section.querySelector('tbody');
+  if (tbody && ref) {
+    const existing = Array.from(tbody.querySelectorAll('tr')).find(tr => {
+      const inpRef = tr.querySelector('td:first-child input, td:first-child select');
+      return inpRef && inpRef.value.trim() === ref.trim();
     });
+
+    if (existing) {
+      const qtyInp = existing.querySelector('td:nth-child(3) input');
+      const oldQty = Number(qtyInp?.value || 0);
+      qtyInp.value = oldQty + Number(qty || 0);
+
+      // Recalcular totales (ya existen en tu código)
+      recalcRow(existing);
+      recalcTotals();
+      return;
+    }
   }
+
+  // Si no existe, la creamos normal
+  addRow(accTableKey,{
+    ref: ref || '',
+    desc,
+    qty,
+    descuento: Number(descPct || 0)
+  });
+}
 
   // Helper para comparar categoría del Excel
 function normTxt(x){
@@ -1384,9 +1406,9 @@ section.querySelector('[data-acc="eth"]')?.addEventListener('click',()=>{
       && (r.material || '').toLowerCase() === 'accesorio'
     );
 
-    if (accesorio && !hasAccRowWithRef(accesorio.referencia)){
-      pushAccRow('Accesorio puerto ethernet', 1, accesorio.referencia, dscto);
-    }
+if (accesorio?.referencia){
+  pushAccRow('Accesorio puerto ethernet', 1, accesorio.referencia, dscto);
+}
   }
 });
 
@@ -1405,9 +1427,9 @@ section.querySelector('[data-acc="usb"]')?.addEventListener('click',()=>{
       catEq(r,'Accesorio puerto usb')
     );
 
-    if (accesorio && !hasAccRowWithRef(accesorio.referencia)){
-      pushAccRow('Accesorio puerto usb', 1, accesorio.referencia, dscto);
-    }
+if (accesorio?.referencia){
+  pushAccRow('Accesorio puerto usb', 1, accesorio.referencia, dscto);
+}
   }
 });
 
