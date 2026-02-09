@@ -1764,7 +1764,7 @@ renderTable();
 loadPricingFromURL();
 wireContactsInput();                                   // escucha el file input de contactos
 attachSearchableCombo('clienteSelect','cliente', {     // input+select sincronizados
-  onCommit: ()=>{}, matchMode: 'startsWith'
+  onCommit: ()=>{}, matchMode: 'includes'
 });
 tryAutoLoadContactsFromFolder();                       // intenta leer CONTACTOS.xlsx automáticamente
 
