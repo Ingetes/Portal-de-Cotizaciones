@@ -241,6 +241,30 @@ header .brand{
 <div class="card" style="margin-bottom:16px">
   <h2>1) Datos generales</h2>
   <div class="grid two">
+<div>
+  <label for="numCotizacion">Número de cotización <span class="req">*</span></label>
+  <input id="numCotizacion" type="text" placeholder="###">
+</div>
+
+<div>
+  <label for="inicComercial">Iniciales comercial <span class="req">*</span></label>
+  <input id="inicComercial" type="text" placeholder="AAA" style="text-transform:uppercase">
+</div>
+
+<div>
+  <label for="anioYY">Año (YY) <span class="req">*</span></label>
+  <input id="anioYY" type="text" placeholder="##">
+</div>
+
+<div>
+  <label for="versionDoc">Versión (A,B,…) opcional</label>
+  <input id="versionDoc" type="text" placeholder="A" style="text-transform:uppercase">
+</div>
+
+<div class="col-span-2">
+  <label for="nombreSalida">Nombre de salida</label>
+  <input id="nombreSalida" type="text" readonly>
+</div>
     <div>
       <label for="tipoDoc">Tipo <span class="req">*</span></label>
       <select id="tipoDoc"> 
@@ -1302,6 +1326,9 @@ document.getElementById('totalView').textContent    = fmtMoney(totalFinal);
 /* ====== Validación mí­nimos ====== */
 function validar(){
   const req = [
+    { el: document.getElementById('numCotizacion'), name: 'Número de cotización' },
+    { el: document.getElementById('inicComercial'), name: 'Iniciales comercial' },
+    { el: document.getElementById('anioYY'), name: 'Año (YY)' },
     { el: document.getElementById('tipoDoc'),   name: 'Tipo' },
     { el: document.getElementById('nombreDoc'), name: 'Nombre' },
     { el: document.getElementById('ingeniero'), name: 'Ingeniero' },
@@ -1309,15 +1336,23 @@ function validar(){
     { el: document.getElementById('cliente'),   name: 'Cliente' },
   ];
 
+
   // limpia estados previos
   req.forEach(({el}) => el?.classList.remove('error'));
 
-  const faltantes = [];
-  if (!req[0].el.value)                         { faltantes.push(req[0].name); req[0].el.classList.add('error'); }
-  if (!req[1].el.value.trim())                  { faltantes.push(req[1].name); req[1].el.classList.add('error'); }
-  if (!req[2].el.value.trim())                  { faltantes.push(req[2].name); req[2].el.classList.add('error'); }
-  if (!req[3].el.value.trim())                  { faltantes.push(req[3].name); req[3].el.classList.add('error'); }
-  if (!req[4].el.value.trim()) { faltantes.push(req[4].name); req[4].el.classList.add('error'); } // â† NUEVO
+const faltantes = [];
+
+req.forEach(({ el, name }) => {
+  if (!el) return;
+
+  const val = el.value?.trim?.() ?? el.value;
+  if (!val) {
+    faltantes.push(name);
+    el.classList.add('error');
+  } else {
+    el.classList.remove('error');
+  }
+});
 
   const warnBox = document.getElementById('validacion');
 
@@ -1751,7 +1786,10 @@ ws.eachRow({ includeEmpty: true }, row => {
 ===================================================== */
 const buf  = await wb.xlsx.writeBuffer({ useStyles:true });
     const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    await saveBlob(blob, 'CotizacionIngenieria.xlsx');
+const nombreArchivo =
+  (document.getElementById('nombreSalida')?.value || 'CotizacionIngenieria') + '.xlsx';
+
+await saveBlob(blob, nombreArchivo);
 
   } catch (err) {
     console.error(err);
@@ -1863,6 +1901,25 @@ ingCancel?.addEventListener('click', ()=>{ modal.classList.add('hidden'); });
 
 /* Cargar al inicio */
 loadIngenierosRemote();
+
+function actualizarNombreSalida() {
+  const num   = document.getElementById('numCotizacion')?.value.trim();
+  const ini   = document.getElementById('inicComercial')?.value.trim().toUpperCase();
+  const anio  = document.getElementById('anioYY')?.value.trim();
+  const ver   = document.getElementById('versionDoc')?.value.trim().toUpperCase();
+
+  let nombre = '';
+  if (num && ini && anio) {
+    nombre = `Q${num}-${ini}-${anio}${ver || ''}`;
+  }
+
+  const out = document.getElementById('nombreSalida');
+  if (out) out.value = nombre;
+}
+
+['numCotizacion','inicComercial','anioYY','versionDoc'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input', actualizarNombreSalida);
+});
 
 </script>
 </body>
