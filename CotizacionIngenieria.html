@@ -1053,15 +1053,32 @@ Imprevistos (
   `;
   tbody.insertBefore(trImp, trV);
 
-  const trTot = document.createElement('tr');
-  trTot.style.background = '#f1f5f9';
   trTot.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">Total</td>
-    <td class="right"><span id="totalView">$ 0</span></td>
+    <td class="right">
+      <span id="totalView">$ 0</span>
+      <button type="button" id="btnUrgente"
+        style="margin-left:8px; padding:6px 10px; border-radius:10px; border:1px solid #e5e7eb; background:#f3f4f6; color:#111827; font-weight:700; cursor:pointer;">
+        Urgente
+      </button>
+    </td>
   `;
 
   // Insertar justo DESPUÉS de la fila de viáticos
   tbody.insertBefore(trTot, trV.nextSibling);
+  // Botón URGENTE (toggle)
+  const btnU = document.getElementById('btnUrgente');
+  if (btnU && !btnU.dataset.wired) {
+    btnU.dataset.wired = '1';
+    btnU.addEventListener('click', () => {
+      URGENTE = !URGENTE;
+      btnU.textContent = URGENTE ? 'Urgente ✅' : 'Urgente';
+      btnU.style.background = URGENTE ? '#fee2e2' : '#f3f4f6';
+      btnU.style.borderColor = URGENTE ? '#fecaca' : '#e5e7eb';
+      btnU.style.color = URGENTE ? '#7f1d1d' : '#111827';
+      recalcTotals();
+    });
+  }
 }
 insertSubtotalImprevistosBeforeViaticos();
 }
@@ -1275,7 +1292,9 @@ function limitImprevistos(input){
   // Recalcular totales de inmediato
   recalcTotals();
 }
-  
+
+let URGENTE = false;
+
 function recalcTotals(){
   let subtotal = 0;
 
@@ -1301,7 +1320,8 @@ function recalcTotals(){
   const imprev = subtotal * (pct / 100);
 
   // TOTAL FINAL = Subtotal + Imprevistos + Viáticos
-  const totalFinal = subtotal + imprev + viaticos;
+  const totalBase = subtotal + imprev + viaticos;
+  const totalFinal = URGENTE ? (totalBase * 1.30) : totalBase;
 
   // Pintar valores de la tabla azul
 document.getElementById('subtotalView').textContent = fmtMoney(subtotal);
@@ -1503,6 +1523,15 @@ if (selCli) {
   if (typeof updateViaticosPriceView === 'function') updateViaticosPriceView();
   if (typeof updateDependentRows === 'function') updateDependentRows();
   if (typeof recalcTotals === 'function') recalcTotals();
+
+  URGENTE = false;
+  const btnU = document.getElementById('btnUrgente');
+  if (btnU){
+    btnU.textContent = 'Urgente';
+    btnU.style.background = '#f3f4f6';
+    btnU.style.borderColor = '#e5e7eb';
+    btnU.style.color = '#111827';
+  }
 
   // 5) Aviso de reinicio
 alert('Formulario reiniciado. Puedes comenzar una nueva cotización.');
