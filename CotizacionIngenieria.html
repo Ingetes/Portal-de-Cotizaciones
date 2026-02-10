@@ -241,6 +241,30 @@ header .brand{
 <div class="card" style="margin-bottom:16px">
   <h2>1) Datos generales</h2>
   <div class="grid two">
+<div>
+  <label for="numCotizacion">Número de cotización <span class="req">*</span></label>
+  <input id="numCotizacion" type="text" placeholder="###">
+</div>
+
+<div>
+  <label for="inicComercial">Iniciales comercial <span class="req">*</span></label>
+  <input id="inicComercial" type="text" placeholder="AAA" style="text-transform:uppercase">
+</div>
+
+<div>
+  <label for="anioYY">Año (YY) <span class="req">*</span></label>
+  <input id="anioYY" type="text" placeholder="##">
+</div>
+
+<div>
+  <label for="versionDoc">Versión (A,B,…) opcional</label>
+  <input id="versionDoc" type="text" placeholder="A" style="text-transform:uppercase">
+</div>
+
+<div class="col-span-2">
+  <label for="nombreSalida">Nombre de salida</label>
+  <input id="nombreSalida" type="text" readonly>
+</div>
     <div>
       <label for="tipoDoc">Tipo <span class="req">*</span></label>
       <select id="tipoDoc"> 
@@ -1016,7 +1040,7 @@ Imprevistos (
     type="number"
     id="impPct"
     value="10"
-    min="5"
+    min="0"
     max="25"
     oninput="limitImprevistos(this)"
     style="width:70px;text-align:right;border-radius:8px;padding:4px 6px;"
@@ -1033,11 +1057,31 @@ Imprevistos (
   trTot.style.background = '#f1f5f9';
   trTot.innerHTML = `
     <td colspan="5" style="font-weight:800; text-align:right;">Total</td>
-    <td class="right"><span id="totalView">$ 0</span></td>
+    <td class="right">
+      <span id="totalView">$ 0</span>
+      <button type="button" id="btnUrgente"
+        style="margin-left:8px; padding:6px 10px; border-radius:10px; border:1px solid #e5e7eb; background:#f3f4f6; color:#111827; font-weight:700; cursor:pointer;">
+        Urgente
+      </button>
+    </td>
   `;
 
   // Insertar justo DESPUÉS de la fila de viáticos
   tbody.insertBefore(trTot, trV.nextSibling);
+  // Botón URGENTE (toggle)
+  const btnU = document.getElementById('btnUrgente');
+  if (btnU && !btnU.dataset.wired) {
+    btnU.dataset.wired = '1';
+    btnU.addEventListener('click', () => {
+      URGENTE = !URGENTE;
+      btnU.textContent = URGENTE ? 'Urgente ✅' : 'Urgente';
+      btnU.style.background = URGENTE ? '#fee2e2' : '#f3f4f6';
+      btnU.style.borderColor = URGENTE ? '#fecaca' : '#e5e7eb';
+      btnU.style.color = URGENTE ? '#7f1d1d' : '#111827';
+      recalcTotals();
+    });
+  }
+
 }
 insertSubtotalImprevistosBeforeViaticos();
 }
@@ -1235,10 +1279,10 @@ function limitImprevistos(input){
     v = 25;
     input.value = v;
     msg = "Máximo permitido: 25%";
-  } else if (v < 5){
-    v = 5;
+  } else if (v < 0){
+    v = 0;
     input.value = v;
-    msg = "Mínimo permitido: 5%";
+    msg = "Mínimo permitido: 0%";
   }
 
   // Estilo rojo discreto cuando se corrige
@@ -1251,7 +1295,9 @@ function limitImprevistos(input){
   // Recalcular totales de inmediato
   recalcTotals();
 }
-  
+
+let URGENTE = false;
+
 function recalcTotals(){
   let subtotal = 0;
 
@@ -1277,7 +1323,8 @@ function recalcTotals(){
   const imprev = subtotal * (pct / 100);
 
   // TOTAL FINAL = Subtotal + Imprevistos + Viáticos
-  const totalFinal = subtotal + imprev + viaticos;
+  const totalBase = subtotal + imprev + viaticos;
+  const totalFinal = URGENTE ? (totalBase * 1.30) : totalBase;
 
   // Pintar valores de la tabla azul
 document.getElementById('subtotalView').textContent = fmtMoney(subtotal);
@@ -1302,6 +1349,9 @@ document.getElementById('totalView').textContent    = fmtMoney(totalFinal);
 /* ====== Validación mí­nimos ====== */
 function validar(){
   const req = [
+    { el: document.getElementById('numCotizacion'), name: 'Número de cotización' },
+    { el: document.getElementById('inicComercial'), name: 'Iniciales comercial' },
+    { el: document.getElementById('anioYY'), name: 'Año (YY)' },
     { el: document.getElementById('tipoDoc'),   name: 'Tipo' },
     { el: document.getElementById('nombreDoc'), name: 'Nombre' },
     { el: document.getElementById('ingeniero'), name: 'Ingeniero' },
@@ -1309,15 +1359,23 @@ function validar(){
     { el: document.getElementById('cliente'),   name: 'Cliente' },
   ];
 
+
   // limpia estados previos
   req.forEach(({el}) => el?.classList.remove('error'));
 
-  const faltantes = [];
-  if (!req[0].el.value)                         { faltantes.push(req[0].name); req[0].el.classList.add('error'); }
-  if (!req[1].el.value.trim())                  { faltantes.push(req[1].name); req[1].el.classList.add('error'); }
-  if (!req[2].el.value.trim())                  { faltantes.push(req[2].name); req[2].el.classList.add('error'); }
-  if (!req[3].el.value.trim())                  { faltantes.push(req[3].name); req[3].el.classList.add('error'); }
-  if (!req[4].el.value.trim()) { faltantes.push(req[4].name); req[4].el.classList.add('error'); } // â† NUEVO
+const faltantes = [];
+
+req.forEach(({ el, name }) => {
+  if (!el) return;
+
+  const val = el.value?.trim?.() ?? el.value;
+  if (!val) {
+    faltantes.push(name);
+    el.classList.add('error');
+  } else {
+    el.classList.remove('error');
+  }
+});
 
   const warnBox = document.getElementById('validacion');
 
@@ -1385,7 +1443,7 @@ function postDownloadToParent(blob, fileName, mime){
 }
 
 // === Reinicio de formulario y tabla (como en Word) ===
-function resetCotizacion(ev){
+function resetCotizacion(ev){ 
   ev?.preventDefault?.();
 
   // 1) Campos obligatorios
@@ -1396,13 +1454,28 @@ function resetCotizacion(ev){
   const warnBox   = document.getElementById('validacion');
   const impPctEl  = document.getElementById('impPct');
   const clienteInp = document.getElementById('cliente');
+  // NUEVOS CAMPOS DE NOMBRE/NUMERACIÓN
+  const numCot = document.getElementById('numCotizacion');
+  const iniCom = document.getElementById('inicComercial');
+  const anioYY = document.getElementById('anioYY');
+  const verDoc = document.getElementById('versionDoc');
+  const nomSal = document.getElementById('nombreSalida');
 
   if (tipoSel)   tipoSel.selectedIndex = 0;
   if (nombreInp) nombreInp.value = '';
   if (ingInp)    ingInp.value = '';
   if (alcInp)    alcInp.value = '';
   if (clienteInp) clienteInp.value = '';
-
+  if (numCot) numCot.value = '';
+  if (iniCom) iniCom.value = '';
+  if (anioYY) anioYY.value = '';
+  if (verDoc) verDoc.value = '';
+  if (nomSal) nomSal.value = '';
+  if (warnBox){
+    warnBox.style.display = 'none';
+    warnBox.textContent = '';
+  }
+  if (typeof actualizarNombreSalida === 'function') actualizarNombreSalida();
   // Quita cualquier borde rojo previo
   document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 
@@ -1455,6 +1528,15 @@ if (selCli) {
   if (typeof updateViaticosPriceView === 'function') updateViaticosPriceView();
   if (typeof updateDependentRows === 'function') updateDependentRows();
   if (typeof recalcTotals === 'function') recalcTotals();
+
+  URGENTE = false;
+  const btnU = document.getElementById('btnUrgente');
+  if (btnU){
+    btnU.textContent = 'Urgente';
+    btnU.style.background = '#f3f4f6';
+    btnU.style.borderColor = '#e5e7eb';
+    btnU.style.color = '#111827';
+  }
 
   // 5) Aviso de reinicio
 alert('Formulario reiniciado. Puedes comenzar una nueva cotización.');
@@ -1750,8 +1832,11 @@ ws.eachRow({ includeEmpty: true }, row => {
    6) Guardar
 ===================================================== */
 const buf  = await wb.xlsx.writeBuffer({ useStyles:true });
-    const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    await saveBlob(blob, 'CotizacionIngenieria.xlsx');
+const blob = new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+const nombreArchivo =
+  (document.getElementById('nombreSalida')?.value || 'CotizacionIngenieria') + '.xlsx';
+
+await saveBlob(blob, nombreArchivo);
 
   } catch (err) {
     console.error(err);
@@ -1863,6 +1948,25 @@ ingCancel?.addEventListener('click', ()=>{ modal.classList.add('hidden'); });
 
 /* Cargar al inicio */
 loadIngenierosRemote();
+
+function actualizarNombreSalida() {
+  const num   = document.getElementById('numCotizacion')?.value.trim();
+  const ini   = document.getElementById('inicComercial')?.value.trim().toUpperCase();
+  const anio  = document.getElementById('anioYY')?.value.trim();
+  const ver   = document.getElementById('versionDoc')?.value.trim().toUpperCase();
+
+  let nombre = '';
+  if (num && ini && anio) {
+    nombre = `Q${num}-${ini}-${anio}${ver || ''}`;
+  }
+
+  const out = document.getElementById('nombreSalida');
+  if (out) out.value = nombre;
+}
+
+['numCotizacion','inicComercial','anioYY','versionDoc'].forEach(id=>{
+  document.getElementById(id)?.addEventListener('input', actualizarNombreSalida);
+});
 
 </script>
 </body>
