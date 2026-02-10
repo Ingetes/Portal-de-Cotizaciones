@@ -1431,13 +1431,26 @@ function resetCotizacion(ev){
   const warnBox   = document.getElementById('validacion');
   const impPctEl  = document.getElementById('impPct');
   const clienteInp = document.getElementById('cliente');
+  const numCot = document.getElementById('numCotizacion');
+  const iniCom = document.getElementById('inicComercial');
+  const anioYY = document.getElementById('anioYY');
+  const verDoc = document.getElementById('versionDoc');
+  const nomSal = document.getElementById('nombreSalida');
 
   if (tipoSel)   tipoSel.selectedIndex = 0;
   if (nombreInp) nombreInp.value = '';
   if (ingInp)    ingInp.value = '';
   if (alcInp)    alcInp.value = '';
   if (clienteInp) clienteInp.value = '';
-
+  if (numCot) numCot.value = '';
+  if (iniCom) iniCom.value = '';
+  if (anioYY) anioYY.value = '';
+  if (verDoc) verDoc.value = '';
+  if (nomSal) nomSal.value = '';
+  if (warnBox){
+    warnBox.style.display = 'none';
+    warnBox.textContent = '';
+  }
   // Quita cualquier borde rojo previo
   document.querySelectorAll('.error').forEach(el => el.classList.remove('error'));
 
