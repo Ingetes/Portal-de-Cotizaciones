@@ -1628,6 +1628,12 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
     const impPct    = clampImprevistos(impPctRaw);
     const clienteVal = (document.getElementById('cliente') || {}).value || '';
 
+// ===== URGENTE / % =====
+const urgenteOn = (typeof URGENTE !== 'undefined') ? !!URGENTE : false;
+
+let urgPct = parseFloat(document.getElementById('urgPct')?.value || '30');
+if (isNaN(urgPct)) urgPct = 30;
+
     /* =====================================================
        2) Arma AOA (sin filas en blanco)
           Fila 1: TIPO
@@ -1663,6 +1669,13 @@ document.getElementById('btnDescargar').addEventListener('click', async () => {
       if (include) dataRows.push([desc, opt, cond, p, q, sub]);
     });
     dataRows.forEach(r => rows.push(r));
+
+// ===== VIÁTICOS (monto total) =====
+const idxV = (typeof ROW_INDEX !== 'undefined') ? ROW_INDEX['Viáticos'] : -1;
+const vP   = (idxV >= 0) ? Number((typeof precioMap !== 'undefined' && precioMap.get(idxV)) || 0) : 0;
+const vQ   = (idxV >= 0) ? Number((typeof diasMap   !== 'undefined' && diasMap.get(idxV))   || 0) : 0;
+const viaticosMonto = (vP || 0) * (vQ || 0);   // total viáticos (precio unitario * días)
+const hayViaticos   = viaticosMonto > 0;
 
     /* =====================================================
        3) Libro y hoja INGENIERIA
@@ -1704,31 +1717,67 @@ ws.getCell(r,6).numFmt = '"$" #,##0';
       }
     }
 
-    // Totales pegados inmediatamente bajo los datos
-    const lastData   = firstData + items - 1;
-    const rSubtotal  = (items>0) ? lastData + 1 : headerRow + 1;
-    const rImprev    = rSubtotal + 1;
-    const rTotalPlus = rSubtotal + 2;
+// Totales pegados inmediatamente bajo los datos (incluye Viáticos y Urgencia)
+const lastData = firstData + items - 1;
+let r = (items > 0) ? lastData + 1 : headerRow + 1;
 
-ws.getCell(rSubtotal,6).value  = (items>0)
+const rSubtotal = r++;
+const rImprev   = r++;
+
+const rViaticos = hayViaticos ? r++ : null;
+const rUrg      = urgenteOn   ? r++ : null;
+
+const rTotal    = r++;
+
+// SUBTOTAL
+ws.getCell(rSubtotal,6).value = (items > 0)
   ? { formula:`ROUNDUP(SUM(F${firstData}:F${lastData}),-3)` }
   : 0;
-    ws.getCell(rSubtotal,6).numFmt = '"$" #,##0';
-    ws.getCell(rImprev,6).value = { formula:`ROUNDUP(F${rSubtotal}*(${impPct}/100),-3)` };
-    ws.getCell(rImprev,6).numFmt   = '"$" #,##0';
-    ws.getCell(rTotalPlus,6).value = { formula:`ROUNDUP(F${rSubtotal}+F${rImprev},-3)` };
-    ws.getCell(rTotalPlus,6).numFmt= '"$" #,##0';
+ws.getCell(rSubtotal,6).numFmt = '"$" #,##0';
 
-    const styleTotal = (r, txt) => {
-      safeMerge(ws, r,1, r,5);
-      const a = ws.getCell(r,1);
-      a.value = txt; a.font = { bold:true };
-      a.alignment = { horizontal:'right', vertical:'middle' };
-      for (let c=1; c<=6; c++){ const cc = ws.getCell(r,c); cc.border = box; cc.fill = yellow; }
-    };
-    styleTotal(rSubtotal,  'SUBTOTAL');
-    styleTotal(rImprev,    `IMPREVISTOS (${impPct}%)`);
-    styleTotal(rTotalPlus, 'TOTAL');
+// IMPREVISTOS
+ws.getCell(rImprev,6).value = { formula:`ROUNDUP(F${rSubtotal}*(${impPct}/100),-3)` };
+ws.getCell(rImprev,6).numFmt = '"$" #,##0';
+
+// Base = Subtotal + Imprevistos (+ Viáticos si hay)
+let baseFormula = `F${rSubtotal}+F${rImprev}`;
+
+// VIÁTICOS (si hay)
+if (rViaticos){
+  ws.getCell(rViaticos,6).value  = { formula:`ROUNDUP(${viaticosMonto},-3)` };
+  ws.getCell(rViaticos,6).numFmt = '"$" #,##0';
+  baseFormula += `+F${rViaticos}`;
+}
+
+// URGENCIA (si está activo)
+if (rUrg){
+  ws.getCell(rUrg,6).value  = { formula:`ROUNDUP((${baseFormula})*(${urgPct}/100),-3)` };
+  ws.getCell(rUrg,6).numFmt = '"$" #,##0';
+}
+
+// TOTAL = base (+ urgencia si aplica)
+const totalFormula = rUrg ? `ROUNDUP((${baseFormula})+F${rUrg},-3)` : `ROUNDUP((${baseFormula}),-3)`;
+ws.getCell(rTotal,6).value  = { formula: totalFormula };
+ws.getCell(rTotal,6).numFmt = '"$" #,##0';
+
+const styleTotal = (row, txt) => {
+  safeMerge(ws, row,1, row,5);
+  const a = ws.getCell(row,1);
+  a.value = txt; a.font = { bold:true };
+  a.alignment = { horizontal:'right', vertical:'middle' };
+  for (let c=1; c<=6; c++){
+    const cc = ws.getCell(row,c);
+    cc.border = box;
+    cc.fill = yellow;
+  }
+};
+
+// Pintar filas
+styleTotal(rSubtotal,  'SUBTOTAL');
+styleTotal(rImprev,    `IMPREVISTOS (${impPct}%)`);
+if (rViaticos) styleTotal(rViaticos, 'VIÁTICOS');
+if (rUrg)      styleTotal(rUrg, `URGENCIA (${urgPct}%)`);
+styleTotal(rTotal,     'TOTAL');
 
     /* =====================================================
        4) RESUMEN PARA VENTA (con cuadricula)
@@ -1744,7 +1793,7 @@ ws.getCell(rSubtotal,6).value  = (items>0)
       if (VENTA_SET.has(d)) ventaRefs.push(firstData + i);
     }
 
-    const resStart = rTotalPlus + 2;                  // una fila libre entre totales y el resumen
+    const resStart = rTotal + 2;                  // una fila libre entre totales y el resumen
     safeMerge(ws, resStart,1, resStart,3);
     ws.getCell(resStart,1).value = 'RESUMEN PARA VENTA';
     ws.getCell(resStart,1).font  = { bold:true };
@@ -1794,7 +1843,7 @@ ws.getCell(rSubtotal,6).value  = (items>0)
     // Alcance está SIEMPRE en fila 3 (B3) por el nuevo layout
     const alcRow = 4;
     const rr = 5;
-    const totalLink = `INGENIERIA!F${rTotalPlus}`;
+    const totalLink = `INGENIERIA!F${rTotal}`;
 
     if (items>0){
       wv.getCell(rr,4).value = 1; wv.getCell(rr,5).value = 1;
