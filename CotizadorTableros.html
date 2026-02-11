@@ -4073,19 +4073,20 @@ return;
         }
 
         // 🔹 Cables: un solo combo, cambia según PROFIBUS / PROFINET
-        function refreshCableRefs() {
-          const tipo = document.getElementById('com_cable_tipo')?.value || '';
+function refreshCableRefs() {
+  const tipo = document.getElementById('com_cable_tipo')?.value || '';
 
-          fillComRefs('com_cable_ref', r => {
-            // Categoria = Cable, y la función dice si es PROFIBUS o PROFINET
-            if (!comNorm(r.categoria).includes('cable')) return false;
-            if (!tipo) return true;
-            const f = comNorm(r.funcion);
-            if (tipo === 'PROFIBUS' && !f.includes('profibus')) return false;
-            if (tipo === 'PROFINET' && !f.includes('profinet')) return false;
-            return true;
-          });
-        }
+  fillComRefs('com_cable_ref', r => {
+    if (!comNorm(r.categoria).includes('cable')) return false;
+    if (!tipo) return true;
+    const f = comNorm(r.funcion);
+    if (tipo === 'PROFIBUS' && !f.includes('profibus')) return false;
+    if (tipo === 'PROFINET' && !f.includes('profinet')) return false;
+    return true;
+  });
+
+  updateComImage('com_cable_ref', 'img_com_cable'); // ✅ AÑADE ESTO
+}
 
 function syncHembraUI() {
   const tipo = document.getElementById('com_con_tipo')?.value || '';
@@ -4138,6 +4139,7 @@ function refreshConnectorRefs() {
 
     return true;
   });
+updateComImage('com_con_ref', 'img_com_con'); // ✅ AÑADE ESTO
 }
 
         // Exponer para cuando se cargue el Excel
@@ -4154,9 +4156,6 @@ updateComImage('com_con_ref',   'img_com_con');
 
         // Listeners
 
-document.getElementById('com_con_tipo')?.addEventListener('change', () => {
-document.getElementById('com_con_plug').value = '';
-document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
 document.getElementById('com_cable_ref')?.addEventListener('change', () => {
   updateComImage('com_cable_ref', 'img_com_cable');
 });
@@ -4164,6 +4163,10 @@ document.getElementById('com_cable_ref')?.addEventListener('change', () => {
 document.getElementById('com_con_ref')?.addEventListener('change', () => {
   updateComImage('com_con_ref', 'img_com_con');
 });
+
+document.getElementById('com_con_tipo')?.addEventListener('change', () => {
+document.getElementById('com_con_plug').value = '';
+document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
 
   syncHembraUI();
   refreshConnectorRefs();
@@ -4183,7 +4186,6 @@ document.getElementById('com_con_hembra')?.addEventListener('change', () => {
   
 document.getElementById('com_cable_tipo')?.addEventListener('change', () => {
   refreshCableRefs();
-  updateComImage('com_cable_ref', 'img_com_cable');
 });
 
         // Helper para agregar filas a la tabla de comunicaciones
