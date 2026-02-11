@@ -6019,9 +6019,7 @@ ws.getCell(rTotal, 9).value = { formula: `ROUNDUP(I${rParcial}+J${rImp},-2)` };
     ws.getCell(rr, col).fill = fillYellow;
   }
 });
-
-const nombreCot = (document.getElementById('f_nombre_cot')?.value || '').trim();
-
+  
 // limpia caracteres raros para nombre de archivo
 const safeName = nombreCot
   .replace(/[\\/:*?"<>|]/g, '-')  // inválidos Windows
