@@ -132,7 +132,7 @@
             <h3>Descargar Documentación</h3>
             <p class="muted">Recursos corporativos como listas de precios, plantillas y guías.</p>
             <div class="stack">
-              <a id="lnkSiemens"  href="./Listaprecios2025.pdf" target="_blank" rel="noopener" class="btn btn-wide">Lista de precios Siemens</a>
+              <a id="lnkSiemens"  href="./Listapreciosenero2026.pdf" target="_blank" rel="noopener" class="btn btn-wide">Lista de precios Siemens</a>
               <a id="lnkMotores"  href="./ListaPreciosMotores.pdf"   target="_blank" rel="noopener" class="btn btn-wide">Lista de Precios de Motores</a>
               <a id="lnkIngetes"  href="./Listapreciosingetes.pdf"   target="_blank" rel="noopener" class="btn btn-wide">Lista de Precios Ingetes</a>
               <a id="lnkTarifasIng" href="./ListaPreciosIngenieria.xlsx" target="_blank" rel="noopener" class="btn btn-wide">Tarifas Ingeniería (Excel)</a>
@@ -274,15 +274,34 @@
       <div class="row"><img src="ingetes.jpg" alt="" style="height:42px"><h2 style="margin-left:10px">Cotizador de Proyectos</h2></div>
       <button id="backToPanelFromProjects" class="btn btn-small">← Volver</button>
     </div>
-    <iframe
-      id="projectsFrame"
-      class="embedded"
-      src="CotizadorProyectos.html"
-      title="Cotizador de Proyectos"
-      sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-popups"
-      allow="download"
-      style="width:100%;height:100vh;border:0">
-    </iframe>
+<!-- Tabs -->
+<div class="tabs" role="tablist" aria-label="Tipos de generador">
+  <button id="tabExcelProjects" class="tab active" role="tab" aria-selected="true" aria-controls="panelExcelProjects">Excel (.xlsx)</button>
+  <button id="tabWordProjects"  class="tab" role="tab" aria-selected="false" aria-controls="panelWordProjects">Word (.docx)</button>
+</div>
+
+<!-- Panel Excel -->
+<div id="panelExcelProjects" class="tab-panel active" role="tabpanel" aria-labelledby="tabExcelProjects">
+  <iframe
+    id="iframeProjectsExcel"
+    src="CotizadorProyectos.html"
+    sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-popups"
+    allow="download"
+    style="width:100%;height:100vh;border:0">
+  </iframe>
+</div>
+
+<!-- Panel Word -->
+<div id="panelWordProjects" class="tab-panel" role="tabpanel" aria-labelledby="tabWordProjects">
+  <iframe
+    id="projectsFrameWord"
+    class="embedded"
+    src="GeneradorCotizacionWORD.html"
+    title="Generador Word"
+    sandbox="allow-scripts allow-same-origin allow-downloads"
+    allow="clipboard-read; clipboard-write; file-system-access; fullscreen"
+  ></iframe>
+</div>
   </div>
 </section>
 
@@ -315,9 +334,37 @@
           <div class="row"><img src="ingetes.jpg" alt="" style="height:42px"><h2 style="margin-left:10px">Cotización Ingeniería</h2></div>
           <button id="backToPanelFromIngenieria" class="btn btn-small">← Volver</button>
         </div>
-        <iframe id="frameIngenieria" class="embedded" src="CotizacionIngenieria.html" title="Cotización Ingeniería"></iframe>
+<!-- Tabs -->
+<div class="tabs" role="tablist" aria-label="Tipos de generador">
+  <button id="tabExcelIng" class="tab active" role="tab" aria-selected="true" aria-controls="panelExcelIng">Excel (.xlsx)</button>
+  <button id="tabWordIng"  class="tab" role="tab" aria-selected="false" aria-controls="panelWordIng">Word (.docx)</button>
+</div>
+
+<!-- Panel Excel -->
+<div id="panelExcelIng" class="tab-panel active" role="tabpanel" aria-labelledby="tabExcelIng">
+  <iframe
+    id="iframeIngExcel"
+    src="CotizacionIngenieria.html"
+    sandbox="allow-scripts allow-forms allow-modals allow-downloads allow-popups"
+    allow="download"
+    style="width:100%;height:100vh;border:0">
+  </iframe>
+</div>
+
+<!-- Panel Word -->
+<div id="panelWordIng" class="tab-panel" role="tabpanel" aria-labelledby="tabWordIng">
+  <iframe
+    id="ingenieriaFrameWord"
+    class="embedded"
+    src="GeneradorCotizacionWORD.html"
+    title="Generador Word"
+    sandbox="allow-scripts allow-same-origin allow-downloads"
+    allow="clipboard-read; clipboard-write; file-system-access; fullscreen"
+  ></iframe>
+</div>
       </div>
     </section>
+
     <!-- ===== REVISOR DE INVENTARIO ===== -->
     <section id="inventarioView" class="hidden" aria-hidden="true">
       <div class="panel-card">
@@ -363,7 +410,7 @@
           <p class="muted">Actualiza los documentos de descarga - archivos menores a 5 MB.</p>
           <div class="stack">
             <label>Lista Siemens (PDF)<br>
-            <small class="muted">Nombre de archivo requerido: <b>Listaprecios2025.pdf</b></small>
+            <small class="muted">Nombre de archivo requerido: <b>Listapreciosenero2026.pdf</b></small>
             <input id="fileSiemens" type="file" accept="application/pdf" class="input">
             </label>
             <div id="statusSiemens" class="status-line muted"></div>
@@ -461,7 +508,7 @@ $('backToPanelFromImport')?.addEventListener('click', e=>{ e.preventDefault(); b
     const tabWordImp    = $('tabWordImport');
     const panelExcelImp = $('panelExcelImport');
     const panelWordImp  = $('panelWordImport');
-    
+
     function activateImport(which){
       const isExcel = (which === 'excel');
       tabExcelImp?.classList.toggle('active', isExcel);
@@ -471,6 +518,38 @@ $('backToPanelFromImport')?.addEventListener('click', e=>{ e.preventDefault(); b
     }
     tabExcelImp?.addEventListener('click', ()=>activateImport('excel'));
     tabWordImp?.addEventListener('click',  ()=>activateImport('word'));
+
+// Tabs de Proyectos
+const tabExcelProj   = document.getElementById('tabExcelProjects');
+const tabWordProj    = document.getElementById('tabWordProjects');
+const panelExcelProj = document.getElementById('panelExcelProjects');
+const panelWordProj  = document.getElementById('panelWordProjects');
+
+function activateProjects(which){
+  const isExcel = (which === 'excel');
+  tabExcelProj?.classList.toggle('active', isExcel);
+  tabWordProj?.classList.toggle('active', !isExcel);
+  panelExcelProj?.classList.toggle('active', isExcel);
+  panelWordProj?.classList.toggle('active', !isExcel);
+}
+tabExcelProj?.addEventListener('click', ()=>activateProjects('excel'));
+tabWordProj?.addEventListener('click',  ()=>activateProjects('word'));
+
+// Tabs de Ingeniería
+const tabExcelIng   = document.getElementById('tabExcelIng');
+const tabWordIng    = document.getElementById('tabWordIng');
+const panelExcelIng = document.getElementById('panelExcelIng');
+const panelWordIng  = document.getElementById('panelWordIng');
+
+function activateIng(which){
+  const isExcel = (which === 'excel');
+  tabExcelIng?.classList.toggle('active', isExcel);
+  tabWordIng?.classList.toggle('active', !isExcel);
+  panelExcelIng?.classList.toggle('active', isExcel);
+  panelWordIng?.classList.toggle('active', !isExcel);
+}
+tabExcelIng?.addEventListener('click', ()=>activateIng('excel'));
+tabWordIng?.addEventListener('click',  ()=>activateIng('word'));
 
     // ===== Modal de Ajustes =====
     const modal=$('settingsModal');
@@ -616,7 +695,7 @@ async function subirPDF(inputId, rutaEnRepo, etiqueta, statusId) {
 
 btnSave?.addEventListener('click', async ()=>{
   const res = [];
-  res.push(await subirPDF('fileSiemens','Listaprecios2025.pdf','Lista Siemens','statusSiemens'));
+  res.push(await subirPDF('fileSiemens','Listapreciosenero2026.pdf','Lista Siemens','statusSiemens'));
   res.push(await subirPDF('fileMotores','ListaPreciosMotores.pdf','Lista Motores','statusMotores'));
   res.push(await subirPDF('fileIngetes','Listapreciosingetes.pdf','Lista Ingetes','statusIngetes'));
   res.push(await subirPDF('fileTarifasIng','ListaPreciosIngenieria.xlsx','Tarifas Ingeniería','statusTarifasIng'));
@@ -632,7 +711,7 @@ btnSave?.addEventListener('click', async ()=>{
   // Romper caché si hubo al menos 1 OK
   if (res.some(x=>x.ok)){
     const v='?v='+Date.now();
-    const l1=document.getElementById('lnkSiemens'); if(l1) l1.href='./Listaprecios2025.pdf'+v;
+    const l1=document.getElementById('lnkSiemens'); if(l1) l1.href='./Listapreciosenero2026.pdf'+v;
     const l2=document.getElementById('lnkMotores'); if(l2) l2.href='./ListaPreciosMotores.pdf'+v;
     const l3=document.getElementById('lnkIngetes'); if(l3) l3.href='./Listapreciosingetes.pdf'+v;
 
