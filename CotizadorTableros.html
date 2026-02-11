@@ -4153,15 +4153,21 @@ updateComImage('com_con_ref',   'img_com_con');
 };
 
         // Listeners
-        document.getElementById('com_cable_tipo')?.addEventListener('change', () => {
-          refreshCableRefs();
-        });
 
 document.getElementById('com_con_tipo')?.addEventListener('change', () => {
-  document.getElementById('com_con_plug').value = '';
-  document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
+document.getElementById('com_con_plug').value = '';
+document.getElementById('com_con_ref').innerHTML = '<option value="">– Seleccionar –</option>';
+document.getElementById('com_cable_ref')?.addEventListener('change', () => {
+  updateComImage('com_cable_ref', 'img_com_cable');
+});
+
+document.getElementById('com_con_ref')?.addEventListener('change', () => {
+  updateComImage('com_con_ref', 'img_com_con');
+});
+
   syncHembraUI();
   refreshConnectorRefs();
+  updateComImage('com_con_ref', 'img_com_con'); // <-- AÑADE ESTA LÍNEA
 });
 
 document.getElementById('com_con_plug')?.addEventListener('change', () => {
