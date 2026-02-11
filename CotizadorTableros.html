@@ -5791,8 +5791,33 @@ function downloadExcelWithFallback(blob, fileName) {
   setTimeout(() => URL.revokeObjectURL(url), 2000);
 }
 
-document.getElementById('btn-export').addEventListener('click', async () => {
+// ====== Forzar nombre en MAYÚSCULA ======
+const inputNombreCot = document.getElementById('f_nombre_cot');
+if (inputNombreCot) {
+  inputNombreCot.addEventListener('input', function () {
+    this.value = this.value.toUpperCase();
+  });
+}
 
+document.getElementById('btn-export').addEventListener('click', async () => {
+  const nombreCot = document.getElementById('f_nombre_cot')?.value.trim();
+  const descTab   = document.getElementById('f_desc_tablero')?.value.trim();
+  const fUtilVal  = document.getElementById('f_util')?.value;
+
+  if (!nombreCot) {
+    alert('El nombre de la cotización es obligatorio.');
+    return;
+  }
+
+  if (!descTab) {
+    alert('La descripción del tablero es obligatoria.');
+    return;
+  }
+
+  if (!fUtilVal || Number(fUtilVal) <= 0) {
+    alert('El factor de utilidad es obligatorio y debe ser mayor a 1.');
+    return;
+  }
   // 1) Tomar parámetros (los ids ya existen en tu HTML)
   const descuento = 0; // ← lo quieres en el Excel (editable allá). Si luego haces input en UI lo conectamos aquí.
   const fUtil = Number(document.getElementById('f_util')?.value || 1) || 1;
