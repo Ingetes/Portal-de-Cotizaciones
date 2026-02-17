@@ -293,6 +293,16 @@
           <button id="goInventory" class="btn btn-wide">Revisor de inventario</button>
         </div>
       </div>
+      
+<!-- Herramientas -->
+<div class="box">
+  <h3>Herramientas</h3>
+  <p class="muted">Accede a utilidades técnicas y de selección para agilizar tu preventa.</p>
+  <div class="stack">
+    <button id="goTools" class="btn btn-wide btn-primary">Ingresar</button>
+  </div>
+</div>
+
     </div>
   </div>
 </section>
@@ -512,6 +522,130 @@
       </div>
     </section>
 
+<!-- ===== HERRAMIENTAS ===== -->
+<section id="herramientasView" class="hidden" aria-hidden="true">
+  <div class="panel-card">
+    <div class="row" style="justify-content:space-between;margin-bottom:12px">
+      <div class="row">
+        <img src="ingetes.jpg" alt="" style="height:42px">
+        <h2 style="margin-left:10px">Herramientas</h2>
+      </div>
+      <button id="backToPanelFromTools" class="btn btn-small">← Volver</button>
+    </div>
+
+    <p class="muted" style="margin-top:0">
+      Accede a utilidades técnicas y de selección que agilizan tu preingeniería y cotización.
+    </p>
+
+    <div class="tools-wrap">
+      <div class="tools-grid">
+
+        <!-- Card -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">TIA SELECTION TOOL</h3>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Selección de equipos para TIA Portal: CPUs, I/O, comunicaciones y accesorios.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://tia.siemens.com/">Abrir</a>
+            <a class="btn btn-ghost" target="_blank" rel="noopener" href="https://support.industry.siemens.com/">Abrir en nube</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">PIA SELECTION TOOL</h3>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Selección para instrumentación y analítica de procesos.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://pia.siemens.com/">Abrir</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">COMPATIBILITY TOOL</h3>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Herramienta de compatibilidad para comprobar combinaciones de productos.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://support.industry.siemens.com/">Abrir</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">Cuestionario para selección de instrumentación</h3>
+            <span class="tool-chip">Formulario</span>
+          </div>
+          <p class="tool-desc">Cuestionario por tipo de sensor y descarga de PDF con las respuestas.</p>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button">Responder</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">Configurador de variadores y servomotores SIEMENS</h3>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Configura variadores, motores y servos según requerimientos.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener" href="https://www.siemens.com/">Abrir</a>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">Compatibilidad de liner (medidores de caudal)</h3>
+            <span class="tool-chip">Referencia</span>
+          </div>
+          <p class="tool-desc">Documento de referencia para elegir liner según fluido y condiciones.</p>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button">Vista previa</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">Tabla de compatibilidad de materiales</h3>
+            <span class="tool-chip">Referencia</span>
+          </div>
+          <p class="tool-desc">Consulta rápida para compatibilidades químicas y de proceso.</p>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button">Abrir</button>
+            <button class="btn btn-ghost" type="button">Vista previa</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">Guía de selección de celdas de carga</h3>
+            <span class="tool-chip">Guía</span>
+          </div>
+          <p class="tool-desc">Criterios de selección para celdas de carga por aplicación.</p>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button">Vista previa</button>
+          </div>
+        </div>
+
+        <div class="tool-card">
+          <div class="tool-top">
+            <h3 class="tool-title">Herramientas de selección de fuentes</h3>
+            <span class="tool-chip">Utilidad</span>
+          </div>
+          <p class="tool-desc">Selector para elegir fuentes de alimentación según carga y aplicación.</p>
+          <div class="tool-actions">
+            <button class="btn btn-primary" type="button">Vista previa</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
 
   </main>
 
@@ -596,6 +730,19 @@
       hideSec('inventarioView');
       showSec('panel');
     });
+
+// Ir a Herramientas
+document.getElementById('goTools')?.addEventListener('click', ()=>{
+  hideSec('panel');
+  showSec('herramientasView');
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+// Volver desde Herramientas
+document.getElementById('backToPanelFromTools')?.addEventListener('click', ()=>{
+  hideSec('herramientasView');
+  showSec('panel');
+});
 
     $('startBtn')?.addEventListener('click', e=>{ e.preventDefault(); window.__goPanel(); });
     $('goFast')?.addEventListener('click',  e=>{ e.preventDefault(); goFast(); });
