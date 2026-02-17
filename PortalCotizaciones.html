@@ -5,6 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PORTAL DE COTIZACIONES INGETES</title>
   <style>
+  .tools-details{
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:#fff;
+  padding:12px;
+}
+
+.tools-summary{
+  list-style:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border-radius:12px;
+  user-select:none;
+}
+
+.tools-summary::-webkit-details-marker{ display:none; }
+
+.tools-summary:hover{ background:#f8fafc; }
+
+.tools-summary-chip{
+  background:var(--primary);
+  color:#fff;
+  border:1px solid var(--primary);
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:13px;
+  font-weight:700;
+}
+
+.tools-details[open] .tools-summary-chip{
+  background:var(--primaryDark);
+  border-color:var(--primaryDark);
+}
+
+.tools-content{ margin-top:14px; }
+
     :root{
       --bg1:#ffffff; --bg2:#f1f5f9; --card:#ffffff; --border:#e2e8f0; --text:#0f172a; --muted:#475569;
       --shadow:0 10px 30px rgba(2,6,23,.08); --radius:16px;
@@ -259,143 +299,143 @@
         <h3>Herramientas comerciales</h3>
         <p class="muted">Accesos directos a herramientas de selección y documentos de referencia.</p>
 <div class="tools-wrap">
-  <div class="tools-header">
-    <p class="muted" style="margin:0">
-      Accesos directos a herramientas de selección y documentos de referencia.
-    </p>
+  <details class="tools-details">
+    <summary class="tools-summary">
+      <span>Herramientas Siemens y referencias</span>
+      <span class="tools-summary-chip">Ingresar</span>
+    </summary>
 
-    <button id="toggleTools" class="btn btn-small btn-primary" type="button">
-      Ingresar
-    </button>
-  </div>
+    <div class="tools-content">
+      <div class="tools-grid">
 
-  <!-- Contenido que se despliega -->
-  <div id="toolsContent" class="hidden" style="margin-top:14px">
+        <!-- 1 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">TIA SELECTION TOOL</h4>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Selección de equipos para TIA Portal: CPUs, IOs, comunicaciones y accesorios.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="https://www.siemens.com/tia-selection-tool-standalone">Descargar software</a>
+            <a class="btn btn-ghost" target="_blank" rel="noopener"
+               href="https://www.siemens.com/tstcloud">Abrir en nube</a>
+          </div>
+        </div>
 
-    <div class="tools-grid">
+        <!-- 2 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">PIA SELECTION TOOL</h4>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Selección para instrumentación y analítica de procesos.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="https://www.pia-portal.automation.siemens.com/default.htm">Abrir</a>
+          </div>
+        </div>
 
-      <!-- 1 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">TIA SELECTION TOOL</h4>
-          <span class="tool-chip">Siemens</span>
+        <!-- 3 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">COMPATIBILITY TOOL</h4>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Herramienta de compatibilidad para selección de productos y verificación.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="https://support.industry.siemens.com/compatool/#/main/start">Abrir</a>
+          </div>
         </div>
-        <p class="tool-desc">Selección de equipos para TIA Portal: CPUs, IOs, comunicaciones y accesorios.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="https://www.siemens.com/tia-selection-tool-standalone">Descargar software</a>
-          <a class="btn btn-ghost" target="_blank" rel="noopener"
-             href="https://www.siemens.com/tstcloud">Abrir en nube</a>
-        </div>
-      </div>
 
-      <!-- 2 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">PIA SELECTION TOOL</h4>
-          <span class="tool-chip">Siemens</span>
+        <!-- 4 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">Cuestionario para selección de instrumentación</h4>
+            <span class="tool-chip">Formulario</span>
+          </div>
+          <p class="tool-desc">Por tipo de sensor (flujo, nivel, temperatura, presión y peso) y descarga PDF.</p>
+          <div class="tool-actions">
+            <!-- IMPORTANTE: aquí mejor link (no botón) -->
+            <a id="openQuizTool" class="btn btn-primary" href="./brief-instrumentacion.html" target="_blank" rel="noopener">
+              Responder
+            </a>
+          </div>
         </div>
-        <p class="tool-desc">Selección para instrumentación y analítica de procesos.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="https://www.pia-portal.automation.siemens.com/default.htm">Abrir</a>
-        </div>
-      </div>
 
-      <!-- 3 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">COMPATIBILITY TOOL</h4>
-          <span class="tool-chip">Siemens</span>
+        <!-- 5 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">Configurador de variadores y servomotores SIEMENS</h4>
+            <span class="tool-chip">Siemens</span>
+          </div>
+          <p class="tool-desc">Configura variadores, motores y servos según requerimientos.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="https://mall.industry.siemens.com/spice/cloudcm/dashboard?caller=SPC">Abrir</a>
+          </div>
         </div>
-        <p class="tool-desc">Utilice la herramienta de compatibilidad para selección de productos y verificación.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="https://support.industry.siemens.com/compatool/#/main/start">Abrir</a>
-        </div>
-      </div>
 
-      <!-- 4 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">Cuestionario para selección de instrumentación</h4>
-          <span class="tool-chip">Formulario</span>
+        <!-- 6 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">Compatibilidad de liner (medidores de caudal)</h4>
+            <span class="tool-chip">Referencia</span>
+          </div>
+          <p class="tool-desc">Documento de referencia para elegir el liner adecuado según fluido y condiciones.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="./Siemens Liner Full New.pdf">Vista previa</a>
+          </div>
         </div>
-        <p class="tool-desc">Por tipo de sensor (flujo, nivel, temperatura, presión y peso) y descarga PDF.</p>
-        <div class="tool-actions">
-          <button id="openQuizTool" class="btn btn-primary" type="button">Responder</button>
-        </div>
-      </div>
 
-      <!-- 5 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">Configurador de variadores y servomotores SIEMENS</h4>
-          <span class="tool-chip">Siemens</span>
+        <!-- 7 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">Tabla de compatibilidad de materiales</h4>
+            <span class="tool-chip">Referencia</span>
+          </div>
+          <p class="tool-desc">Consulta rápida para compatibilidades químicas y de proceso.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="https://www.coleparmer.com/chemical-resistance">Abrir</a>
+            <a class="btn btn-ghost" target="_blank" rel="noopener"
+               href="./Chemical_Resistance_Chart_202106.pdf">Vista previa</a>
+          </div>
         </div>
-        <p class="tool-desc">Configura variadores, motores y servos según requerimientos.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="https://mall.industry.siemens.com/spice/cloudcm/dashboard?caller=SPC">Abrir</a>
-        </div>
-      </div>
 
-      <!-- 6 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">Compatibilidad de liner (medidores de caudal)</h4>
-          <span class="tool-chip">Referencia</span>
+        <!-- 8 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">Guía de selección de celdas de carga</h4>
+            <span class="tool-chip">Guía</span>
+          </div>
+          <p class="tool-desc">Criterios de selección para celdas de carga por aplicación.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">Vista previa</a>
+          </div>
         </div>
-        <p class="tool-desc">Documento de referencia para elegir el liner adecuado según fluido y condiciones.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="./Siemens Liner Full New.pdf">Vista previa</a>
-        </div>
-      </div>
 
-      <!-- 7 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">Tabla de compatibilidad de materiales</h4>
-          <span class="tool-chip">Referencia</span>
+        <!-- 9 -->
+        <div class="tool-card">
+          <div class="tool-top">
+            <h4 class="tool-title">Herramientas de selección de fuentes</h4>
+            <span class="tool-chip">Utilidad</span>
+          </div>
+          <p class="tool-desc">Selector para elegir fuentes de alimentación adecuadas según carga y aplicación.</p>
+          <div class="tool-actions">
+            <a class="btn btn-primary" target="_blank" rel="noopener"
+               href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">Vista previa</a>
+          </div>
         </div>
-        <p class="tool-desc">Consulta rápida para compatibilidades químicas y de proceso.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="https://www.coleparmer.com/chemical-resistance">Abrir</a>
-          <a class="btn btn-ghost" target="_blank" rel="noopener"
-             href="./Chemical_Resistance_Chart_202106.pdf">Vista previa</a>
-        </div>
-      </div>
 
-      <!-- 8 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">Guía de selección de celdas de carga</h4>
-          <span class="tool-chip">Guía</span>
-        </div>
-        <p class="tool-desc">Criterios de selección para celdas de carga por aplicación.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">Vista previa</a>
-        </div>
-      </div>
-
-      <!-- 9 -->
-      <div class="tool-card">
-        <div class="tool-top">
-          <h4 class="tool-title">Herramientas de selección de fuentes</h4>
-          <span class="tool-chip">Utilidad</span>
-        </div>
-        <p class="tool-desc">Selector para elegir fuentes de alimentación adecuadas según carga y aplicación.</p>
-        <div class="tool-actions">
-          <a class="btn btn-primary" target="_blank" rel="noopener"
-             href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">Vista previa</a>
-        </div>
       </div>
     </div>
-  </div>
+  </details>
 </div>
+
       </div>
     </div>
   </div>
@@ -1097,25 +1137,6 @@ document.getElementById('goProjects')?.addEventListener('click', e=>{
 });
 document.getElementById('backToPanelFromProjects')?.addEventListener('click', e=>{
   e.preventDefault(); backFromProjects();
-});
-
-// ===== Herramientas comerciales: botón Ingresar (mostrar/ocultar) =====
-(function(){
-  const btn = document.getElementById('toggleTools');
-  const cont = document.getElementById('toolsContent');
-  if (!btn || !cont) return;
-
-  btn.addEventListener('click', ()=>{
-    const isHidden = cont.classList.contains('hidden');
-    cont.classList.toggle('hidden', !isHidden);
-    btn.textContent = isHidden ? 'Ocultar' : 'Ingresar';
-  });
-})();
-    
-// ===== Abrir cuestionario (Responder) =====
-document.getElementById('openQuizTool')?.addEventListener('click', ()=>{
-  // Opción A (recomendada): abrir en pestaña nueva
-  window.open('./brief-instrumentacion.html', '_blank', 'noopener');
 });
 
 </script>
