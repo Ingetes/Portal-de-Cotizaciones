@@ -1192,6 +1192,19 @@ window.addEventListener('message', (ev) => {
   }
 });
 
+// Volver desde el Brief embebido
+window.addEventListener('message', (ev)=>{
+  const d = ev.data || {};
+  if (d.__ingetes_nav === 'backToTools'){
+    const hideSec=(id)=>{ const el=document.getElementById(id); if(el){ el.classList.add('hidden'); el.setAttribute('aria-hidden','true'); } };
+    const showSec=(id)=>{ const el=document.getElementById(id); if(el){ el.classList.remove('hidden'); el.setAttribute('aria-hidden','false'); } };
+
+    hideSec('quizInstrumentacionView');
+    showSec('herramientasView');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+});
+
 // === Cotizador de Proyectos ===
 function goProjects(){
   const panel = document.getElementById('panel');
