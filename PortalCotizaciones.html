@@ -5,6 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>PORTAL DE COTIZACIONES INGETES</title>
   <style>
+
+/* FIX: que nada se salga de los cards */
+*,
+*::before,
+*::after{
+  box-sizing: border-box;
+}
+
+.card{
+  overflow: hidden; /* recorta cualquier desborde raro en bordes redondeados */
+}
+
+/* inputs y selects a prueba de desborde */
+input, select, textarea{
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* si hay filas (row) que se pasan */
+.row > *{
+  min-width: 0;
+}
+
   .tools-details{
   border:1px solid var(--border);
   border-radius:16px;
