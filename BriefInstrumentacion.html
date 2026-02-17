@@ -49,6 +49,11 @@ input, select, textarea{
     input,select,textarea{ width:100%; padding:10px 12px; border:1px solid var(--b); border-radius:12px; font-size:14px; }
     .row{ display:flex; gap:10px; flex-wrap:wrap; }
     .row > *{ flex:1; }
+/* FIX radios: que no se estiren como columnas */
+.row.rad > *{
+  flex: 0 0 auto !important;
+}
+
     .pill{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
     .pill button{ border-radius:999px; }
     .pill button.active{ background:var(--t); border-color:var(--t); color:#fff; }
@@ -63,7 +68,7 @@ input, select, textarea{
         <h1>Cuestionario para selección de instrumentación</h1>
         <p>Selecciona el tipo de sensor, responde el formulario y descarga un PDF resumen.</p>
       </div>
-      <a class="btn" href="./PortalCotizaciones%20(3).html">← Volver</a>
+      <button class="btn" id="btnBack" type="button">← Volver</button>
     </div>
 
     <div class="grid">
@@ -368,7 +373,7 @@ function render(){
         ${f.options.map(op=>`<option ${op===val?'selected':''} value="${escapeHtml(op)}">${escapeHtml(op)}</option>`).join('')}
       </select>`);
     }else if(f.type==='radio'){
-      h.push(`<div class="row">` + f.options.map(op=>{
+      h.push(`<div class="row rad">` + f.options.map(op=>{
         const checked = (op===val) ? 'checked' : '';
         return `<label style="display:flex;gap:8px;align-items:center;font-size:14px;color:#0f172a;margin:0">
           <input type="radio" name="rad_${quizType}_${f.k}" data-k="${f.k}" value="${escapeHtml(op)}" ${checked}/>
@@ -514,6 +519,15 @@ document.getElementById('btnBlank').addEventListener('click', async ()=>{
 
   const safe = QUIZ[quizType].title.replace(/\s+/g,'_');
   doc.save(`Brief_instrumentacion_${safe}_BLANCO.pdf`);
+});
+
+// Volver: si está dentro de iframe, pide al portal que vuelva a Herramientas
+document.getElementById('btnBack')?.addEventListener('click', ()=>{
+  try{
+    window.parent.postMessage({ __ingetes_nav: 'backToTools' }, '*');
+  }catch(e){}
+  // Fallback por si lo abren directo:
+  window.location.href = './PortalCotizaciones.html';
 });
 
 render();
