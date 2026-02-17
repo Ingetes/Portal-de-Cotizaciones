@@ -1,1 +1,500 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Brief Instrumentación</title>
+
+  <!-- jsPDF (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+  <style>
+    :root{ --b:#e2e8f0; --t:#0f172a; --m:#475569; --p:#059669; --pd:#047857; }
+    body{ margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial; background:#f1f5f9; color:var(--t); }
+    .wrap{ max-width:1100px; margin:0 auto; padding:22px; }
+    .top{ display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    h1{ margin:0; font-size:22px; }
+    p{ margin:8px 0 0; color:var(--m); line-height:1.5; }
+    .btn{ appearance:none; border:1px solid var(--b); background:#fff; color:#334155; padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:700; text-decoration:none; display:inline-block; }
+    .btnP{ background:var(--p); border-color:var(--p); color:#fff; }
+    .btnP:hover{ background:var(--pd); border-color:var(--pd); }
+    .grid{ display:grid; gap:14px; margin-top:16px; }
+    @media(min-width:960px){ .grid{ grid-template-columns:360px 1fr; } }
+    .card{ background:#fff; border:1px solid var(--b); border-radius:18px; padding:14px; }
+    .muted{ color:var(--m); font-size:13px; }
+    label{ display:block; font-size:12px; color:#64748b; margin:10px 0 6px; }
+    input,select,textarea{ width:100%; padding:10px 12px; border:1px solid var(--b); border-radius:12px; font-size:14px; }
+    .row{ display:flex; gap:10px; flex-wrap:wrap; }
+    .row > *{ flex:1; }
+    .pill{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .pill button{ border-radius:999px; }
+    .pill button.active{ background:var(--t); border-color:var(--t); color:#fff; }
+    .sep{ height:1px; background:var(--b); margin:12px 0; }
+    .warn{ background:#fff7ed; border:1px solid #fed7aa; color:#9a3412; padding:10px 12px; border-radius:12px; font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <h1>Cuestionario para selección de instrumentación</h1>
+        <p>Selecciona el tipo de sensor, responde el formulario y descarga un PDF resumen.</p>
+      </div>
+      <a class="btn" href="./PortalCotizaciones%20(3).html">← Volver</a>
+    </div>
+
+    <div class="grid">
+      <!-- IZQUIERDA -->
+      <div class="card">
+        <div class="muted"><b>1.</b> Elige el tipo de medición</div>
+        <div class="pill">
+          <button class="btn" data-type="flujo">Flujo</button>
+          <button class="btn" data-type="nivel">Nivel</button>
+          <button class="btn" data-type="temperatura">Temperatura</button>
+          <button class="btn" data-type="presion">Presión</button>
+          <button class="btn" data-type="peso">Peso</button>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="muted"><b>2.</b> Datos generales (obligatorio)</div>
+
+        <label>Nombre de la aplicación *</label>
+        <input id="g_appName" />
+
+        <label>Empresa *</label>
+        <input id="g_empresa" />
+
+        <div class="row">
+          <div>
+            <label>Nombre de contacto *</label>
+            <input id="g_contacto" />
+          </div>
+          <div>
+            <label>Cargo *</label>
+            <input id="g_cargo" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Celular *</label>
+            <input id="g_celular" />
+          </div>
+          <div>
+            <label>Correo *</label>
+            <input id="g_correo" type="email" />
+          </div>
+        </div>
+
+        <div class="sep"></div>
+
+        <div class="row">
+          <button id="btnPdf" class="btn btnP" type="button">Descargar PDF con respuestas</button>
+          <button id="btnBlank" class="btn" type="button">PDF en blanco</button>
+        </div>
+
+        <div style="margin-top:10px">
+          <button id="btnClear" class="btn" type="button">Limpiar respuestas</button>
+        </div>
+
+        <div id="msg" style="margin-top:10px"></div>
+      </div>
+
+      <!-- DERECHA -->
+      <div class="card">
+        <div class="muted"><b>3.</b> Cuestionario técnico</div>
+        <div id="tech"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ====== DATA (resumen usable) ====== */
+const QUIZ = {
+  flujo: {
+    title: 'Sensor de flujo',
+    fields: [
+      { k:'aplicacion', label:'Aplicación', type:'text' },
+      { k:'producto', label:'Nombre del producto / fluido a medir', type:'text' },
+      { k:'densidad', label:'Densidad', type:'text' },
+      { k:'viscosidad', label:'Viscosidad', type:'text' },
+      { k:'conductividad', label:'Conductividad (opcional)', type:'text', optional:true },
+      { k:'corrosion', label:'Resistencia a la corrosión (opcional)', type:'text', optional:true },
+      { k:'abrasion', label:'Resistencia a la abrasión (opcional)', type:'text', optional:true },
+
+      { k:'material', label:'Material que pasa por la tubería', type:'select', options:['Líquido','Gas','Vapor'] },
+      { k:'liquido', label:'Especifique cuál líquido es', type:'text', show:(d)=>d.material==='Líquido' },
+      { k:'gas', label:'Especifique cuál gas es', type:'text', show:(d)=>d.material==='Gas' },
+
+      { k:'temp', label:'Temperatura del medio', type:'text' },
+      { k:'tempUnidadFlujo', label:'Unidad de temperatura', type:'select', options:['°C','°F'] },
+
+      { k:'presionMin', label:'Presión mínima del medio', type:'text' },
+      { k:'presionMax', label:'Presión máxima del medio', type:'text' },
+      { k:'presionUnidad', label:'Unidad de presión del medio', type:'select', options:['bar','psi','kPa','otra'] },
+
+      { k:'dn', label:'Diámetro nominal de la tubería', type:'text' },
+      { k:'dnUnidad', label:'Unidad DN', type:'select', options:['in','mm'] },
+
+      { k:'conexion', label:'Conexión a proceso', type:'select', options:['Brida (flange)','Clamp','Otra'] },
+      { k:'conexionOtra', label:'Si selecciona "Otra", especifique cuál', type:'text', show:(d)=>d.conexion==='Otra' },
+
+      { k:'tecnologia', label:'Tecnología de preferencia', type:'select', options:['Electromagnético','Coriolis','Según recomendación'] },
+      { k:'tipoVapor', label:'Si el producto es vapor, indique el tipo', type:'radio', options:['Sobrecalentado','Saturado'], show:(d)=>d.material==='Vapor' },
+
+      { k:'montaje', label:'Montaje del transmisor', type:'select', options:['Compacto','Remoto'] },
+      { k:'montajeDist', label:'Si es remoto, distancia entre sensor y transmisor', type:'text', show:(d)=>d.montaje==='Remoto' },
+      { k:'displayRemoto', label:'Si es remoto, tipo de montaje del transmisor', type:'select', options:['Tapa ciega','Con vidrio'], show:(d)=>d.montaje==='Remoto' },
+
+      { k:'alimentacion', label:'Alimentación del transmisor', type:'radio', options:['110 VAC','24 VDC'] },
+      { k:'comCon', label:'¿Requiere comunicación?', type:'radio', options:['Con comunicación','Sin comunicación'] },
+      { k:'comun', label:'Protocolo de comunicación', type:'select', options:['HART','Profinet','Profibus DP','Profibus PA','Modbus TCP/IP','Modbus RTU (RS-485)'], show:(d)=>d.comCon!=='Sin comunicación' },
+
+      { k:'medirPresion', label:'¿El transmisor debe medir presión?', type:'radio', options:['Sí','No'], show:(d)=>d.material==='Vapor' },
+    ]
+  },
+
+  nivel: {
+    title:'Sensor de nivel',
+    fields:[
+      { k:'aplicacion', label:'Aplicación', type:'text' },
+      { k:'producto', label:'Nombre del producto', type:'text' },
+      { k:'modo', label:'Tipo de medición', type:'radio', options:['Continua','Detección'] },
+      { k:'material', label:'Material a medir', type:'select', options:['Líquido','Sólidos a granel','Interfaz'] },
+      { k:'liquido', label:'Especifique cuál líquido es', type:'text', show:(d)=>d.material==='Líquido' },
+      { k:'interfazFluidos', label:'Fluidos de proceso', type:'text', show:(d)=>d.material==='Interfaz' },
+      { k:'interfazSonda', label:'Longitud de la sonda', type:'text', show:(d)=>d.material==='Interfaz' },
+      { k:'altura', label:'Altura del tanque', type:'text' },
+      { k:'diametro', label:'Diámetro del tanque', type:'text' },
+      { k:'diametroUnidad', label:'Unidad diámetro', type:'select', options:['in','mm'] },
+      { k:'conexion', label:'Conexión a proceso', type:'select', options:['Brida','Roscada','Sanitaria (Clamp)'] },
+      { k:'temp', label:'Temperatura de almacenamiento', type:'text' },
+      { k:'tempUnidadNivel', label:'Unidad de temperatura', type:'select', options:['°C','°F'] },
+      { k:'presionAlmacenamiento', label:'Presión de almacenamiento', type:'text' },
+      { k:'presionAlmUnidad', label:'Unidad de presión', type:'select', options:['bar','psi','mbar'] },
+      { k:'display', label:'¿Con display local?', type:'radio', options:['Con display','Sin display'] },
+      { k:'comun', label:'Comunicación', type:'select', options:['HART (4–20 mA)','Profibus DP','Modbus'] },
+      { k:'alimentacion', label:'Alimentación', type:'select', options:['110 VAC','24 VDC','Fuente interna'] },
+    ]
+  },
+
+  temperatura: {
+    title:'Sensor de temperatura',
+    fields:[
+      { k:'aplicacion', label:'Aplicación', type:'text' },
+      { k:'producto', label:'Nombre del producto', type:'text' },
+      { k:'tipoSensor', label:'Tipo de sensor de temperatura', type:'select', options:['RTD (PT100/PT1000)','Termocupla'] },
+      { k:'tipoTermocupla', label:'Tipo de termocupla', type:'select', options:['J','K','T','E','N','B','R','S','C'], show:(d)=>d.tipoSensor==='Termocupla' },
+      { k:'longBulbo', label:'Longitud del bulbo', type:'text' },
+      { k:'longBulboUnidad', label:'Unidad longitud', type:'select', options:['mm','in'] },
+      { k:'diamBulbo', label:'Diámetro del bulbo', type:'text' },
+      { k:'diamBulboUnidad', label:'Unidad diámetro', type:'select', options:['mm','in'] },
+      { k:'longCable', label:'Longitud del cable (m)', type:'text' },
+      { k:'hilos', label:'Cantidad de hilos', type:'select', options:['2','3','4'] },
+      { k:'montajeCabezal', label:'Montaje', type:'radio', options:['Con cabezal','Sin cabezal'] },
+      { k:'termopozo', label:'¿Requiere termopozo?', type:'radio', options:['Sí','No'] },
+      { k:'conexionProc', label:'Conexión a proceso', type:'select', options:['Rosca','Brida','Sanitaria (clamp)'] },
+      { k:'diamConexion', label:'Diámetro conexión a proceso', type:'text' },
+      { k:'diamConexionUnidad', label:'Unidad diámetro conexión', type:'select', options:['in','mm'] },
+      { k:'tempMin', label:'Temperatura mínima de proceso', type:'text' },
+      { k:'tempMax', label:'Temperatura máxima de proceso', type:'text' },
+      { k:'tempUnidad', label:'Unidad de temperatura', type:'select', options:['°C','°F'] },
+      { k:'displayTemp', label:'¿Con display local?', type:'radio', options:['Con display','Sin display'] },
+      { k:'comun', label:'Comunicación del transmisor', type:'select', options:['4–20 mA','HART','0–10 V'] },
+      { k:'atex', label:'¿Requiere protección contra explosión?', type:'radio', options:['Sí','No'] },
+    ]
+  },
+
+  presion: {
+    title:'Sensor de presión',
+    fields:[
+      { k:'aplicacion', label:'Aplicación', type:'text' },
+      { k:'producto', label:'Nombre del producto', type:'text' },
+      { k:'rangoMin', label:'Rango de presión del proceso (mín)', type:'text' },
+      { k:'rangoMax', label:'Rango de presión del proceso (máx)', type:'text' },
+      { k:'unidadPresion', label:'Unidad de medida', type:'select', options:['psi','bar','mbar'] },
+      { k:'display', label:'¿Requiere display local?', type:'radio', options:['Con display','Sin display'] },
+      { k:'tipoDisplay', label:'Si requiere display, tipo de tapa', type:'select', options:['Tapa ciega','Con vidrio'], show:(d)=>d.display==='Con display' },
+      { k:'proteccionExplosion', label:'¿Requiere protección contra explosión?', type:'radio', options:['No','Sí'] },
+      { k:'tipoProteccion', label:'Si requiere protección, ¿cuál?', type:'text', show:(d)=>d.proteccionExplosion==='Sí' },
+      { k:'conexion', label:'Conexión a proceso', type:'select', options:['Rosca','Brida','Sanitaria'] },
+      { k:'precision', label:'Precisión requerida', type:'text' },
+      { k:'comun', label:'Comunicación del transmisor', type:'select', options:['4–20 mA','0–10 V','HART','Modbus'] },
+    ]
+  },
+
+  peso: {
+    title:'Sensor de peso / sistema de pesaje',
+    fields:[
+      { k:'aplicacion', label:'Aplicación', type:'text' },
+      { k:'producto', label:'Nombre del producto', type:'text' },
+      { k:'tipoPeso', label:'¿Qué se va a suministrar?', type:'radio', options:['Celdas de carga','Transmisor de peso','Combinado (celdas + transmisor)'] },
+
+      { k:'productoExpo', label:'Productos a los que estará expuesta la celda de carga', type:'text',
+        show:(d)=>d.tipoPeso==='Celdas de carga' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'resolucionValor', label:'Resolución requerida', type:'text',
+        show:(d)=>d.tipoPeso==='Celdas de carga' || d.tipoPeso?.startsWith('Combinado') },
+      { k:'resolucionUnidad', label:'Unidad de resolución', type:'select', options:['g','kg'],
+        show:(d)=>d.tipoPeso==='Celdas de carga' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'cantBasculas', label:'Cantidad de básculas', type:'text',
+        show:(d)=>d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'gradoIP', label:'Grado de protección IP', type:'text',
+        show:(d)=>d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'montajePeso', label:'Montaje del transmisor', type:'select', options:['Universal','Tablero','Panel','Riel DIN (omega)'],
+        show:(d)=>d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'comunPeso', label:'Comunicación del transmisor', type:'select',
+        options:['Profinet','Sin comunicación','Salida análoga (4–20 mA, 0–10 VDC)','Profibus','EtherCAT','Ethernet IP','DeviceNet','Modbus TCP-IP','Modbus RTU RS-485'],
+        show:(d)=>d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'impresora', label:'¿Requiere impresora?', type:'radio', options:['Sí','No'],
+        show:(d)=>d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'aplicativo', label:'Aplicativo', type:'select',
+        options:['Totalización','Cuenta piezas','Pesaje de vehículos','Control estadístico','Etiquetado','Pesaje de ejes','Sistemas de dosificación monoproducto','Sistemas de dosificación multiproducto','Chequeador dinámico','Pesaje dinámico en banda (a granel)','Otro'],
+        show:(d)=>d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado') },
+
+      { k:'aplicativoOtro', label:'Si selecciona "Otro", describa', type:'text',
+        show:(d)=> (d.tipoPeso==='Transmisor de peso' || d.tipoPeso?.startsWith('Combinado')) && d.aplicativo==='Otro' },
+    ]
+  }
+};
+
+/* ====== STATE ====== */
+let quizType = null;
+let quizData = {};
+const general = { appName:'', empresa:'', contacto:'', cargo:'', celular:'', correo:'' };
+
+const tech = document.getElementById('tech');
+const msg  = document.getElementById('msg');
+
+function setMsg(html){ msg.innerHTML = html || ''; }
+
+function readGeneral(){
+  general.appName  = document.getElementById('g_appName').value.trim();
+  general.empresa  = document.getElementById('g_empresa').value.trim();
+  general.contacto = document.getElementById('g_contacto').value.trim();
+  general.cargo    = document.getElementById('g_cargo').value.trim();
+  general.celular  = document.getElementById('g_celular').value.trim();
+  general.correo   = document.getElementById('g_correo').value.trim();
+}
+
+function validate(){
+  readGeneral();
+  const missingG = [];
+  if(!general.appName) missingG.push('Nombre de la aplicación');
+  if(!general.empresa) missingG.push('Empresa');
+  if(!general.contacto) missingG.push('Nombre de contacto');
+  if(!general.cargo) missingG.push('Cargo');
+  if(!general.celular) missingG.push('Celular');
+  if(!general.correo) missingG.push('Correo');
+
+  if(!quizType){
+    setMsg(`<div class="warn">Primero selecciona el tipo de sensor.</div>`);
+    return { ok:false, missing: missingG };
+  }
+
+  const cfg = QUIZ[quizType];
+  const visible = cfg.fields.filter(f => !f.show || f.show(quizData));
+
+  const missingT = visible
+    .filter(f => !f.optional)
+    .filter(f => !String(quizData[f.k] ?? '').trim())
+    .map(f => f.label);
+
+  const all = [...missingG, ...missingT];
+  if(all.length){
+    const show = all.slice(0,6).map(x=>`• ${x}`).join('<br>');
+    setMsg(`<div class="warn"><b>Faltan campos obligatorios:</b><br>${show}${all.length>6?'<br>…':''}</div>`);
+    return { ok:false, missing: all };
+  }
+  setMsg('');
+  return { ok:true, missing:[] };
+}
+
+/* ====== RENDER ====== */
+function render(){
+  tech.innerHTML = '';
+  if(!quizType){
+    tech.innerHTML = `<p class="muted" style="margin-top:10px">Selecciona el tipo de sensor para ver el formulario.</p>`;
+    return;
+  }
+
+  const cfg = QUIZ[quizType];
+  const h = [];
+  h.push(`<h2 style="margin:8px 0 0;font-size:16px">Cuestionario – ${cfg.title}</h2>`);
+
+  cfg.fields.forEach(f=>{
+    if (f.show && !f.show(quizData)) return;
+
+    const val = String(quizData[f.k] ?? '');
+    h.push(`<label>${f.label}${f.optional?' (opcional)':''}</label>`);
+
+    if(f.type==='text'){
+      h.push(`<input data-k="${f.k}" value="${escapeHtml(val)}" />`);
+    }else if(f.type==='textarea'){
+      h.push(`<textarea data-k="${f.k}" rows="3">${escapeHtml(val)}</textarea>`);
+    }else if(f.type==='select'){
+      h.push(`<select data-k="${f.k}">
+        <option value="">— Selecciona —</option>
+        ${f.options.map(op=>`<option ${op===val?'selected':''} value="${escapeHtml(op)}">${escapeHtml(op)}</option>`).join('')}
+      </select>`);
+    }else if(f.type==='radio'){
+      h.push(`<div class="row">` + f.options.map(op=>{
+        const checked = (op===val) ? 'checked' : '';
+        return `<label style="display:flex;gap:8px;align-items:center;font-size:14px;color:#0f172a;margin:0">
+          <input type="radio" name="rad_${quizType}_${f.k}" data-k="${f.k}" value="${escapeHtml(op)}" ${checked}/>
+          <span>${escapeHtml(op)}</span>
+        </label>`;
+      }).join('') + `</div>`);
+    }
+  });
+
+  tech.innerHTML = h.join('');
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ====== EVENTS ====== */
+document.querySelectorAll('button[data-type]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    quizType = btn.dataset.type;
+    quizData = {};
+    document.querySelectorAll('button[data-type]').forEach(b=>b.classList.toggle('active', b===btn));
+    render();
+    setMsg('');
+  });
+});
+
+tech.addEventListener('input', (e)=>{
+  const el = e.target;
+  const k = el.getAttribute('data-k');
+  if(!k) return;
+  quizData[k] = el.value;
+  // re-render para actualizar visibilidad dinámica
+  render();
+});
+
+tech.addEventListener('change', (e)=>{
+  const el = e.target;
+  const k = el.getAttribute('data-k');
+  if(!k) return;
+  if(el.type==='radio'){
+    quizData[k] = el.value;
+  }else{
+    quizData[k] = el.value;
+  }
+  render();
+});
+
+document.getElementById('btnClear').addEventListener('click', ()=>{
+  quizData = {};
+  render();
+  setMsg('');
+});
+
+document.getElementById('btnPdf').addEventListener('click', async ()=>{
+  const v = validate();
+  if(!v.ok) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const pad = 56;
+  let y = pad;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Cuestionario para selección de instrumentación', pad, y); y+=20;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(12);
+  doc.text(`Tipo: ${QUIZ[quizType].title}`, pad, y); y+=24;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('Datos generales', pad, y); y+=18;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(11);
+  const pairs = [
+    ['Nombre de la aplicación', general.appName],
+    ['Empresa', general.empresa],
+    ['Nombre de contacto', general.contacto],
+    ['Cargo', general.cargo],
+    ['Celular', general.celular],
+    ['Correo', general.correo],
+  ];
+  pairs.forEach(([l,val])=>{
+    doc.text(`• ${l}: ${val || '—'}`, pad, y); y+=16;
+  });
+  y+=10;
+
+  const cfg = QUIZ[quizType];
+  const visible = cfg.fields.filter(f => !f.show || f.show(quizData));
+
+  visible.forEach(f=>{
+    const val = String(quizData[f.k] ?? '').trim() || '—';
+    doc.setFont('helvetica','bold'); doc.text(`• ${f.label}:`, pad, y); y+=14;
+    doc.setFont('helvetica','normal');
+    const lines = doc.splitTextToSize(val, 480);
+    lines.forEach(line=>{ doc.text(line, pad+16, y); y+=14; });
+    y+=6;
+    if(y>770){ doc.addPage(); y=pad; }
+  });
+
+  doc.setFont('helvetica','italic'); doc.setFontSize(10);
+  doc.text('Por favor entregar al comercial que tiene a cargo su cuenta.', pad, y+10);
+
+  const safe = QUIZ[quizType].title.replace(/\s+/g,'_');
+  doc.save(`Brief_instrumentacion_${safe}.pdf`);
+});
+
+document.getElementById('btnBlank').addEventListener('click', async ()=>{
+  if(!quizType){ setMsg(`<div class="warn">Primero selecciona el tipo de sensor.</div>`); return; }
+  readGeneral(); // opcional
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit:'pt', format:'a4' });
+  const pad = 56;
+  let y = pad;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('Cuestionario para selección de instrumentación', pad, y); y+=20;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(12);
+  doc.text(`Tipo: ${QUIZ[quizType].title}`, pad, y); y+=26;
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('Datos generales (para diligenciar)', pad, y); y+=18;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(11);
+  ['Nombre de la aplicación','Empresa','Nombre de contacto','Cargo','Celular','Correo'].forEach(l=>{
+    doc.text(`• ${l}: ________________________________`, pad, y); y+=16;
+    if(y>770){ doc.addPage(); y=pad; }
+  });
+
+  y+=10;
+  doc.setFont('helvetica','bold'); doc.setFontSize(12);
+  doc.text('Cuestionario técnico (para diligenciar)', pad, y); y+=18;
+
+  doc.setFont('helvetica','normal'); doc.setFontSize(11);
+  QUIZ[quizType].fields.forEach(f=>{
+    doc.setFont('helvetica','bold'); doc.text(`• ${f.label}`, pad, y); y+=14;
+    doc.setFont('helvetica','normal');
+    doc.text('_______________________________________________', pad+16, y); y+=18;
+    if(y>770){ doc.addPage(); y=pad; }
+  });
+
+  doc.setFont('helvetica','italic'); doc.setFontSize(10);
+  doc.text('Por favor entregar al comercial que tiene a cargo su cuenta.', pad, y+10);
+
+  const safe = QUIZ[quizType].title.replace(/\s+/g,'_');
+  doc.save(`Brief_instrumentacion_${safe}_BLANCO.pdf`);
+});
+
+render();
+</script>
+</body>
+</html>
 
