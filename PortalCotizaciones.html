@@ -96,7 +96,87 @@
 @keyframes spin{to{transform:rotate(360deg)}}
 .status-ok{color:#14532d}
 .status-err{color:#7f1d1d}
-  
+
+/* ===== Herramientas comerciales: UI tipo cards ===== */
+:root{
+  --primary:#059669;        /* emerald */
+  --primaryDark:#047857;
+  --soft:#f8fafc;
+}
+
+.btn-primary{
+  background:var(--primary);
+  border-color:var(--primary);
+  color:#fff;
+}
+.btn-primary:hover{ background:var(--primaryDark); border-color:var(--primaryDark); }
+
+.btn-ghost{
+  background:#fff;
+  border:1px solid var(--border);
+  color:#334155;
+}
+.btn-ghost:hover{ background:#f8fafc; }
+
+.tools-wrap{ margin-top:12px; }
+.tools-header{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.tools-grid{
+  margin-top:14px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:14px;
+}
+@media(min-width:760px){
+  .tools-grid{ grid-template-columns:1fr 1fr; }
+}
+@media(min-width:1060px){
+  .tools-grid{ grid-template-columns:1fr 1fr 1fr; }
+}
+
+.tool-card{
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:16px;
+  background:#fff;
+  box-shadow:0 10px 24px rgba(2,6,23,.06);
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  min-height:170px;
+}
+.tool-top{
+  display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+}
+.tool-title{
+  font-size:16px;
+  font-weight:800;
+  line-height:1.25;
+  margin:0;
+}
+.tool-chip{
+  font-size:11px;
+  padding:4px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  color:#334155;
+  background:#f8fafc;
+  white-space:nowrap;
+}
+.tool-desc{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.55;
+}
+.tool-actions{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:auto;
+}
+.tool-actions .btn{ padding:10px 14px; border-radius:12px; font-size:14px; }
   </style>
 </head>
 <body>
@@ -178,59 +258,144 @@
       <div class="box">
         <h3>Herramientas comerciales</h3>
         <p class="muted">Accesos directos a herramientas de selección y documentos de referencia.</p>
+<div class="tools-wrap">
+  <div class="tools-header">
+    <p class="muted" style="margin:0">
+      Accesos directos a herramientas de selección y documentos de referencia.
+    </p>
 
-        <div class="stack">
-          <!-- Siemens Tools -->
-          <a class="btn btn-wide" target="_blank" rel="noopener"
-             href="https://www.siemens.com/tia-selection-tool-standalone">
-            TIA Selection Tool · Descargar software
-          </a>
-          <a class="btn btn-wide" target="_blank" rel="noopener"
-             href="https://www.siemens.com/tstcloud">
-            TIA Selection Tool · Abrir en nube
-          </a>
+    <button id="toggleTools" class="btn btn-small btn-primary" type="button">
+      Ingresar
+    </button>
+  </div>
 
-          <a class="btn btn-wide" target="_blank" rel="noopener"
-             href="https://www.pia-portal.automation.siemens.com/default.htm">
-            PIA Selection Tool · Abrir
-          </a>
+  <!-- Contenido que se despliega -->
+  <div id="toolsContent" class="hidden" style="margin-top:14px">
 
-          <a class="btn btn-wide" target="_blank" rel="noopener"
-             href="https://support.industry.siemens.com/compatool/#/main/start">
-            Compatibility Tool · Abrir
-          </a>
+    <div class="tools-grid">
 
-          <a class="btn btn-wide" target="_blank" rel="noopener"
-             href="https://mall.industry.siemens.com/spice/cloudcm/dashboard?caller=SPC">
-            Configurador variadores/servos (SPICE) · Abrir
-          </a>
-
-          <!-- Cuestionario (lo conectas a tu JS con este id) -->
-          <button id="openQuizTool" class="btn btn-wide">
-            Cuestionario selección de instrumentación · Responder
-          </button>
-
-          <!-- Referencias / PDFs (pon aquí tus rutas reales) -->
-          <a class="btn btn-wide" target="_blank" rel="noopener" href="./Siemens Liner Full New.pdf">
-            Compatibilidad de liner (caudal) · Vista previa
-          </a>
-
-          <a class="btn btn-wide" target="_blank" rel="noopener"
-             href="https://www.coleparmer.com/chemical-resistance">
-            Tabla compatibilidad materiales · Abrir web
-          </a>
-          <a class="btn btn-wide" target="_blank" rel="noopener" href="./Chemical_Resistance_Chart_202106.pdf">
-            Tabla compatibilidad materiales · Vista previa
-          </a>
-
-          <a class="btn btn-wide" target="_blank" rel="noopener" href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">
-            Guía selección celdas de carga · Vista previa
-          </a>
-
-          <a class="btn btn-wide" target="_blank" rel="noopener" href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">
-            Herramientas selección de fuentes · Vista previa
-          </a>
+      <!-- 1 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">TIA SELECTION TOOL</h4>
+          <span class="tool-chip">Siemens</span>
         </div>
+        <p class="tool-desc">Selección de equipos para TIA Portal: CPUs, IOs, comunicaciones y accesorios.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://www.siemens.com/tia-selection-tool-standalone">Descargar software</a>
+          <a class="btn btn-ghost" target="_blank" rel="noopener"
+             href="https://www.siemens.com/tstcloud">Abrir en nube</a>
+        </div>
+      </div>
+
+      <!-- 2 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">PIA SELECTION TOOL</h4>
+          <span class="tool-chip">Siemens</span>
+        </div>
+        <p class="tool-desc">Selección para instrumentación y analítica de procesos.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://www.pia-portal.automation.siemens.com/default.htm">Abrir</a>
+        </div>
+      </div>
+
+      <!-- 3 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">COMPATIBILITY TOOL</h4>
+          <span class="tool-chip">Siemens</span>
+        </div>
+        <p class="tool-desc">Utilice la herramienta de compatibilidad para selección de productos y verificación.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://support.industry.siemens.com/compatool/#/main/start">Abrir</a>
+        </div>
+      </div>
+
+      <!-- 4 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">Cuestionario para selección de instrumentación</h4>
+          <span class="tool-chip">Formulario</span>
+        </div>
+        <p class="tool-desc">Por tipo de sensor (flujo, nivel, temperatura, presión y peso) y descarga PDF.</p>
+        <div class="tool-actions">
+          <button id="openQuizTool" class="btn btn-primary" type="button">Responder</button>
+        </div>
+      </div>
+
+      <!-- 5 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">Configurador de variadores y servomotores SIEMENS</h4>
+          <span class="tool-chip">Siemens</span>
+        </div>
+        <p class="tool-desc">Configura variadores, motores y servos según requerimientos.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://mall.industry.siemens.com/spice/cloudcm/dashboard?caller=SPC">Abrir</a>
+        </div>
+      </div>
+
+      <!-- 6 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">Compatibilidad de liner (medidores de caudal)</h4>
+          <span class="tool-chip">Referencia</span>
+        </div>
+        <p class="tool-desc">Documento de referencia para elegir el liner adecuado según fluido y condiciones.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="./Siemens Liner Full New.pdf">Vista previa</a>
+        </div>
+      </div>
+
+      <!-- 7 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">Tabla de compatibilidad de materiales</h4>
+          <span class="tool-chip">Referencia</span>
+        </div>
+        <p class="tool-desc">Consulta rápida para compatibilidades químicas y de proceso.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="https://www.coleparmer.com/chemical-resistance">Abrir</a>
+          <a class="btn btn-ghost" target="_blank" rel="noopener"
+             href="./Chemical_Resistance_Chart_202106.pdf">Vista previa</a>
+        </div>
+      </div>
+
+      <!-- 8 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">Guía de selección de celdas de carga</h4>
+          <span class="tool-chip">Guía</span>
+        </div>
+        <p class="tool-desc">Criterios de selección para celdas de carga por aplicación.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">Vista previa</a>
+        </div>
+      </div>
+
+      <!-- 9 -->
+      <div class="tool-card">
+        <div class="tool-top">
+          <h4 class="tool-title">Herramientas de selección de fuentes</h4>
+          <span class="tool-chip">Utilidad</span>
+        </div>
+        <p class="tool-desc">Selector para elegir fuentes de alimentación adecuadas según carga y aplicación.</p>
+        <div class="tool-actions">
+          <a class="btn btn-primary" target="_blank" rel="noopener"
+             href="./manual de celdas y MODULOS DE PESAJE RICE LAKE en español.pdf">Vista previa</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
       </div>
     </div>
   </div>
@@ -932,6 +1097,25 @@ document.getElementById('goProjects')?.addEventListener('click', e=>{
 });
 document.getElementById('backToPanelFromProjects')?.addEventListener('click', e=>{
   e.preventDefault(); backFromProjects();
+});
+
+// ===== Herramientas comerciales: botón Ingresar (mostrar/ocultar) =====
+(function(){
+  const btn = document.getElementById('toggleTools');
+  const cont = document.getElementById('toolsContent');
+  if (!btn || !cont) return;
+
+  btn.addEventListener('click', ()=>{
+    const isHidden = cont.classList.contains('hidden');
+    cont.classList.toggle('hidden', !isHidden);
+    btn.textContent = isHidden ? 'Ocultar' : 'Ingresar';
+  });
+})();
+    
+// ===== Abrir cuestionario (Responder) =====
+document.getElementById('openQuizTool')?.addEventListener('click', ()=>{
+  // Opción A (recomendada): abrir en pestaña nueva
+  window.open('./brief-instrumentacion.html', '_blank', 'noopener');
 });
 
 </script>
