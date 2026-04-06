@@ -1805,12 +1805,7 @@ if (stock >= it.cant && it.cant > 0) estado = 'EN INVENTARIO';
 wsLoc['J'+r] = { t:'s', v: estado };
 
   // MODIFICAR ESTAS LÍNEAS - Sumar el envío directamente en la fórmula
-  if (it.envio > 0) {
-    wsLoc['N'+r]={t:'n',f:`CEILING((L${r}*M${r})+$I$${frDesc},100)`};
-  } else {
-    wsLoc['N'+r]={t:'n',f:`CEILING(L${r}*M${r}+0,100)`};
-  }
-  
+  wsLoc['N'+r]={t:'n',f:`CEILING((L${r}*M${r})+I${frDesc},100)`};
   wsLoc['O'+r]={t:'n',f:`CEILING(N${r}*E${r},100)`}; 
   wsLoc['L'+r]={t:'n',f:`CEILING(H${r}*(1 - J${r}),100)`}; 
 });
@@ -1818,6 +1813,8 @@ wsLoc['J'+r] = { t:'s', v: estado };
 // === Fila ENVÍO en fallback SheetJS (H..K en la misma fila frDesc)
 const totalQtyRange = `E${startData}:E${startData + items.length - 1}`;
 
+const frDesc = startData + items.length + 5;
+    
 wsLoc['H' + frDesc] = { t:'s', v:'ENVÍO POR ÍTEM:' };
 wsLoc['I' + frDesc] = { t:'n', v:(parseFloat($('#envio').value || '0') || 0) };
 wsLoc['I' + frDesc].z = '"$" #,##0';
