@@ -1806,7 +1806,7 @@ wsLoc['J'+r] = { t:'s', v: estado };
 
   // MODIFICAR ESTAS LÍNEAS - Sumar el envío directamente en la fórmula
   if (it.envio > 0) {
-    wsLoc['N'+r]={t:'n',f:`CEILING((L${r}*M${r})+${it.envio},100)`};
+    wsLoc['N'+r]={t:'n',f:`CEILING((L${r}*M${r})+$I$${frDesc},100)`};
   } else {
     wsLoc['N'+r]={t:'n',f:`CEILING(L${r}*M${r}+0,100)`};
   }
