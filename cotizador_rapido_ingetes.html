@@ -489,7 +489,7 @@ const roundedUnitWithShip = (roundedUnit != null)
 
 // 👉 total antes de IVA = unitario final * cantidad
 const roundedTotal = (roundedUnitWithShip != null)
-  ? (roundedUnitWithShip * qty)
+  ? roundUpTo((roundedUnitWithShip * qty), 100)
   : null;
 
 // tarjetas (muestran valores ya redondeados)
