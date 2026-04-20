@@ -1464,11 +1464,7 @@ if (estado === 'NO EN INVENTARIO') {
     c(11).value=it.factorUtil;
 
     // Unitario con envío (mismo comportamiento que tenías)
-const envio = parseFloat($('#envio').value || '0') || 0;
-
-c(12).value = {
-  formula: `CEILING(L${r}*M${r}+${envio},100)`
-};
+c(12).value={formula:`CEILING(L${r}*M${r}+${it.envio||0},100)`};
 
     c(13).value={formula:`CEILING(N${r}*E${r},100)`};
 
