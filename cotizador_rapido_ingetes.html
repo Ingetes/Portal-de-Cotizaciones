@@ -470,11 +470,14 @@ $("mallLink").href = url;          // <- solo actualiza el href
     const notes = $("notes").value.trim();
 
 const baseCOP   = priceMode === "USD" ? (price * trm) : price;
-const afterDisc = baseCOP ? baseCOP * (1 - discount / 100) : null;
-const saleAfter = afterDisc != null ? afterDisc * (util || 1) : null;
+    
+const afterDisc = baseCOP
+  ? roundUpTo(baseCOP * (1 - discount / 100), 100)
+  : null;
 
-// 👉 redondeos del precio neto (sin envío)
-const roundedUnit = (saleAfter != null) ? roundUpTo(saleAfter, 100) : null;
+const roundedUnit = (afterDisc != null)
+  ? roundUpTo((afterDisc * (util || 1)) + (shipping || 0), 100)
+  : null;
 
 // 👉 reparto del envío entre las unidades
 //    - si qty=2 y shipping=20.000 => 10.000 por unidad
@@ -488,8 +491,8 @@ const roundedUnitWithShip = (roundedUnit != null)
   : null;
 
 // 👉 total antes de IVA = unitario final * cantidad
-const roundedTotal = (roundedUnitWithShip != null)
-  ? roundUpTo((roundedUnitWithShip * qty), 100)
+const roundedTotal = (roundedUnit != null)
+  ? roundUpTo((roundedUnit * qty), 100)
   : null;
 
 // tarjetas (muestran valores ya redondeados)
