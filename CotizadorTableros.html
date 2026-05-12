@@ -2137,6 +2137,7 @@ try {
     REF_ACC_TAB = rowsAccTab.map(r => ({
       categoria:  getColFlexible(r, 'Categoria'),
       referencia: getColFlexible(r, 'Referencia')
+      imagen:     getColFlexible(r, 'Imagen') || getColFlexible(r, 'imagen')
     })).filter(r => r.referencia);
   } else {
     REF_ACC_TAB = [];
