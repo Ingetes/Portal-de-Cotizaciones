@@ -905,13 +905,14 @@ function renderInvUI() {
     const cols=headers.map(h=>({raw:h, n:norm(h)}));
     const find=(arr)=>{const hit=cols.find(c=>arr.some(p=>c.n.includes(norm(p)))); return hit?hit.raw:null};
     return {
-      referencia: find(['id de material','id material','material','referencia']),
-      opciones:  find(['opcion','opciones','options','option']),
-      cantidad:   find(['cantidad','qty','quantity']),
-      descripcion:find(['descripcion','descripción','description']),
-      precio:     find(['precio unidad (peso colombiano)','precio unidad','precio lista','unidad (peso colombiano)','price (colombian peso)','Price (Colombian Peso)']),
-      descuento:  find(['descuento (%)','descuento','discount']),
-      fecha:      find(['fecha de entrega estimada','entrega estimada','estimated delivery','delivery'])
+      referencia:   find(['id de material','id material','material','referencia']),
+      opciones:     find(['opcion','opciones','options','option']),
+      cantidad:     find(['cantidad','qty','quantity']),
+      descripcion:  find(['descripcion','descripción','description']),
+      precio:       find(['precio unidad (peso colombiano)','precio unidad','precio lista','unidad (peso colombiano)','price (colombian peso)','Price (Colombian Peso)']),
+      tarificacion: find(['unidad de tarificación','unidad de tarificacion','tarificación','tarificacion','pricing unit']),
+      descuento:    find(['descuento (%)','descuento','discount']),
+      fecha:        find(['fecha de entrega estimada','entrega estimada','estimated delivery','delivery'])
     };
   }
   const toNum=v=>{ if(typeof v==='number')return v; const s=String(v).replace(/[^0-9,.-]/g,'').replace(/,(?=\d{3}(\D|$))/g,'').replace(',', '.'); const n=parseFloat(s); return isFinite(n)?n:0; };
@@ -1301,7 +1302,9 @@ if(missing.length){
 // Mapear filas del Mall a ítems
 const items = parsedRows.map((r, idx)=>{ 
   const cant  = toNum(r[m.cantidad])||1;
-  const p     = toNum(r[m.precio]);
+const precioLista = toNum(r[m.precio]);
+const tarifa = Math.max(1, toNum(r[m.tarificacion]) || 1);
+const p = precioLista / tarifa;
   const d     = toNum(r[m.descuento]);
   const costo = p*(1 - d/100);
   const vUnit = costo*(factor||1) + (envio || 0);
